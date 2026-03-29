@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M.Tech AIML — Sem 2 Course Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F2;
+    --card: #FFFFFF;
+    --border: #E2DFD6;
+    --text: #1A1916;
+    --muted: #7A786E;
+    --faint: #B8B5AC;
+    --nlp: #534AB7; --nlp-bg: #EEEDFE; --nlp-b: #AFA9EC;
+    --dl:  #0F6E56; --dl-bg:  #E1F5EE; --dl-b:  #5DCAA5;
+    --av:  #854F0B; --av-bg:  #FAEEDA; --av-b:  #EF9F27;
+    --no:  #444441; --no-bg:  #F1EFE8; --no-b:  #B4B2A9;
+    --mandatory: #185FA5; --mandatory-bg: #E6F1FB; --mandatory-b: #85B7EB;
+    --locked: #C04828;
+    --selected-bg: #EAF3DE; --selected: #3B6D11; --selected-b: #97C459;
+    --radius: 10px; --radius-sm: 6px;
+    --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 0.5px rgba(0,0,0,0.06);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px 16px 40px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .header-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: var(--border);
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  header p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* STEPS */
+  .step-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+  .step-num {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--text);
+    color: var(--bg);
+    font-size: 10px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* MANDATORY */
+  .mandatory-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .mandatory-card {
+    background: var(--mandatory-bg);
+    border: 0.5px solid var(--mandatory-b);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .mandatory-card .abbr {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--mandatory);
+    margin-bottom: 2px;
+  }
+  .mandatory-card .fullname {
+    font-size: 11px;
+    color: #185FA5cc;
+    line-height: 1.4;
+  }
+
+  /* SPEC BUTTONS */
+  .spec-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .spec-btn {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    padding: 10px 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    box-shadow: var(--shadow);
+  }
+  .spec-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
+  .spec-btn .s-tag {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .spec-btn .s-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .spec-btn .s-rule {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  .spec-btn.active-nlp { background: var(--nlp-bg); border-color: var(--nlp); }
+  .spec-btn.active-nlp .s-tag, .spec-btn.active-nlp .s-rule { color: var(--nlp); }
+  .spec-btn.active-nlp .s-name { color: #3C3489; }
+
+  .spec-btn.active-dl  { background: var(--dl-bg);  border-color: var(--dl); }
+  .spec-btn.active-dl  .s-tag, .spec-btn.active-dl  .s-rule { color: var(--dl); }
+  .spec-btn.active-dl  .s-name { color: #085041; }
+
+  .spec-btn.active-av  { background: var(--av-bg);  border-color: var(--av-b); }
+  .spec-btn.active-av  .s-tag, .spec-btn.active-av  .s-rule { color: var(--av); }
+  .spec-btn.active-av  .s-name { color: #633806; }
+
+  .spec-btn.active-no  { background: var(--no-bg);  border-color: var(--no-b); }
+  .spec-btn.active-no  .s-tag, .spec-btn.active-no  .s-rule { color: var(--no); }
+  .spec-btn.active-no  .s-name { color: #2C2C2A; }
+
+  /* INFO BAR */
+  .info-bar {
+    display: none;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .info-bar.show { display: block; }
+
+  /* BUCKETS */
+  .buckets-section { display: none; }
+  .buckets-section.show { display: block; }
+  .buckets-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .bucket-card {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .bucket-card.dimmed { opacity: 0.38; pointer-events: none; }
+  .bucket-head {
+    padding: 7px 10px;
+    background: var(--bg);
+    border-bottom: 0.5px solid var(--border);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* COURSE ITEMS */
+  .c-item {
+    padding: 10px 10px;
+    border-bottom: 0.5px solid var(--border);
+    cursor: default;
+    transition: background 0.12s, opacity 0.12s;
+    position: relative;
+  }
+  .c-item:last-child { border-bottom: none; }
+  .c-item .c-abbr {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    margin-bottom: 1px;
+  }
+  .c-item .c-full {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+  .c-item .c-units {
+    font-size: 9px;
+    color: var(--faint);
+    margin-top: 2px;
+  }
+  .c-item .badge {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-top: 3px;
+  }
+
+  /* States */
+  .c-item.state-mandatory {
+    background: var(--mandatory-bg);
+    cursor: not-allowed;
+  }
+  .c-item.state-mandatory .c-abbr { color: var(--mandatory); }
+  .c-item.state-mandatory .c-full { color: #185FA5aa; }
+  .c-item.state-mandatory .badge { background: #B5D4F4; color: var(--mandatory); }
+
+  .c-item.state-available {
+    cursor: pointer;
+  }
+  .c-item.state-available:hover { background: #F7F6F2; }
+  .c-item.state-available .c-abbr { color: var(--text); }
+
+  .c-item.state-selected {
+    background: var(--selected-bg);
+    cursor: pointer;
+  }
+  .c-item.state-selected:hover { background: #daefc5; }
+  .c-item.state-selected .c-abbr { color: var(--selected); }
+  .c-item.state-selected .c-full { color: #3B6D11aa; }
+  .c-item.state-selected .badge { background: #C0DD97; color: var(--selected); }
+
+  .c-item.state-locked {
+    opacity: 0.3;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+  .c-item.state-blocked {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+  .c-item.state-blocked .c-full { text-decoration: line-through; }
+
+  /* SUMMARY */
+  .summary-section {
+    display: none;
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .summary-section.show { display: block; }
+  .summary-head {
+    padding: 10px 14px;
+    background: var(--bg);
+    border-bottom: 0.5px solid var(--border);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .summary-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .summary-row:last-child { border-bottom: none; }
+  .s-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--faint);
+    min-width: 16px;
+    padding-top: 1px;
+  }
+  .s-check {
+    font-size: 12px;
+    min-width: 16px;
+    padding-top: 1px;
+  }
+  .s-text .s-abbr {
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .s-text .s-full {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .s-pending { color: var(--faint); font-style: italic; font-size: 12px; padding-top: 2px; }
+
+  /* RESET BUTTON */
+  .reset-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 12px;
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: var(--shadow);
+  }
+  .reset-btn:hover { color: var(--locked); border-color: #F09595; background: #FCEBEB; }
+  .reset-btn:active { transform: scale(0.98); }
+  .reset-icon { font-size: 13px; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .l-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    border: 0.5px solid;
+    flex-shrink: 0;
+  }
+
+  .tap-hint {
+    font-size: 10px;
+    color: var(--faint);
+    text-align: center;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  /* Divider */
+  .divider {
+    height: 0.5px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  @media (max-width: 380px) {
+    .spec-grid { grid-template-columns: 1fr 1fr; }
+    .buckets-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">M.Tech AIML · BITS Pilani</div>
+  <h1>Sem 2 Course Planner</h1>
+  <p>Pick your specialisation, then choose your electives</p>
+</header>
+
+<!-- STEP 1: Mandatory -->
+<div class="step-label"><span class="step-num">1</span> Always mandatory for everyone</div>
+<div class="mandatory-grid">
+  <div class="mandatory-card">
+    <div class="abbr">ACI</div>
+    <div class="fullname">Artificial &amp; Computer Intelligence</div>
+  </div>
+  <div class="mandatory-card">
+    <div class="abbr">DRL</div>
+    <div class="fullname">Deep Reinforcement Learning</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- STEP 2: Spec -->
+<div class="step-label"><span class="step-num">2</span> Choose your specialisation</div>
+<div class="spec-grid">
+  <button class="spec-btn" onclick="setSpec('nlp',this)">
+    <div class="s-tag">Spec 1</div>
+    <div class="s-name">NLP</div>
+    <div class="s-rule">NLP mandatory · 1 free elective</div>
+  </button>
+  <button class="spec-btn" onclick="setSpec('dl',this)">
+    <div class="s-tag">Spec 2</div>
+    <div class="s-name">Deep Learning</div>
+    <div class="s-rule">UDL mandatory · no PGM/VA · B1 allowed</div>
+  </button>
+  <button class="spec-btn" onclick="setSpec('av',this)">
+    <div class="s-tag">Spec 3</div>
+    <div class="s-name">Audio &amp; Vision</div>
+    <div class="s-rule">CV mandatory · no Cyber/SEML · B1 allowed</div>
+  </button>
+  <button class="spec-btn" onclick="setSpec('none',this)">
+    <div class="s-tag">No Spec</div>
+    <div class="s-name">None</div>
+    <div class="s-rule">Pick any 2 from all 4 buckets</div>
+  </button>
+</div>
+
+<div class="info-bar" id="info"></div>
+
+<!-- STEP 3: Buckets -->
+<div class="buckets-section" id="buckets-section">
+  <div class="step-label"><span class="step-num">3</span> Choose your elective(s)</div>
+  <div class="tap-hint">Tap a subject to select it — others in that bucket will cancel out</div>
+  <div class="legend">
+    <div class="legend-item"><div class="l-dot" style="background:#E6F1FB;border-color:#85B7EB"></div>Mandatory</div>
+    <div class="legend-item"><div class="l-dot" style="background:#EAF3DE;border-color:#97C459"></div>Selected</div>
+    <div class="legend-item"><div class="l-dot" style="background:#fff;border-color:#E2DFD6"></div>Available</div>
+    <div class="legend-item"><div class="l-dot" style="background:#F1EFE8;border-color:#D3D1C7;opacity:0.4"></div>Cancelled out</div>
+  </div>
+  <div class="buckets-grid" id="buckets"></div>
+</div>
+
+<div class="divider" id="divider-sum" style="display:none"></div>
+
+<!-- SUMMARY -->
+<div class="summary-section" id="summary">
+  <div class="summary-head">Your final course selection</div>
+  <div id="summary-rows"></div>
+</div>
+
+<!-- RESET -->
+<div id="reset-wrap" style="display:none">
+  <button class="reset-btn" onclick="reset()">
+    <span class="reset-icon">↺</span> Reset all selections
+  </button>
+</div>
+
+<script>
+const DATA = {
+  buckets: [
+    { id:'b1', name:'Bucket 1', courses:[
+      { id:'nlp',   abbr:'NLP',   full:'Natural Language Processing',    units:4 }
+    ]},
+    { id:'b2', name:'Bucket 2', courses:[
+      { id:'cyber', abbr:'Cyber Sec', full:'AI & ML for Cyber Security', units:5 },
+      { id:'cv',    abbr:'CV',    full:'Computer Vision',                units:4 },
+      { id:'seml',  abbr:'SEML',  full:'Software Engg for ML',           units:4 }
+    ]},
+    { id:'b3', name:'Bucket 3', courses:[
+      { id:'udl',   abbr:'UDL',   full:'Unsupervised Deep Learning',     units:4 },
+      { id:'pgm',   abbr:'PGM',   full:'Probabilistic Graphical Models', units:4 },
+      { id:'va',    abbr:'VA',    full:'Video Analysis',                 units:4 }
+    ]},
+    { id:'b4', name:'Bucket 4', courses:[
+      { id:'ir',    abbr:'IR',    full:'Information Retrieval',          units:4 },
+      { id:'dm4ml', abbr:'DM4ML', full:'Data Mgmt for Machine Learning', units:4 },
+      { id:'dml',   abbr:'DML',   full:'Distributed Machine Learning',  units:4 }
+    ]}
+  ]
+};
+
+const SPECS = {
+  nlp:  { cls:'active-nlp', mandatory:['nlp'],  hardLock:[], dimBuckets:[], maxElective:1, info:'NLP (Bucket 1) is your mandatory 3rd subject. Tap any one subject from Bucket 2, 3, or 4 as your 4th subject.' },
+  dl:   { cls:'active-dl',  mandatory:['udl'],  hardLock:['pgm','va'], dimBuckets:[], maxElective:1, info:'UDL (Bucket 3) is your mandatory 3rd subject — PGM and VA are excluded. Tap one subject from any bucket (incl. NLP from Bucket 1) as your 4th.' },
+  av:   { cls:'active-av',  mandatory:['cv'],   hardLock:['cyber','seml'], dimBuckets:[], maxElective:1, info:'CV (Bucket 2) is your mandatory 3rd subject — Cyber Sec and SEML are excluded. Tap one subject from any bucket (incl. NLP from Bucket 1) as your 4th.' },
+  none: { cls:'active-no',  mandatory:[],       hardLock:[], dimBuckets:[], maxElective:2, info:'No specialisation — all 4 buckets are open. Tap any 2 subjects from any 2 buckets (max 1 per bucket).' }
+};
+
+let currentSpec = null;
+let selected = []; // array of course ids picked by user
+
+function courseById(id) {
+  for (const b of DATA.buckets) {
+    const c = b.courses.find(x => x.id === id);
+    if (c) return { ...c, bucketId: b.id };
+  }
+  return null;
+}
+
+function bucketOfCourse(id) {
+  for (const b of DATA.buckets) {
+    if (b.courses.find(c => c.id === id)) return b.id;
+  }
+  return null;
+}
+
+function setSpec(key, btn) {
+  document.querySelectorAll('.spec-btn').forEach(b => {
+    b.className = 'spec-btn';
+  });
+  btn.classList.add(SPECS[key].cls);
+
+  currentSpec = key;
+  selected = [];
+
+  const sp = SPECS[key];
+  const infoEl = document.getElementById('info');
+  infoEl.textContent = sp.info;
+  infoEl.className = 'info-bar show';
+
+  document.getElementById('buckets-section').className = 'buckets-section show';
+  document.getElementById('reset-wrap').style.display = 'block';
+
+  renderBuckets();
+  renderSummary();
+}
+
+function toggleCourse(courseId) {
+  const sp = SPECS[currentSpec];
+  if (sp.mandatory.includes(courseId)) return;
+  if (sp.hardLock.includes(courseId)) return;
+  const bkt = bucketOfCourse(courseId);
+  if (sp.dimBuckets.includes(bkt)) return;
+
+  if (selected.includes(courseId)) {
+    selected = selected.filter(x => x !== courseId);
+  } else {
+    // Check if bucket already has a selected item
+    const bktSelected = selected.filter(id => bucketOfCourse(id) === bkt);
+    if (bktSelected.length > 0) {
+      // Replace selection in same bucket
+      selected = selected.filter(id => bucketOfCourse(id) !== bkt);
+    }
+    // Check max elective limit
+    if (selected.length >= sp.maxElective) {
+      // Remove oldest
+      selected.shift();
+    }
+    selected.push(courseId);
+  }
+
+  renderBuckets();
+  renderSummary();
+}
+
+function getState(courseId, bucketId) {
+  const sp = SPECS[currentSpec];
+  if (sp.mandatory.includes(courseId)) return 'mandatory';
+  if (sp.hardLock.includes(courseId)) return 'locked';
+  if (sp.dimBuckets.includes(bucketId)) return 'dimmed-course';
+  if (selected.includes(courseId)) return 'selected';
+  // If another course in same bucket is selected → blocked
+  const bktSelected = selected.filter(id => bucketOfCourse(id) === bucketId);
+  if (bktSelected.length > 0) return 'blocked';
+  // If all elective slots are filled, gray out remaining unselected courses
+  if (selected.length >= sp.maxElective) return 'blocked';
+  return 'available';
+}
+
+function renderBuckets() {
+  const sp = SPECS[currentSpec];
+  const container = document.getElementById('buckets');
+  container.innerHTML = DATA.buckets.map(b => {
+    const isDimmed = sp.dimBuckets.includes(b.id);
+    const items = b.courses.map(c => {
+      const state = getState(c.id, b.id);
+      let cls = 'c-item';
+      let badge = '';
+      let clickable = '';
+
+      if (state === 'mandatory') {
+        cls += ' state-mandatory';
+        badge = '<span class="badge">mandatory</span>';
+      } else if (state === 'selected') {
+        cls += ' state-selected';
+        badge = '<span class="badge">✓ selected</span>';
+        clickable = `onclick="toggleCourse('${c.id}')"`;
+      } else if (state === 'available') {
+        cls += ' state-available';
+        clickable = `onclick="toggleCourse('${c.id}')"`;
+      } else if (state === 'locked') {
+        cls += ' state-locked';
+      } else if (state === 'blocked') {
+        cls += ' state-blocked';
+        // Only allow click if in the same bucket as a selected item (to swap)
+        const bktHasSelection = selected.some(id => bucketOfCourse(id) === b.id);
+        if (bktHasSelection) clickable = `onclick="toggleCourse('${c.id}')"`;
+      } else {
+        cls += ' state-available';
+      }
+
+      return `<div class="${cls}" ${clickable}>
+        <div class="c-abbr">${c.abbr}</div>
+        <div class="c-full">${c.full}</div>
+        <div class="c-units">${c.units} units</div>
+        ${badge}
+      </div>`;
+    }).join('');
+
+    return `<div class="bucket-card${isDimmed ? ' dimmed' : ''}">
+      <div class="bucket-head">${b.name}</div>
+      ${items}
+    </div>`;
+  }).join('');
+}
+
+function renderSummary() {
+  const sp = SPECS[currentSpec];
+  const allSubjects = [
+    { abbr:'ACI', full:'Artificial & Computer Intelligence', fixed:true },
+    { abbr:'DRL', full:'Deep Reinforcement Learning', fixed:true },
+    ...sp.mandatory.map(id => { const c = courseById(id); return { abbr: c.abbr, full: c.full, fixed:true }; }),
+    ...selected.map(id => { const c = courseById(id); return { abbr: c.abbr, full: c.full, fixed:false }; })
+  ];
+
+  const total = 2 + sp.mandatory.length + sp.maxElective;
+  const rows = [];
+  for (let i = 0; i < total; i++) {
+    const s = allSubjects[i];
+    if (s) {
+      rows.push(`<div class="summary-row">
+        <div class="s-num">S${i+1}</div>
+        <div class="s-check">${s.fixed ? '🔵' : '🟢'}</div>
+        <div class="s-text">
+          <div class="s-abbr">${s.abbr}</div>
+          <div class="s-full">${s.full}</div>
+        </div>
+      </div>`);
+    } else {
+      rows.push(`<div class="summary-row">
+        <div class="s-num">S${i+1}</div>
+        <div class="s-check" style="color:#E2DFD6">○</div>
+        <div class="s-pending">Not chosen yet</div>
+      </div>`);
+    }
+  }
+
+  document.getElementById('summary-rows').innerHTML = rows.join('');
+  const sumEl = document.getElementById('summary');
+  sumEl.className = 'summary-section show';
+  document.getElementById('divider-sum').style.display = 'block';
+}
+
+function reset() {
+  currentSpec = null;
+  selected = [];
+  document.querySelectorAll('.spec-btn').forEach(b => b.className = 'spec-btn');
+  document.getElementById('info').className = 'info-bar';
+  document.getElementById('buckets-section').className = 'buckets-section';
+  document.getElementById('summary').className = 'summary-section';
+  document.getElementById('divider-sum').style.display = 'none';
+  document.getElementById('reset-wrap').style.display = 'none';
+  document.getElementById('buckets').innerHTML = '';
+  document.getElementById('summary-rows').innerHTML = '';
+}
+</script>
+</body>
+</html>
