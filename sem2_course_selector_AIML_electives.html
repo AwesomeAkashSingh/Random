@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BITS Pilani AIML — Sem 2 Elective Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0e0f14;
+  --bg2: #161820;
+  --bg3: #1e2028;
+  --card: #1a1c24;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.14);
+  --text: #e8e9f0;
+  --muted: #8a8c9e;
+  --faint: #52546a;
+  --nlp: #7c6af7; --nlp-bg: rgba(124,106,247,0.12); --nlp-b: rgba(124,106,247,0.35);
+  --dl:  #22c997; --dl-bg:  rgba(34,201,151,0.12);  --dl-b:  rgba(34,201,151,0.35);
+  --av:  #f59e0b; --av-bg:  rgba(245,158,11,0.12);  --av-b:  rgba(245,158,11,0.35);
+  --no:  #94a3b8; --no-bg:  rgba(148,163,184,0.1);  --no-b:  rgba(148,163,184,0.3);
+  --mandatory: #38bdf8; --mandatory-bg: rgba(56,189,248,0.12); --mandatory-b: rgba(56,189,248,0.35);
+  --selected: #4ade80; --selected-bg: rgba(74,222,128,0.12); --selected-b: rgba(74,222,128,0.35);
+  --locked-bg: rgba(239,68,68,0.08); --locked: rgba(239,68,68,0.5);
+  --radius: 14px; --radius-sm: 8px; --radius-xs: 5px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; font-size: 15px; }
+a { color: var(--mandatory); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, #0e0f14 0%, #16183a 50%, #0e1814 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 20px 36px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(124,106,247,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--mandatory); background: var(--mandatory-bg);
+  border: 1px solid var(--mandatory-b);
+  padding: 4px 12px; border-radius: 20px; margin-bottom: 16px;
+}
+.hero h1 { font-size: clamp(22px, 5vw, 36px); font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 8px; }
+.hero h1 span { color: var(--nlp); }
+.hero p { font-size: 14px; color: var(--muted); max-width: 520px; margin: 0 auto 20px; }
+.hero-links { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.hero-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  transition: all 0.18s; cursor: pointer;
+}
+.btn-primary { background: var(--nlp); color: #fff; border: none; }
+.btn-primary:hover { background: #9580ff; transform: translateY(-1px); text-decoration: none; }
+.btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+.btn-secondary:hover { background: var(--bg3); text-decoration: none; }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); font-size: 11px; padding: 7px 14px; }
+.btn-ghost:hover { border-color: var(--border2); color: var(--text); text-decoration: none; }
+
+/* MAIN LAYOUT */
+.main { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; }
+
+/* SECTION */
+.section { margin-bottom: 32px; }
+.section-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--faint); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* SEM 1 PILLS */
+.sem1-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media(min-width:560px){ .sem1-grid { grid-template-columns: repeat(4, 1fr); } }
+.sem1-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  transition: border-color 0.15s;
+}
+.sem1-card:hover { border-color: var(--border2); }
+.sem1-code { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--faint); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+.sem1-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
+.sem1-topics { font-size: 10px; color: var(--muted); line-height: 1.5; }
+
+/* MANDATORY CARDS */
+.mandatory-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+.mandatory-card {
+  background: var(--mandatory-bg); border: 1px solid var(--mandatory-b);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+}
+.mandatory-card .mc-label { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mandatory); margin-bottom: 4px; }
+.mandatory-card .mc-name { font-size: 13px; font-weight: 600; color: #a8d8f0; margin-bottom: 4px; }
+.mandatory-card .mc-sub { font-size: 11px; color: var(--muted); }
+
+/* SPEC BUTTONS */
+.spec-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 18px; }
+@media(min-width:600px){ .spec-grid { grid-template-columns: repeat(4,1fr); } }
+.spec-btn {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 10px;
+  cursor: pointer; text-align: left; transition: all 0.16s;
+}
+.spec-btn:hover { border-color: var(--border2); transform: translateY(-1px); }
+.spec-btn .sb-tag { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-bottom: 4px; }
+.spec-btn .sb-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.spec-btn .sb-rule { font-size: 10px; color: var(--muted); line-height: 1.4; }
+.spec-btn.a-nlp { background: var(--nlp-bg); border-color: var(--nlp-b); }
+.spec-btn.a-nlp .sb-tag { color: var(--nlp); }
+.spec-btn.a-nlp .sb-name { color: #c4b8ff; }
+.spec-btn.a-dl  { background: var(--dl-bg);  border-color: var(--dl-b); }
+.spec-btn.a-dl  .sb-tag { color: var(--dl); }
+.spec-btn.a-dl  .sb-name { color: #a0eed8; }
+.spec-btn.a-av  { background: var(--av-bg);  border-color: var(--av-b); }
+.spec-btn.a-av  .sb-tag { color: var(--av); }
+.spec-btn.a-av  .sb-name { color: #fde68a; }
+.spec-btn.a-no  { background: var(--no-bg);  border-color: var(--no-b); }
+.spec-btn.a-no  .sb-tag { color: var(--no); }
+.spec-btn.a-no  .sb-name { color: #cbd5e1; }
+
+/* INFO BAR */
+.info-bar { display:none; font-size:12px; color:var(--muted); background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-xs); padding:10px 14px; margin-bottom:16px; line-height:1.6; }
+.info-bar.show { display:block; }
+
+/* BUCKETS */
+.buckets-section { display:none; }
+.buckets-section.show { display:block; }
+.buckets-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:20px; }
+@media(min-width:600px){ .buckets-grid { grid-template-columns:repeat(4,1fr); } }
+.bucket-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; transition:opacity 0.2s; }
+.bucket-card.dimmed { opacity:0.25; pointer-events:none; }
+.bucket-head { padding:7px 10px; background:var(--bg3); border-bottom:1px solid var(--border); font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--faint); }
+.c-item { padding:10px 10px; border-bottom:1px solid var(--border); transition:all 0.12s; cursor:default; }
+.c-item:last-child { border-bottom:none; }
+.c-abbr { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:500; margin-bottom:2px; }
+.c-full { font-size:10px; color:var(--muted); line-height:1.35; }
+.c-units { font-size:9px; color:var(--faint); margin-top:3px; }
+.c-badge { display:inline-block; font-size:8px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:2px 6px; border-radius:3px; margin-top:3px; }
+.c-more { font-size:9px; font-weight:600; color:var(--nlp); cursor:pointer; margin-top:4px; display:inline-block; letter-spacing:0.03em; }
+.c-more:hover { text-decoration:underline; }
+
+.c-item.s-mandatory { background:var(--mandatory-bg); }
+.c-item.s-mandatory .c-abbr { color:var(--mandatory); }
+.c-item.s-mandatory .c-badge { background:rgba(56,189,248,0.18); color:var(--mandatory); }
+.c-item.s-selected { background:var(--selected-bg); cursor:pointer; }
+.c-item.s-selected:hover { background:rgba(74,222,128,0.18); }
+.c-item.s-selected .c-abbr { color:var(--selected); }
+.c-item.s-selected .c-badge { background:rgba(74,222,128,0.2); color:var(--selected); }
+.c-item.s-available { cursor:pointer; }
+.c-item.s-available:hover { background:var(--bg3); }
+.c-item.s-locked { opacity:0.25; cursor:not-allowed; text-decoration:line-through; }
+.c-item.s-blocked { opacity:0.22; cursor:not-allowed; }
+
+/* SUMMARY */
+.summary-section { display:none; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:20px; }
+.summary-section.show { display:block; }
+.summary-head { padding:10px 16px; background:var(--bg3); border-bottom:1px solid var(--border); font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--faint); }
+.sum-row { display:flex; align-items:flex-start; gap:12px; padding:11px 16px; border-bottom:1px solid var(--border); }
+.sum-row:last-child { border-bottom:none; }
+.sum-num { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--faint); min-width:20px; padding-top:2px; }
+.sum-dot { font-size:14px; min-width:18px; }
+.sum-text .sa { font-weight:600; font-size:13px; }
+.sum-text .sf { font-size:11px; color:var(--muted); margin-top:1px; }
+.sum-pending { font-size:12px; color:var(--faint); font-style:italic; padding-top:2px; }
+
+/* SUBJECT FEATURES */
+.features-section { display:none; margin-bottom:24px; }
+.features-section.show { display:block; }
+.features-title { font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--faint); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.features-title::after { content:''; flex:1; height:1px; background:var(--border); }
+.features-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+.feat-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius-sm); overflow:hidden;
+  transition:border-color 0.15s, transform 0.15s;
+}
+.feat-card:hover { border-color:var(--border2); transform:translateY(-2px); }
+.feat-header { padding:12px 14px 10px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:flex-start; }
+.feat-header .fh-left .fcode { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:500; margin-bottom:3px; }
+.feat-header .fh-left .fname { font-size:14px; font-weight:700; line-height:1.2; }
+.feat-header .fh-right { text-align:right; }
+.feat-header .fh-right .fbucket { font-size:9px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; padding:2px 7px; border-radius:3px; margin-bottom:4px; display:inline-block; }
+.feat-body { padding:12px 14px; }
+.feat-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px; font-size:12px; }
+.feat-row:last-child { margin-bottom:0; }
+.feat-label { color:var(--muted); font-size:11px; }
+.feat-val { font-weight:500; font-size:11px; text-align:right; max-width:60%; }
+.feat-topics { font-size:11px; color:var(--muted); padding:8px 14px; background:var(--bg3); border-top:1px solid var(--border); line-height:1.5; }
+.feat-topics strong { color:var(--text); font-weight:500; }
+.feat-more-btn { display:flex; width:100%; align-items:center; justify-content:center; gap:5px; padding:9px; font-size:11px; font-weight:600; background:transparent; border:none; border-top:1px solid var(--border); color:var(--nlp); cursor:pointer; transition:background 0.12s; letter-spacing:0.03em; }
+.feat-more-btn:hover { background:var(--nlp-bg); }
+
+/* difficulty badges */
+.diff-easy { color:#4ade80; } .diff-medium { color:#fbbf24; } .diff-high { color:#f87171; } .diff-na { color:var(--faint); }
+.speed-ok { color:var(--mandatory); } .speed-slow { color:#fbbf24; } .speed-good { color:#4ade80; }
+
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--bg2); border:1px solid var(--border2); border-radius:var(--radius); max-width:560px; width:100%; max-height:85vh; overflow:hidden; display:flex; flex-direction:column; }
+.modal-head { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.modal-head h3 { font-size:15px; font-weight:700; }
+.modal-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; line-height:1; padding:0; }
+.modal-close:hover { color:var(--text); }
+.modal-body { padding:18px 20px; overflow-y:auto; flex:1; font-size:13px; line-height:1.7; color:var(--muted); }
+.modal-body h4 { font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--faint); margin:14px 0 6px; }
+.modal-body h4:first-child { margin-top:0; }
+.modal-body ul { padding-left:18px; }
+.modal-body li { margin-bottom:3px; color:var(--muted); }
+.modal-body .highlight { color:var(--text); font-weight:500; }
+.modal-body .tag { display:inline-block; font-size:10px; padding:2px 8px; border-radius:3px; margin:2px; font-weight:500; }
+.modal-body .t-career { background:rgba(124,106,247,0.18); color:var(--nlp); }
+.modal-body .t-tool  { background:rgba(34,201,151,0.15);  color:var(--dl); }
+.modal-body .t-topic { background:rgba(56,189,248,0.15);  color:var(--mandatory); }
+
+/* RESET */
+.reset-btn { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-xs); font-family:'Outfit',sans-serif; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; transition:all 0.15s; }
+.reset-btn:hover { color:#f87171; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.07); }
+
+/* DIVIDER */
+.divider { height:1px; background:var(--border); margin:24px 0; }
+
+/* STATS */
+.stats-intro { font-size:12px; color:var(--muted); margin-bottom:16px; line-height:1.6; }
+.stats-intro strong { color:var(--text); }
+.charts-grid { display:grid; grid-template-columns:1fr; gap:16px; }
+@media(min-width:600px){ .charts-grid { grid-template-columns:1fr 1fr; } }
+.chart-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; }
+.chart-card.wide { grid-column:1/-1; }
+.chart-title { font-size:12px; font-weight:600; color:var(--text); margin-bottom:12px; }
+.chart-sub { font-size:10px; color:var(--faint); margin-top:6px; }
+.chart-wrap { position:relative; height:240px; }
+.chart-wrap-tall { position:relative; height:300px; }
+
+/* LEGEND */
+.leg { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+.leg-item { display:flex; align-items:center; gap:5px; font-size:10px; color:var(--muted); }
+.l-dot { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+
+/* LINKS */
+.links-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media(min-width:600px){ .links-grid { grid-template-columns:repeat(3,1fr); } }
+.link-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; transition:all 0.15s; text-decoration:none; color:var(--text); display:block; }
+.link-card:hover { border-color:var(--border2); transform:translateY(-2px); text-decoration:none; }
+.link-card .lc-icon { font-size:20px; margin-bottom:8px; }
+.link-card .lc-title { font-size:13px; font-weight:600; margin-bottom:3px; }
+.link-card .lc-sub { font-size:11px; color:var(--muted); line-height:1.4; }
+
+/* AI INSIGHT */
+.insight-card { background:linear-gradient(135deg,rgba(124,106,247,0.1),rgba(34,201,151,0.08)); border:1px solid rgba(124,106,247,0.25); border-radius:var(--radius); padding:18px 20px; margin-bottom:20px; }
+.insight-card h4 { font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--nlp); margin-bottom:10px; }
+.insight-card p { font-size:12px; color:var(--muted); line-height:1.7; margin-bottom:6px; }
+.insight-card p:last-child { margin-bottom:0; }
+.insight-card strong { color:var(--text); }
+
+/* TAP HINT */
+.tap-hint { font-size:10px; color:var(--faint); font-style:italic; text-align:center; margin-bottom:10px; }
+
+/* FOOTER */
+footer { text-align:center; padding:24px 16px; border-top:1px solid var(--border); font-size:11px; color:var(--faint); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">M.Tech AIML · BITS Pilani WILP · Semester 2</div>
+  <h1>Choose Your <span>Sem 2</span> Electives</h1>
+  <p>A comprehensive guide for 1300+ students across all backgrounds and age groups. Select your specialisation, explore subject details, and make an informed choice.</p>
+  <div class="hero-links">
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLScQHU05zyXCzcF5cvYUi7x2U1SJgFw15sKDfLHsiEAaACbJMA/viewform?usp=header" target="_blank" class="hero-btn btn-primary">Submit Your Selection ↗</a>
+    <a href="https://docs.google.com/spreadsheets/d/1i2L2v1nMNOWqXJLYSmqAoS238VlDr-vqOcj0AyqLsiA/edit?usp=sharing" target="_blank" class="hero-btn btn-secondary">View Live Stats ↗</a>
+    <a href="#stats" class="hero-btn btn-ghost">See Batch Stats ↓</a>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- SEM 1 FOUNDATION -->
+<div class="section">
+  <div class="section-title">Your Sem 1 Foundation</div>
+  <div class="sem1-grid">
+    <div class="sem1-card">
+      <div class="sem1-code">AIMLC ZC416 · MFML</div>
+      <div class="sem1-title">Mathematical Foundations for ML</div>
+      <div class="sem1-topics">Linear algebra · Eigenvalues · Gradient descent · PCA · SVM optimisation</div>
+    </div>
+    <div class="sem1-card">
+      <div class="sem1-code">ZG565 · ML</div>
+      <div class="sem1-title">Machine Learning</div>
+      <div class="sem1-topics">Regression · SVM · Decision trees · Bayesian learning · Ensemble · K-Means</div>
+    </div>
+    <div class="sem1-card">
+      <div class="sem1-code">AIML ZG511 · DNN</div>
+      <div class="sem1-title">Deep Neural Networks</div>
+      <div class="sem1-topics">CNNs · RNNs · LSTMs · Transformers · Attention · Backpropagation · Optimisation</div>
+    </div>
+    <div class="sem1-card">
+      <div class="sem1-code">AIML ZC418 · ISM</div>
+      <div class="sem1-title">Intro to Statistical Methods</div>
+      <div class="sem1-topics">Probability · Bayes theorem · Distributions · Hypothesis testing · ARIMA · GMM</div>
+    </div>
+  </div>
+</div>
+
+<!-- AI INSIGHT -->
+<div class="insight-card">
+  <h4>💡 From BITS Pilani's AI/ML Perspective</h4>
+  <p>Your Sem 1 gave you the mathematical and algorithmic bedrock of AI. In Sem 2, you <strong>specialise</strong>. The field is bifurcating: <strong>language/NLP</strong> (GPT, LLMs, RAG) and <strong>vision/multimodal</strong> (autonomous vehicles, medical imaging) are the two dominant job markets. Deep Learning research (diffusion models, generative AI) requires UDL fundamentals. MLOps and data engineering roles need SEML and DM4ML.</p>
+  <p>Industry trend (2025–26): <strong>NLP + IR</strong> is the backbone of enterprise RAG pipelines. <strong>CV + VA</strong> powers robotics and surveillance. <strong>UDL</strong> is the research gateway to understanding how ChatGPT-style models are built from scratch.</p>
+</div>
+
+<!-- MANDATORY -->
+<div class="section">
+  <div class="section-title">Step 1 — Always mandatory for everyone</div>
+  <div class="mandatory-row">
+    <div class="mandatory-card">
+      <div class="mc-label">Mandatory · ACI</div>
+      <div class="mc-name">Artificial &amp; Computational Intelligence</div>
+      <div class="mc-sub">Prof. Vijayalakshmi Anand · 1h 45m · 4 units</div>
+    </div>
+    <div class="mandatory-card">
+      <div class="mc-label">Mandatory · DRL</div>
+      <div class="mc-name">Deep Reinforcement Learning</div>
+      <div class="mc-sub">4 units · Policy gradients · Q-learning · Model-based RL</div>
+    </div>
+  </div>
+</div>
+
+<!-- SPECIALISATION -->
+<div class="section">
+  <div class="section-title">Step 2 — Choose your specialisation</div>
+  <div class="spec-grid">
+    <button class="spec-btn" onclick="setSpec('nlp',this)">
+      <div class="sb-tag">Spec 1</div>
+      <div class="sb-name" style="color:#c4b8ff">NLP</div>
+      <div class="sb-rule">NLP auto-selected as 3rd · pick 1 more freely</div>
+    </button>
+    <button class="spec-btn" onclick="setSpec('dl',this)">
+      <div class="sb-tag">Spec 2</div>
+      <div class="sb-name" style="color:#a0eed8">Deep Learning</div>
+      <div class="sb-rule">UDL auto-selected · no PGM/VA · B1 open</div>
+    </button>
+    <button class="spec-btn" onclick="setSpec('av',this)">
+      <div class="sb-tag">Spec 3</div>
+      <div class="sb-name" style="color:#fde68a">Audio &amp; Vision</div>
+      <div class="sb-rule">CV auto-selected · no Cyber/SEML · B1 open</div>
+    </button>
+    <button class="spec-btn" onclick="setSpec('none',this)">
+      <div class="sb-tag">No Spec</div>
+      <div class="sb-name" style="color:#cbd5e1">General</div>
+      <div class="sb-rule">All 4 buckets open · pick any 2</div>
+    </button>
+  </div>
+  <div class="info-bar" id="info"></div>
+</div>
+
+<!-- BUCKETS -->
+<div class="buckets-section" id="buckets-section">
+  <div class="section-title">Step 3 — Pick your elective(s)</div>
+  <div class="tap-hint">Tap to select · tap again to deselect · others in the same bucket cancel out</div>
+  <div class="buckets-grid" id="buckets"></div>
+  <div class="leg">
+    <div class="leg-item"><div class="l-dot" style="background:rgba(56,189,248,0.25);border:1px solid var(--mandatory-b)"></div>Mandatory elective</div>
+    <div class="leg-item"><div class="l-dot" style="background:rgba(74,222,128,0.2);border:1px solid var(--selected-b)"></div>Selected</div>
+    <div class="leg-item"><div class="l-dot" style="background:var(--card);border:1px solid var(--border)"></div>Available</div>
+    <div class="leg-item"><div class="l-dot" style="background:var(--bg3);border:1px solid var(--border);opacity:0.4"></div>Cancelled out</div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary-section" id="summary">
+  <div class="summary-head">Your Final Course Selection</div>
+  <div id="summary-rows"></div>
+</div>
+
+<!-- SUBJECT FEATURES -->
+<div class="features-section" id="features-section">
+  <div class="features-title">Subject Details from Batch Insights</div>
+  <div class="features-grid" id="features-grid"></div>
+</div>
+
+<!-- RESET -->
+<div id="reset-wrap" style="display:none;margin-bottom:32px">
+  <button class="reset-btn" onclick="resetAll()">↺ Reset all selections</button>
+</div>
+
+<div class="divider"></div>
+
+<!-- STATISTICS -->
+<div id="stats" class="section">
+  <div class="section-title">Batch Statistics — 106 Responses</div>
+  <div class="stats-intro">Data collected from <strong>106 students</strong> who have already filled the Google Form. This gives you a live picture of what the batch is choosing.</div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Specialisation distribution</div>
+      <div class="chart-wrap"><canvas id="specChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Top elective pairs chosen</div>
+      <div class="chart-wrap"><canvas id="comboChart"></canvas></div>
+    </div>
+    <div class="chart-card wide">
+      <div class="chart-title">Individual electives chosen (total picks across all students)</div>
+      <div class="chart-wrap-tall"><canvas id="electChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- LINKS -->
+<div class="section">
+  <div class="section-title">Useful Links</div>
+  <div class="links-grid">
+    <a class="link-card" href="https://docs.google.com/forms/d/e/1FAIpQLScQHU05zyXCzcF5cvYUi7x2U1SJgFw15sKDfLHsiEAaACbJMA/viewform?usp=header" target="_blank">
+      <div class="lc-icon">📝</div>
+      <div class="lc-title">Submit Selection Form</div>
+      <div class="lc-sub">Fill the Google Form to register your Sem 2 subject choices</div>
+    </a>
+    <a class="link-card" href="https://docs.google.com/spreadsheets/d/1i2L2v1nMNOWqXJLYSmqAoS238VlDr-vqOcj0AyqLsiA/edit?usp=sharing" target="_blank">
+      <div class="lc-icon">📊</div>
+      <div class="lc-title">Live Response Statistics</div>
+      <div class="lc-sub">See real-time stats from the Google Form responses</div>
+    </a>
+    <a class="link-card" href="https://elearn.bits-pilani.ac.in" target="_blank">
+      <div class="lc-icon">🎓</div>
+      <div class="lc-title">eLearn Portal</div>
+      <div class="lc-sub">BITS Pilani WILP portal for course materials and announcements</div>
+    </a>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Subject Overview</h3>
+      <button class="modal-close" onclick="closeModalDirect()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<footer>
+  BITS Pilani · M.Tech AIML · Sem 2 Elective Planner · Built for the batch of 1300+ students · Stats from 106 early responses
+</footer>
+
+<script>
+const SUBJECTS = {
+  aci: { abbr:'ACI', full:'Artificial & Computational Intelligence', code:'AIMLCZG530', bucket:'B1', color:'#38bdf8',
+    prof:'Vijayalakshmi Anand', updated:'May 2024', duration:'1h 45m', speed:'OK', quality:'OK',
+    comments:'Applications: Voice assistant, Google Translate, chatbots, sentiment analysis.',
+    topics:'Introduction to LLMs, embeddings, RAG. Classic AI methods.',
+    diff_s:'Heavy', diff_q:'Easy', maths:'Light', suitable:'Job switch · GenAI · Chatbots',
+    syllabus: {
+      overview: 'Classical and modern AI — symbolic reasoning, knowledge representation, search algorithms, and their integration with modern ML techniques including LLMs and RAG pipelines.',
+      modules: ['Knowledge representation & reasoning','Search algorithms (A*, heuristics)','Logic & inference engines','Introduction to LLMs and embeddings','RAG (Retrieval Augmented Generation)','Voice assistants & chatbots — system design'],
+      tools: ['Python','Hugging Face','LangChain'],
+      careers: ['AI/ML Engineer','Chatbot Developer','NLP Researcher'],
+      tip: 'If you come from non-tech background and want hands-on exposure to GenAI application building, this is the gentlest entry point.'
+    }
+  },
+  drl: { abbr:'DRL', full:'Deep Reinforcement Learning', code:'AIMLCZG567', bucket:'B2', color:'#818cf8',
+    prof:'TBA', updated:'2024', duration:'—', speed:'—', quality:'—',
+    comments:'Extends your DNN knowledge to sequential decision making.',
+    topics:'Q-learning, policy gradients, actor-critic, multi-agent RL.',
+    diff_s:'High', diff_q:'—', maths:'High', suitable:'Robotics · Game AI · Autonomous systems',
+    syllabus:{
+      overview:'Reinforcement learning theory and deep RL algorithms. Builds on your DNN foundation from Sem 1.',
+      modules:['Markov Decision Processes','Q-learning & Deep Q-Networks (DQN)','Policy gradient methods','Actor-Critic algorithms (A3C, PPO)','Multi-agent RL','Applications: robotics, game playing'],
+      tools:['Python','OpenAI Gym','PyTorch'],
+      careers:['RL Research Engineer','Robotics Software Engineer'],
+      tip:'Mathematically demanding — your ISM (probability) and MFML (optimisation) knowledge is heavily used here.'
+    }
+  },
+  nlp:  { abbr:'NLP', full:'Natural Language Processing', code:'AIMLCZG530', bucket:'B1', color:'#a78bfa',
+    prof:'Vijayalakshmi Anand', updated:'May 2024', duration:'1h 45m', speed:'OK', quality:'OK',
+    comments:'Applications include voice assistants, Google Translate, chatbots, sentiment analysis.',
+    topics:'Introduction to LLMs, embeddings, RAG. Traditional NLP + modern GenAI.',
+    diff_s:'Heavy', diff_q:'Easy', maths:'Light', suitable:'Job switch · GenAI · Chatbots · LLM engineering',
+    syllabus:{
+      overview:'From classical NLP (tokenisation, POS tagging) to modern transformers and LLMs. Highly practical and directly applicable to industry GenAI roles.',
+      modules:['Text preprocessing — tokenisation, stemming, lemmatisation','Bag of Words, TF-IDF, word embeddings (Word2Vec, GloVe)','Sequence models for NLP (RNN, LSTM — extends DNN)','Transformers and attention for NLP','Language models — GPT, BERT, T5','RAG — Retrieval Augmented Generation','Sentiment analysis, NER, QA systems'],
+      tools:['Python','NLTK','spaCy','Hugging Face Transformers','LangChain'],
+      careers:['NLP Engineer','LLM/GenAI Engineer','Chatbot Developer','AI Product Engineer'],
+      tip:'Most popular choice in your batch (64.8% chose NLP specialisation). Lightest on maths — heavy on application. Best for those targeting GenAI industry roles quickly.'
+    }
+  },
+  cyber:{ abbr:'Cyber Sec', full:'AI & ML Techniques for Cybersecurity', code:'AIMLCZG567', bucket:'B2', color:'#f87171',
+    prof:'Sashank Dara', updated:'May 2024', duration:'1h 57m', speed:'Good', quality:'Good',
+    comments:'Not about traditional cybersecurity — it is about applying ML to security problems.',
+    topics:'Anomaly detection, malware classification, network traffic profiling.',
+    diff_s:'Medium', diff_q:'No data', maths:'No data', suitable:'Network engineers · IT operations · Security analysts',
+    syllabus:{
+      overview:'Applies ML and AI techniques to solve cybersecurity problems. No prior cybersecurity experience needed.',
+      modules:['Intro to cybersecurity threats and datasets','Anomaly detection using ML (Isolation Forest, Autoencoders)','Malware classification with ML','Network traffic profiling','Intrusion detection systems','Adversarial ML — attacks and defences'],
+      tools:['Python','Scikit-learn','Wireshark datasets'],
+      careers:['Security Data Scientist','AI Security Engineer','Threat Intelligence Analyst'],
+      tip:'5-unit subject — highest credit elective. Good professor feedback. Ideal if you work in IT/networking and want to apply ML to your domain.'
+    }
+  },
+  cv:   { abbr:'CV', full:'Computer Vision', code:'AIMLCZG525', bucket:'B2', color:'#34d399',
+    prof:'Dhruba Adhikary', updated:'Oct 2025', duration:'2h 14m', speed:'Slow', quality:'Good',
+    comments:'Demo after every lecture. Algorithmic perspective of Computer Vision. Assignment video expected.',
+    topics:'Camera models, image classification, object detection, edge devices, NVIDIA ecosystems.',
+    diff_s:'No data', diff_q:'No data', maths:'No data', suitable:'Robotics · Medical imaging · Automotive · Drones',
+    syllabus:{
+      overview:'From foundational image processing to state-of-the-art object detection and segmentation. Directly extends your CNN knowledge from DNN (Sem 1).',
+      modules:['Image formation and camera models','Image filtering, edge detection, feature extraction','CNNs for vision (builds on DNN Sem 1)','Object detection — YOLO, Faster R-CNN','Image segmentation — U-Net, Mask R-CNN','3D vision and depth estimation','OpenCV hands-on labs','Edge deployment — NVIDIA Jetson'],
+      tools:['Python','OpenCV','PyTorch','TensorFlow','NVIDIA CUDA'],
+      careers:['Computer Vision Engineer','Robotics Software Engineer','Medical Imaging AI','Autonomous Vehicle Engineer'],
+      tip:'Handout updated Oct 2025 — very current syllabus. Teaching is slow but quality is good. Mandatory for Audio & Vision specialisation.'
+    }
+  },
+  seml: { abbr:'SEML', full:'Software Engineering for ML', code:'AIMLCZG546', bucket:'B2', color:'#60a5fa',
+    prof:'Shreyas Suresh Rao', updated:'Recently (2026)', duration:'42m', speed:'OK', quality:'OK',
+    comments:'Professor is Associate Dean of WILP. Shortest video lectures — very concise.',
+    topics:'CI/CD pipelines, containerisation, automated ML workflows, Docker, Kubernetes.',
+    diff_s:'No data', diff_q:'No data', maths:'No data', suitable:'Software engineers · MLOps · DevOps transitioning to ML',
+    syllabus:{
+      overview:'MLOps and software engineering best practices for deploying ML systems in production. The most "software engineering" flavoured course in AIML.',
+      modules:['ML lifecycle and MLOps fundamentals','Version control for ML (DVC, MLflow)','CI/CD pipelines for ML','Docker for ML environments','Kubernetes for ML scaling','Model monitoring and observability','Case studies — production ML failures and fixes'],
+      tools:['Docker','Kubernetes','MLflow','DVC','GitHub Actions','Airflow'],
+      careers:['MLOps Engineer','ML Platform Engineer','DevOps for AI','Platform Reliability Engineer'],
+      tip:'If you are a software developer/SRE wanting to bridge into AI ops, this is your course. Shortest lectures (42 min!) but dense with practical tooling.'
+    }
+  },
+  udl:  { abbr:'UDL', full:'Unsupervised Deep Learning', code:'AIMLCZG533', bucket:'B3', color:'#22c997',
+    prof:'Sugata Ghosal', updated:'Recently (2026)', duration:'50m', speed:'Slow', quality:'OK',
+    comments:'Same professor as ML (Sem 1). 2 heavy Python assignments. Can be called "Generative AI models". Probability distribution functions heavily used.',
+    topics:'PCA variants, Autoencoders, Variational AE, GANs, Diffusion models, Semi-supervised learning, Time series.',
+    diff_s:'High', diff_q:'No data', maths:'High', suitable:'Research · Understanding how LLMs are built · Generative AI',
+    syllabus:{
+      overview:'The theory behind generative AI — GANs, VAEs, diffusion models. If you want to understand how Stable Diffusion or DALL-E works from first principles, this is it.',
+      modules:['Representation learning fundamentals','PCA variants (Kernel PCA, Sparse PCA, ICA, Manifold learning)','Autoencoders — undercomplete, denoising, contractive','Variational Autoencoders (VAE)','Generative Adversarial Networks (GAN) and variants (StyleGAN, CycleGAN)','DeepDream and neural style transfer','Self-supervised and semi-supervised learning','Language model learning basics','Flow models and autoregressive models'],
+      tools:['Python','PyTorch','TensorFlow','Jupyter'],
+      careers:['Generative AI Researcher','Deep Learning Research Engineer','AI Research Scientist'],
+      tip:'Highly mathematical (uses ISM + MFML + DNN heavily). Mandatory for Deep Learning specialisation. The gateway to understanding foundation model training.'
+    }
+  },
+  pgm:  { abbr:'PGM', full:'Probabilistic Graphical Models', code:'AIMLCZG526', bucket:'B3', color:'#fb923c',
+    prof:'G Krishna Kumari', updated:'May 2024', duration:'2h 26m', speed:'Slow', quality:'OK',
+    comments:'Was our ISM instructor in Sem 1. Slowest lectures. Question paper is tough.',
+    topics:'Graph theory, Bayesian networks, Markov random fields, inference algorithms.',
+    diff_s:'Easy', diff_q:'Tough', maths:'High', suitable:'Reasoning under uncertainty · Probabilistic AI · Research',
+    syllabus:{
+      overview:'Mathematical framework for reasoning under uncertainty using graphs. Bridges statistics (ISM) and ML in a rigorous way.',
+      modules:['Graph theory foundations','Bayesian networks — representation and inference','Markov Random Fields','Exact inference — variable elimination, belief propagation','Approximate inference — MCMC, variational methods','Learning PGM parameters from data','Applications — medical diagnosis, NLP structured prediction'],
+      tools:['Python','pgmpy library'],
+      careers:['AI Research Scientist','Probabilistic ML Engineer','Quantitative Analyst'],
+      tip:'Syllabus is manageable but the question paper is tough. Requires strong ISM foundation. Least popular elective — choose only if you enjoy theoretical probabilistic reasoning.'
+    }
+  },
+  va:   { abbr:'VA', full:'Video Analysis', code:'AIMLZG540', bucket:'B3', color:'#f59e0b',
+    prof:'Seetha Parameswaran', updated:'Oct 2025', duration:'1h 15m', speed:'Slow', quality:'Good',
+    comments:'Lengthier papers and assignments. Tough to score marks. Same professor as DNN (Sem 1).',
+    topics:'Object detection & tracking, video generation, OpenCV, LangChain, HuggingFace. Deepfake, autonomous vehicles.',
+    diff_s:'Medium', diff_q:'Tough', maths:'No data', suitable:'Computer Vision · Deepfake detection · Autonomous vehicles · Surveillance',
+    syllabus:{
+      overview:'Extends Computer Vision to temporal/video data. Very applied — uses real-world tools and covers hot topics like deepfake detection.',
+      modules:['Video data fundamentals — frames, codecs, sampling','Object detection in video (extends DNN CNN knowledge)','Object tracking — Kalman filter, deep SORT','Video classification — 3D CNNs, SlowFast','Video generation — temporal GANs','Deepfake detection and synthesis','OpenCV for video processing','Autonomous vehicle perception systems'],
+      tools:['Python','OpenCV','PyTorch','HuggingFace','LangChain'],
+      careers:['Computer Vision Engineer','Video Analytics Engineer','Autonomous Vehicle AI','Security & Surveillance AI'],
+      tip:'Mandatory for Audio & Vision specialisation. Tough scoring — exams are long. But very current topics (deepfakes, autonomous vehicles) with high industry demand.'
+    }
+  },
+  ir:   { abbr:'IR', full:'Information Retrieval', code:'AIMLCZG537', bucket:'B4', color:'#38bdf8',
+    prof:'Vijayalakshmi Anand', updated:'May 2024', duration:'1h 52m', speed:'OK', quality:'OK',
+    comments:'Improves search engines and recommendation systems. Question paper is maths-heavy.',
+    topics:'Web search, crawlers, inverted indexes, ranking, recommendation systems.',
+    diff_s:'Easy', diff_q:'Maths heavy', maths:'High', suitable:'Search engine engineers · Recommendation systems · Data engineers',
+    syllabus:{
+      overview:'The science behind Google Search, recommendation systems, and enterprise knowledge retrieval. Highly relevant for building RAG systems alongside NLP.',
+      modules:['Boolean retrieval and inverted index','TF-IDF and vector space model','Probabilistic retrieval models (BM25)','Web crawlers and link analysis (PageRank)','Evaluation metrics — NDCG, MAP, MRR','Collaborative filtering for recommendations','Semantic search and dense retrieval','Modern neural IR (DPR, ColBERT)'],
+      tools:['Python','Elasticsearch','Whoosh','FAISS'],
+      careers:['Search Engineer','Recommendation Systems Engineer','Data Engineer','RAG/LLM Pipeline Engineer'],
+      tip:'Most popular NLP companion subject. Syllabus is straightforward but QP needs maths. Pairs perfectly with NLP for building production RAG search systems.'
+    }
+  },
+  dm4ml:{ abbr:'DM4ML', full:'Data Management for Machine Learning', code:'AIMLCZG529', bucket:'B4', color:'#e879f9',
+    prof:'Sunil Bhutada', updated:'May 2024', duration:'1h 32m', speed:'OK', quality:'OK',
+    comments:'No quiz, 2 heavy assignments. Written-heavy exam.',
+    topics:'Data ingestion, processing, storage, retrieval. SQL, Kafka, Airflow, dbt, Snowflake, Spark.',
+    diff_s:'Medium', diff_q:'Heavy on writing', maths:'Medium', suitable:'Data engineers · Database admins · ML platform engineers',
+    syllabus:{
+      overview:'End-to-end data lifecycle management for ML pipelines — from raw ingestion to feature stores. The "data infrastructure" course.',
+      modules:['Relational vs NoSQL data models for ML','Data encoding and evolution','ML workflow and data challenges','Data pipeline patterns — ingestion, transformation, serving','Modern data stack — Kafka, Airflow, dbt, Snowflake, Spark','Feature management and feature stores','ML model metadata and registry','Data privacy and anonymity in ML'],
+      tools:['Python','Apache Kafka','Apache Spark','Airflow','dbt','Snowflake','SQL'],
+      careers:['Data Engineer','ML Platform Engineer','Analytics Engineer','Data Infrastructure Architect'],
+      tip:'No quiz — 2 heavy assignments + writing-heavy exam. Best for anyone in data engineering or analytics roles who wants to formalise their ML data pipeline knowledge.'
+    }
+  },
+  dml:  { abbr:'DML', full:'Distributed Machine Learning', code:'AIMLCZG515', bucket:'B4', color:'#4ade80',
+    prof:'Chandra Sekhar V', updated:'Recently (2026)', duration:'1h 2m', speed:'OK', quality:'Doubtful',
+    comments:'Good use of AI tools for creating slides. Teaching quality uncertain based on early feedback.',
+    topics:'Edge AI, multi-agent systems, gradient descent at scale, federated learning. Case studies: fraud detection, e-commerce recommendations.',
+    diff_s:'High', diff_q:'No data', maths:'High', suitable:'Edge AI · Autonomous vehicles · Large-scale distributed systems',
+    syllabus:{
+      overview:'ML at scale — distributing training and inference across multiple machines, and deploying models to edge devices.',
+      modules:['Parallel and distributed computing foundations','Data parallelism vs model parallelism','Federated learning and privacy-preserving ML','Gradient descent at scale (asynchronous SGD)','Communication efficiency — gradient compression','Edge AI and on-device ML','Multi-agent learning systems','Case studies: fraud detection, e-commerce, autonomous vehicles'],
+      tools:['Python','PyTorch Distributed','TensorFlow Federated','ONNX','TFLite'],
+      careers:['Distributed ML Engineer','Edge AI Engineer','ML Systems Engineer','Autonomous Vehicle AI'],
+      tip:'Newest course — handout tentative. Quality feedback uncertain. Highly mathematical. Ideal for those in large-scale infrastructure or edge computing domains.'
+    }
+  }
+};
+
+const SPECS = {
+  nlp:  { cls:'a-nlp', mandatory:['nlp'],  hardLock:[], dimBuckets:[], maxElective:1, info:'NLP (Bucket 1) is your mandatory 3rd subject. Tap any one subject from Buckets 2, 3, or 4 as your 4th subject.' },
+  dl:   { cls:'a-dl',  mandatory:['udl'],  hardLock:['pgm','va'], dimBuckets:[], maxElective:1, info:'UDL (Bucket 3) is your mandatory 3rd subject — PGM and VA are excluded. Tap one from any other bucket (Bucket 1 with NLP is allowed) as your 4th.' },
+  av:   { cls:'a-av',  mandatory:['cv'],   hardLock:['cyber','seml'], dimBuckets:[], maxElective:1, info:'CV (Bucket 2) is your mandatory 3rd subject — Cyber Sec and SEML are excluded. Tap one from any other bucket (Bucket 1 with NLP is allowed) as your 4th.' },
+  none: { cls:'a-no',  mandatory:[],       hardLock:[], dimBuckets:[], maxElective:2, info:'No specialisation — all 4 buckets are open. Tap any 2 subjects from any 2 different buckets (max 1 per bucket).' }
+};
+
+const BUCKETS = [
+  { id:'b1', name:'Bucket 1', courses:['nlp'] },
+  { id:'b2', name:'Bucket 2', courses:['cyber','cv','seml'] },
+  { id:'b3', name:'Bucket 3', courses:['udl','pgm','va'] },
+  { id:'b4', name:'Bucket 4', courses:['ir','dm4ml','dml'] }
+];
+
+const BUCKET_COLORS = { b1:'#a78bfa', b2:'#f87171', b3:'#34d399', b4:'#60a5fa' };
+
+let currentSpec = null;
+let selected = [];
+
+function bucketOf(id) {
+  for (const b of BUCKETS) if (b.courses.includes(id)) return b.id;
+  return null;
+}
+
+function setSpec(key, btn) {
+  document.querySelectorAll('.spec-btn').forEach(b => b.className='spec-btn');
+  btn.classList.add(SPECS[key].cls);
+  currentSpec = key; selected = [];
+  const infoEl = document.getElementById('info');
+  infoEl.textContent = SPECS[key].info; infoEl.className = 'info-bar show';
+  document.getElementById('buckets-section').className = 'buckets-section show';
+  document.getElementById('reset-wrap').style.display = 'block';
+  renderBuckets(); renderSummary(); renderFeatures();
+}
+
+function toggleCourse(id) {
+  const sp = SPECS[currentSpec];
+  if (sp.mandatory.includes(id) || sp.hardLock.includes(id)) return;
+  const bkt = bucketOf(id);
+  if (!bkt) return;
+  if (selected.includes(id)) {
+    selected = selected.filter(x => x !== id);
+  } else {
+    const bktSel = selected.filter(x => bucketOf(x) === bkt);
+    if (bktSel.length > 0) selected = selected.filter(x => bucketOf(x) !== bkt);
+    if (selected.length >= sp.maxElective) selected.shift();
+    selected.push(id);
+  }
+  renderBuckets(); renderSummary(); renderFeatures();
+}
+
+function getState(id, bucketId) {
+  const sp = SPECS[currentSpec];
+  if (sp.mandatory.includes(id)) return 'mandatory';
+  if (sp.hardLock.includes(id)) return 'locked';
+  if (selected.includes(id)) return 'selected';
+  const bktSel = selected.filter(x => bucketOf(x) === bucketId);
+  if (bktSel.length > 0) return 'blocked';
+  if (selected.length >= sp.maxElective) return 'blocked';
+  return 'available';
+}
+
+function renderBuckets() {
+  const sp = SPECS[currentSpec];
+  document.getElementById('buckets').innerHTML = BUCKETS.map(b => {
+    const isDimmed = false;
+    const items = b.courses.map(id => {
+      const c = SUBJECTS[id]; const state = getState(id, b.id);
+      let cls = 'c-item s-'+state; let badge = ''; let click = '';
+      const bktHasSel = selected.some(x => bucketOf(x) === b.id);
+      if (state==='mandatory') { badge = `<div class="c-badge" style="background:var(--mandatory-bg);color:var(--mandatory)">mandatory</div>`; }
+      else if (state==='selected') { badge = `<div class="c-badge" style="background:var(--selected-bg);color:var(--selected)">✓ selected</div>`; click = `onclick="toggleCourse('${id}')" `; }
+      else if (state==='available') { click = `onclick="toggleCourse('${id}')" `; }
+      else if (state==='blocked' && bktHasSel) { click = `onclick="toggleCourse('${id}')" `; }
+      return `<div class="${cls}" ${click}>
+        <div class="c-abbr" style="color:${c.color}">${c.abbr}</div>
+        <div class="c-full">${c.full}</div>
+        <div class="c-units">${id==='cyber'?'5':'4'} units</div>
+        ${badge}
+        <span class="c-more" onclick="event.stopPropagation();showModal('${id}')">More info ›</span>
+      </div>`;
+    }).join('');
+    const bColor = BUCKET_COLORS[b.id];
+    return `<div class="bucket-card${isDimmed?' dimmed':''}">
+      <div class="bucket-head" style="color:${bColor}">${b.name}</div>${items}</div>`;
+  }).join('');
+}
+
+function renderSummary() {
+  const sp = SPECS[currentSpec];
+  const fixed = [
+    {abbr:'ACI', full:'Artificial & Computational Intelligence', dot:'🔵'},
+    {abbr:'DRL', full:'Deep Reinforcement Learning', dot:'🔵'}
+  ];
+  const mands = sp.mandatory.map(id => ({abbr:SUBJECTS[id].abbr, full:SUBJECTS[id].full, dot:'🟣'}));
+  const frees = selected.map(id => ({abbr:SUBJECTS[id].abbr, full:SUBJECTS[id].full, dot:'🟢'}));
+  const all = [...fixed, ...mands, ...frees];
+  const total = 2 + sp.mandatory.length + sp.maxElective;
+  let rows = '';
+  for(let i=0;i<total;i++){
+    const s = all[i];
+    rows += s
+      ? `<div class="sum-row"><div class="sum-num">S${i+1}</div><div class="sum-dot">${s.dot}</div><div class="sum-text"><div class="sa">${s.abbr}</div><div class="sf">${s.full}</div></div></div>`
+      : `<div class="sum-row"><div class="sum-num">S${i+1}</div><div class="sum-dot" style="color:var(--faint)">○</div><div class="sum-pending">Not chosen yet</div></div>`;
+  }
+  document.getElementById('summary-rows').innerHTML = rows;
+  document.getElementById('summary').className = 'summary-section show';
+}
+
+function renderFeatures() {
+  const sp = SPECS[currentSpec];
+  const showIds = [...sp.mandatory, ...selected];
+  if (!showIds.length) {
+    document.getElementById('features-section').className = 'features-section';
+    return;
+  }
+  document.getElementById('features-section').className = 'features-section show';
+  document.getElementById('features-grid').innerHTML = showIds.map(id => {
+    const c = SUBJECTS[id];
+    const diffS = c.diff_s==='Heavy'||c.diff_s==='High' ? `<span class="diff-high">${c.diff_s}</span>` :
+                  c.diff_s==='Medium'||c.diff_s==='Easy' ? `<span class="diff-medium">${c.diff_s}</span>` :
+                  `<span class="diff-na">${c.diff_s}</span>`;
+    const diffQ = c.diff_q.includes('Tough')||c.diff_q.includes('heavy') ? `<span class="diff-high">${c.diff_q}</span>` :
+                  c.diff_q==='Easy' ? `<span class="diff-medium">${c.diff_q}</span>` :
+                  `<span class="diff-na">${c.diff_q}</span>`;
+    const mathsColor = c.maths==='High'?'#f87171':c.maths==='Medium'?'#fbbf24':c.maths==='Light'?'#4ade80':'var(--faint)';
+    const speedColor = c.speed==='Good'?'#4ade80':c.speed==='OK'?'#38bdf8':c.speed==='Slow'?'#fbbf24':'var(--faint)';
+    const qualColor  = c.quality==='Good'?'#4ade80':c.quality==='OK'?'#38bdf8':c.quality==='Doubtful'?'#f87171':'var(--faint)';
+    const bktId = bucketOf(id) || 'b1';
+    const bColor = BUCKET_COLORS[bktId];
+    return `<div class="feat-card">
+      <div class="feat-header">
+        <div class="fh-left">
+          <div class="fcode" style="color:${c.color}">${c.code} · ${id==='cyber'?'5':'4'} units</div>
+          <div class="fname" style="color:${c.color}">${c.abbr}</div>
+        </div>
+        <div class="fh-right">
+          <div class="fbucket" style="background:${bColor}22;color:${bColor}">${BUCKETS.find(b=>b.courses.includes(id))?.name||''}</div>
+        </div>
+      </div>
+      <div class="feat-body">
+        <div class="feat-row"><span class="feat-label">Professor</span><span class="feat-val">${c.prof}</span></div>
+        <div class="feat-row"><span class="feat-label">Handout</span><span class="feat-val">${c.updated}</span></div>
+        <div class="feat-row"><span class="feat-label">Video duration</span><span class="feat-val">${c.duration}</span></div>
+        <div class="feat-row"><span class="feat-label">Teaching speed</span><span class="feat-val" style="color:${speedColor}">${c.speed}</span></div>
+        <div class="feat-row"><span class="feat-label">Teaching quality</span><span class="feat-val" style="color:${qualColor}">${c.quality}</span></div>
+        <div class="feat-row"><span class="feat-label">Syllabus difficulty</span><span class="feat-val">${diffS}</span></div>
+        <div class="feat-row"><span class="feat-label">Exam difficulty</span><span class="feat-val">${diffQ}</span></div>
+        <div class="feat-row"><span class="feat-label">Maths required</span><span class="feat-val" style="color:${mathsColor}">${c.maths}</span></div>
+        <div class="feat-row"><span class="feat-label">Best suited for</span><span class="feat-val">${c.suitable}</span></div>
+      </div>
+      <div class="feat-topics"><strong>Key topics:</strong> ${c.topics}</div>
+      <button class="feat-more-btn" onclick="showModal('${id}')">📖 Full syllabus &amp; career guide ›</button>
+    </div>`;
+  }).join('');
+}
+
+function resetAll() {
+  currentSpec = null; selected = [];
+  document.querySelectorAll('.spec-btn').forEach(b => b.className='spec-btn');
+  document.getElementById('info').className = 'info-bar';
+  document.getElementById('buckets-section').className = 'buckets-section';
+  document.getElementById('summary').className = 'summary-section';
+  document.getElementById('features-section').className = 'features-section';
+  document.getElementById('reset-wrap').style.display = 'none';
+  document.getElementById('buckets').innerHTML = '';
+  document.getElementById('summary-rows').innerHTML = '';
+  document.getElementById('features-grid').innerHTML = '';
+}
+
+// MODAL
+function showModal(id) {
+  const c = SUBJECTS[id];
+  if (!c) return;
+  document.getElementById('modal-title').textContent = `${c.abbr} — ${c.full}`;
+  const s = c.syllabus;
+  document.getElementById('modal-body').innerHTML = `
+    <p style="color:var(--text);margin-bottom:12px">${s.overview}</p>
+    <h4>Modules / Topics</h4>
+    <ul>${s.modules.map(m=>`<li>${m}</li>`).join('')}</ul>
+    <h4>Tools &amp; Libraries</h4>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${s.tools.map(t=>`<span class="tag t-tool">${t}</span>`).join('')}</div>
+    <h4>Career Paths</h4>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${s.careers.map(t=>`<span class="tag t-career">${t}</span>`).join('')}</div>
+    <h4>Batch Insights</h4>
+    <p>${c.comments}</p>
+    <h4>Quick Tip</h4>
+    <p class="highlight" style="background:var(--bg3);padding:10px 12px;border-radius:6px;border-left:3px solid ${c.color}">${s.tip}</p>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(e) { if(e.target===document.getElementById('modal')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('modal').classList.remove('open'); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModalDirect(); });
+
+// CHARTS
+const CHART_DEFAULTS = {
+  font: { family: "'Outfit', sans-serif" },
+  color: '#8a8c9e'
+};
+Chart.defaults.font.family = "'Outfit', sans-serif";
+Chart.defaults.color = '#8a8c9e';
+
+new Chart(document.getElementById('specChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['NLP (64.8%)', 'Deep Learning (16.2%)', 'No Specialisation (11.4%)', 'Audio & Vision (7.6%)'],
+    datasets: [{ data: [68.7, 17.2, 12.1, 8.1], backgroundColor: ['#a78bfa','#22c997','#94a3b8','#f59e0b'], borderColor: '#1a1c24', borderWidth: 3 }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ padding:12, font:{size:10}, color:'#8a8c9e' } } }, cutout:'60%' }
+});
+
+new Chart(document.getElementById('comboChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['NLP+SEML (17.1%)','NLP+IR (16.2%)','NLP+CV (15.2%)','NLP+UDL (11.4%)','NLP+DM4ML (6.7%)','UDL+CV (4.8%)','NLP+DML (4.8%)','Others (23.8%)'],
+    datasets: [{ data:[18,17,16,12,7,5,5,25], backgroundColor:['#a78bfa','#38bdf8','#34d399','#22c997','#e879f9','#f59e0b','#4ade80','#52546a'], borderColor:'#1a1c24', borderWidth:3 }]
+  },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ padding:8, font:{size:9}, color:'#8a8c9e' } } }, cutout:'55%' }
+});
+
+new Chart(document.getElementById('electChart'), {
+  type: 'bar',
+  data: {
+    labels: ['NLP','SEML','IR','UDL','CV','DM4ML','DML','Cyber Sec','VA','PGM'],
+    datasets: [{
+      label: 'Times chosen',
+      data: [82,24,19,26,25,11,11,8,6,1],
+      backgroundColor: ['#a78bfa','#60a5fa','#38bdf8','#22c997','#34d399','#e879f9','#4ade80','#f87171','#f59e0b','#fb923c'],
+      borderRadius: 6, borderWidth: 0
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8a8c9e', font:{size:11} } },
+      y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8a8c9e', font:{size:11} }, beginAtZero: true }
+    }
+  }
+});
+</script>
+</body>
+</html>
