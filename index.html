@@ -3,34 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sem 2 AIML Hub - BITS WILP</title>
+  <title>BITS M. Tech. AIML Oct. 2025 Batch</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      background-color: #f5f7fb;
+      background: linear-gradient(to right, #eef2ff, #f8fbff);
       color: #333;
     }
 
     header {
-      background-color: #4a90e2;
+      background: linear-gradient(to right, #4a90e2, #6fc3ff);
       color: white;
-      padding: 20px;
+      padding: 25px;
       text-align: center;
     }
 
-    nav {
-      background-color: #ffffff;
-      padding: 10px;
+    .banner {
+      background-color: #fff3cd;
+      padding: 15px;
       text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    nav a {
-      margin: 0 15px;
-      text-decoration: none;
-      color: #4a90e2;
       font-weight: bold;
+      border-bottom: 2px solid #ffeeba;
+    }
+
+    .banner a {
+      display: block;
+      margin-top: 8px;
+      color: #d63384;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .tab {
+      padding: 12px 25px;
+      cursor: pointer;
+      background: #e0e7ff;
+      margin: 0 5px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .tab.active {
+      background: #4a90e2;
+      color: white;
     }
 
     .container {
@@ -43,8 +65,8 @@
       background: white;
       padding: 20px;
       margin-bottom: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
     }
 
     .card h2 {
@@ -52,8 +74,19 @@
       color: #4a90e2;
     }
 
+    .announcement {
+      background-color: #e7f1ff;
+      padding: 10px;
+      border-left: 5px solid #4a90e2;
+      margin-bottom: 10px;
+    }
+
     ul {
       padding-left: 20px;
+    }
+
+    .hidden {
+      display: none;
     }
 
     footer {
@@ -62,58 +95,66 @@
       font-size: 14px;
       color: #777;
     }
-
-    .announcement {
-      background-color: #e8f0fe;
-      padding: 10px;
-      border-left: 4px solid #4a90e2;
-      margin-bottom: 10px;
-    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Sem 2 AIML Hub</h1>
-  <p>BITS WILP - Resources, Updates & Announcements</p>
+  <h1>BITS M. Tech. AIML Oct. 2025 Batch</h1>
+  <p>We are currently in <strong>Semester 2</strong></p>
 </header>
 
-<nav>
-  <a href="#announcements">Announcements</a>
-  <a href="#resources">Resources</a>
-  <a href="#links">Important Links</a>
-</nav>
+<div class="banner">
+  Everything you need is here.
+  <a href="https://drive.google.com/drive/folders/1Yke8TBf7oogMu26w1jZqf-hrjAbPzVH9?usp=drive_link" target="_blank">Open Master Drive</a>
+</div>
+
+<div class="tabs">
+  <div class="tab" onclick="showTab('sem1')">Sem 1</div>
+  <div class="tab active" onclick="showTab('sem2')">Sem 2</div>
+</div>
 
 <div class="container">
 
-  <div class="card" id="announcements">
-    <h2>Announcements</h2>
-    <div class="announcement">Assignment 1 deadline extended to 30th Sept.</div>
-    <div class="announcement">Live session on Neural Networks this Sunday.</div>
+  <div id="sem2" class="tab-content">
+    <div class="card">
+      <h2>Sem 2 Announcements</h2>
+      <div class="announcement">Add latest updates here.</div>
+    </div>
+
+    <div class="card">
+      <h2>Sem 2 Resources</h2>
+      <ul>
+        <li><a href="sem2_course_selector_AIML_electives.html">Course Selector Tool</a></li>
+        <li><a href="calculus.html">Calculus Reference</a></li>
+      </ul>
+    </div>
   </div>
 
-  <div class="card" id="resources">
-    <h2>Course Resources</h2>
-    <ul>
-      <li><a href="sem2_course_selector_AIML_electives.html">Course Selector Tool</a></li>
-      <li><a href="calculus.html">Calculus Reference</a></li>
-    </ul>
-  </div>
-
-  <div class="card" id="links">
-    <h2>Important Links</h2>
-    <ul>
-      <li><a href="https://wilp.bits-pilani.ac.in/">BITS WILP Portal</a></li>
-      <li><a href="https://elearn.bits-pilani.ac.in/">E-Learn Portal</a></li>
-      <li><a href="https://kaggle.com">Kaggle Practice</a></li>
-    </ul>
+  <div id="sem1" class="tab-content hidden">
+    <div class="card">
+      <h2>Sem 1 Resources</h2>
+      <ul>
+        <li>Add your Sem 1 materials here</li>
+      </ul>
+    </div>
   </div>
 
 </div>
 
 <footer>
-  <p>Made for BITS WILP AIML Sem 2 Students</p>
+  <p>Built for BITS WILP AIML Students</p>
 </footer>
+
+<script>
+function showTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.getElementById(tabId).classList.remove('hidden');
+
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
 
 </body>
 </html>
