@@ -1,475 +1,420 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Happy Birthday, San 💜</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg1: #ffe3f0;
-      --bg2: #e5d7ff;
-      --bg3: #d7f7ff;
-      --ink: #2f2450;
-      --muted: #6f628f;
-      --card: rgba(255,255,255,0.8);
-      --shadow: 0 18px 50px rgba(73, 52, 120, 0.18);
-      --radius: 28px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday San! 🎂</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Serif+Display:ital@0;1&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #ff6eb4;
+    --yellow: #ffe156;
+    --cyan: #00e5ff;
+    --purple: #c77dff;
+    --mint: #00ffb3;
+    --coral: #ff7b54;
+    --navy: #0d0d2b;
+    --card-bg: rgba(13,13,43,0.92);
+  }
 
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      min-height: 100vh;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,0.9), transparent 28%),
-        radial-gradient(circle at top right, rgba(255,255,255,0.5), transparent 24%),
-        linear-gradient(135deg, var(--bg1), var(--bg2) 50%, var(--bg3));
-      overflow-x: hidden;
-    }
+  body {
+    min-height: 100vh;
+    background: var(--navy);
+    font-family: 'Lato', sans-serif;
+    overflow-x: hidden;
+    position: relative;
+  }
 
-    .wrap {
-      width: min(1180px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 28px 0 40px;
-    }
+  /* ── STARFIELD ── */
+  .stars {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  }
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: #fff;
+    animation: twinkle var(--d, 3s) ease-in-out infinite alternate;
+  }
+  @keyframes twinkle { from { opacity: .1; transform: scale(.8); } to { opacity: .9; transform: scale(1.2); } }
 
-    .hero {
-      position: relative;
-      overflow: hidden;
-      background: rgba(255,255,255,0.52);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.65);
-      border-radius: 34px;
-      box-shadow: var(--shadow);
-      padding: 28px 24px 24px;
-      text-align: center;
-      margin-bottom: 22px;
-    }
+  /* ── CONFETTI ── */
+  .confetti-wrap { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  .c {
+    position: absolute;
+    top: -30px;
+    width: 10px; height: 16px;
+    border-radius: 2px;
+    opacity: 0;
+    animation: fall var(--fd, 4s) var(--fd2, 0s) ease-in infinite;
+  }
+  @keyframes fall {
+    0%   { transform: translateY(-30px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
 
-    .ribbon {
-      display: inline-flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #7a3db8;
-      background: rgba(255,255,255,0.82);
-      border-radius: 999px;
-      padding: 10px 16px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-      margin-bottom: 16px;
-    }
+  /* ── LAYOUT ── */
+  .page {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 40px 20px 60px;
+    min-height: 100vh;
+  }
 
-    h1 {
-      margin: 0;
-      font-size: clamp(2.2rem, 5vw, 4.4rem);
-      line-height: 0.98;
-      letter-spacing: -0.03em;
-      color: #7c2ea7;
-      text-shadow: 0 2px 0 rgba(255,255,255,0.55);
-    }
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    margin-bottom: 12px;
+    animation: riseIn 1s ease both;
+  }
+  .birthday-label {
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    font-size: .8rem;
+    margin-bottom: 6px;
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  @keyframes glow {
+    from { text-shadow: 0 0 6px var(--cyan); }
+    to   { text-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan); }
+  }
+  .name {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(3rem, 12vw, 7rem);
+    line-height: 1;
+    background: linear-gradient(135deg, var(--pink) 0%, var(--yellow) 40%, var(--cyan) 80%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+    background-size: 200% 200%;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .full-name {
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    letter-spacing: .2em;
+    color: rgba(255,255,255,.5);
+    font-size: .75rem;
+    margin-top: 4px;
+  }
 
-    .hero p {
-      margin: 14px auto 0;
-      max-width: 880px;
-      font-size: clamp(1rem, 2vw, 1.22rem);
-      line-height: 1.7;
-      color: var(--muted);
-    }
+  /* ── BELL CURVE SVG ── */
+  .curve-wrap {
+    width: min(600px, 92vw);
+    margin: 10px 0 0;
+    animation: riseIn 1.2s .3s ease both;
+    position: relative;
+  }
+  .curve-wrap svg { width: 100%; display: block; }
+  .curve-label {
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    color: var(--yellow);
+    font-size: clamp(.7rem, 2.5vw, 1rem);
+    text-align: center;
+    pointer-events: none;
+    text-shadow: 0 0 12px rgba(255,225,86,.7);
+  }
 
-    .hero .bigline {
-      margin-top: 16px;
-      display: inline-block;
-      font-weight: 800;
-      color: #5a2c82;
-      background: linear-gradient(90deg, rgba(255,214,238,0.95), rgba(225,235,255,0.95), rgba(214,255,250,0.95));
-      padding: 10px 18px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.7);
-    }
+  /* ── CARD ── */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 24px;
+    padding: clamp(24px, 5vw, 48px) clamp(20px, 6vw, 52px);
+    max-width: 640px;
+    width: 100%;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 30px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.05);
+    animation: riseIn 1s .5s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(199,125,255,.25) 0%, transparent 70%);
+  }
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,.18) 0%, transparent 70%);
+  }
 
-    .board {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 18px;
-      margin-top: 20px;
-    }
+  /* ── EYEBROW ── */
+  .eyebrow {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 22px;
+  }
+  .eyebrow-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--purple), transparent); }
+  .eyebrow-text {
+    font-family: 'Lato', sans-serif;
+    font-weight: 300; letter-spacing: .3em;
+    text-transform: uppercase; font-size: .65rem;
+    color: var(--purple);
+  }
 
-    .card {
-      grid-column: span 6;
-      min-height: 280px;
-      perspective: 1400px;
-      cursor: pointer;
-      outline: none;
-    }
+  /* ── POEM ── */
+  .subtitle {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 3.5vw, 1.35rem);
+    color: var(--yellow);
+    margin-bottom: 20px;
+    line-height: 1.3;
+  }
 
-    .card.wide { grid-column: span 12; min-height: 240px; }
+  .poem {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(.85rem, 2.5vw, 1.05rem);
+    line-height: 1.95;
+    color: rgba(255,255,255,.88);
+    position: relative; z-index: 1;
+  }
+  .poem p { margin-bottom: .3em; }
 
-    .inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      border-radius: var(--radius);
-      transform-style: preserve-3d;
-      transition: transform 0.85s cubic-bezier(.2,.7,.2,1);
-      box-shadow: var(--shadow);
-    }
+  /* highlighted keyword */
+  .kw { 
+    font-style: normal; font-weight: 700;
+    background: linear-gradient(90deg, var(--pink), var(--yellow));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 
-    .card.flipped .inner { transform: rotateY(180deg); }
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .stat-pill {
+    flex: 1 1 120px;
+    border-radius: 50px;
+    padding: 10px 18px;
+    text-align: center;
+    font-size: .7rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 400;
+    border: 1px solid rgba(255,255,255,.12);
+    animation: pillPop 1s ease both;
+  }
+  .stat-pill:nth-child(1) { background: rgba(255,110,180,.12); color: var(--pink); border-color: rgba(255,110,180,.3); animation-delay:.7s }
+  .stat-pill:nth-child(2) { background: rgba(0,229,255,.1); color: var(--cyan); border-color: rgba(0,229,255,.3); animation-delay:.85s }
+  .stat-pill:nth-child(3) { background: rgba(199,125,255,.1); color: var(--purple); border-color: rgba(199,125,255,.3); animation-delay:1s }
+  @keyframes pillPop { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .stat-num { display: block; font-family: 'DM Serif Display', serif; font-size: 1.4rem; font-style: italic; margin-bottom: 2px; }
 
-    .face {
-      position: absolute;
-      inset: 0;
-      border-radius: var(--radius);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      overflow: hidden;
-      border: 2px solid rgba(255,255,255,0.78);
-    }
+  /* ── FOOTER ── */
+  .footer-msg {
+    margin-top: 28px;
+    text-align: center;
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    background: linear-gradient(135deg, var(--coral), var(--pink), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: riseIn 1s 1.2s ease both;
+  }
 
-    .front {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 22px;
-      color: white;
-      position: relative;
-    }
+  .emoji-row {
+    font-size: 1.6rem;
+    text-align: center;
+    margin-top: 10px;
+    letter-spacing: .2em;
+    animation: riseIn 1s 1.4s ease both;
+  }
 
-    .back {
-      transform: rotateY(180deg);
-      background: rgba(255,255,255,0.94);
-      padding: 22px;
-      display: grid;
-      align-content: center;
-      gap: 8px;
-      text-align: center;
-    }
-
-    .back h3 {
-      margin: 0;
-      font-size: clamp(1.2rem, 2.7vw, 1.9rem);
-      color: #6d2aa0;
-    }
-
-    .back p {
-      margin: 0;
-      color: #4a3d69;
-      font-size: clamp(1rem, 2vw, 1.18rem);
-      line-height: 1.65;
-      font-weight: 500;
-    }
-
-    .emoji {
-      font-size: clamp(3rem, 5vw, 4.6rem);
-      line-height: 1;
-      margin-bottom: 14px;
-      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.12));
-      animation: float 2.8s ease-in-out infinite;
-    }
-
-    .title {
-      margin: 0;
-      font-size: clamp(1.55rem, 3vw, 2.25rem);
-      line-height: 1.15;
-      font-weight: 900;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.12);
-    }
-
-    .tap {
-      margin-top: 16px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.35);
-      border-radius: 999px;
-      padding: 8px 14px;
-      backdrop-filter: blur(6px);
-    }
-
-    .front::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 15% 15%, rgba(255,255,255,0.36), transparent 20%),
-        radial-gradient(circle at 85% 18%, rgba(255,255,255,0.24), transparent 18%),
-        radial-gradient(circle at 20% 88%, rgba(255,255,255,0.24), transparent 16%),
-        radial-gradient(circle at 80% 82%, rgba(255,255,255,0.28), transparent 18%);
-      pointer-events: none;
-    }
-
-    .note {
-      margin-top: 18px;
-      background: rgba(255,255,255,0.7);
-      border: 1px solid rgba(255,255,255,0.7);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      padding: 22px 20px;
-      text-align: center;
-    }
-
-    .note strong {
-      display: block;
-      font-size: clamp(1.2rem, 2.5vw, 1.7rem);
-      color: #7b2e97;
-      margin-bottom: 8px;
-    }
-
-    .note span {
-      display: block;
-      color: #514066;
-      font-size: clamp(1rem, 2vw, 1.1rem);
-      line-height: 1.7;
-    }
-
-    .card:nth-child(1) .front { background: linear-gradient(135deg, #ff89c2, #9b5cff); }
-    .card:nth-child(2) .front { background: linear-gradient(135deg, #40c9ff, #1fa2ff); }
-    .card:nth-child(3) .front { background: linear-gradient(135deg, #ffcc70, #ff8177); }
-    .card:nth-child(4) .front { background: linear-gradient(135deg, #f857a6, #ff5858); }
-    .card:nth-child(5) .front { background: linear-gradient(135deg, #7f53ac, #647dee); }
-    .card:nth-child(6) .front { background: linear-gradient(135deg, #59c173, #a17fe0, #5d26c1); }
-    .card:nth-child(7) .front { background: linear-gradient(135deg, #fc5c7d, #6a82fb); }
-    .card:nth-child(8) .front { background: linear-gradient(135deg, #43cea2, #185a9d); }
-
-    .sparkles {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: -1;
-    }
-
-    .sparkles i {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.75);
-      animation: drift linear infinite;
-      filter: blur(0.2px);
-    }
-
-    .gallery-tip {
-      margin-top: 16px;
-      text-align: center;
-      color: rgba(56, 31, 89, 0.8);
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    @keyframes drift {
-      from { transform: translateY(-15vh) translateX(0) rotate(0deg); opacity: 0.75; }
-      to   { transform: translateY(115vh) translateX(60px) rotate(360deg); opacity: 0; }
-    }
-
-    @media (max-width: 860px) {
-      .card, .card.wide { grid-column: span 12; }
-    }
-
-    @media (max-width: 600px) {
-      .wrap { width: min(100% - 18px, 1180px); padding-top: 14px; }
-      .hero { padding: 22px 16px 18px; border-radius: 26px; }
-      .board { gap: 14px; }
-      .card { min-height: 255px; }
-      .card.wide { min-height: 240px; }
-      .front, .back { padding: 18px; }
-    }
-  </style>
+  /* ── UTILS ── */
+  @keyframes riseIn {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+</style>
 </head>
 <body>
-  <div class="sparkles" aria-hidden="true" id="sparkles"></div>
 
-  <main class="wrap">
-    <section class="hero">
-      <div class="ribbon">✨ Birthday Flashcards for San ✨</div>
-      <h1>Happy Birthday, San!</h1>
-      <p>
-        A tap-through birthday card set inspired by the colorful collage style — full of affection,
-        music, approvals, and the little jokes that make your friendship special.
-      </p>
-      <div class="bigline">You make our group better every single day 💖</div>
-    </section>
+<!-- STARS -->
+<div class="stars" id="stars"></div>
 
-    <section class="board" aria-label="Birthday flashcards">
-      <article class="card" tabindex="0" role="button" aria-pressed="false">
-        <div class="inner">
-          <div class="face front">
-            <div class="emoji">👑</div>
-            <h2 class="title">1. San-est in the group</h2>
-            <div class="tap">Tap to open ✨</div>
-          </div>
-          <div class="face back">
-            <h3>The san-est of them all 💜</h3>
-            <p>
-              Calm, iconic, and always the one making the group feel a little brighter.
-              The official queen of good vibes.
-            </p>
-          </div>
-        </div>
-      </article>
+<!-- CONFETTI -->
+<div class="confetti-wrap" id="confetti"></div>
 
-      <article class="card" tabindex="0" role="button" aria-pressed="false">
-        <div class="inner">
-          <div class="face front">
-            <div class="emoji">🎧</div>
-            <h2 class="title">2. When there is san-natta in the group</h2>
-            <div class="tap">Tap to open 🎶</div>
-          </div>
-          <div class="face back">
-            <h3>She shares san-ctified music 🎵</h3>
-            <p>
-              Curating vibes. Healing souls. That’s our San.
-              When the chat gets quiet, the music saves the day.
-            </p>
-          </div>
-        </div>
-      </article>
+<div class="page">
 
-      <article class="card" tabindex="0" role="button" aria-pressed="false">
-        <div class="inner">
-          <div class="face front">
-            <div class="emoji">✅</div>
-            <h2 class="title">3. San-ction before uploading</h2>
-            <div class="tap">Tap to open 📚</div>
-          </div>
-          <div class="face back">
-            <h3>Approved by San ✍️</h3>
-            <p>
-              No wonder we wait for her San-ction before uploading assignments.
-              If San approves, we hit send.
-            </p>
-          </div>
-        </div>
-      </article>
+  <div class="header">
+    <div class="birthday-label">✦ Happy Birthday ✦</div>
+    <div class="name">San</div>
+    <div class="full-name">Sanchayata Nayal</div>
+  </div>
 
-      <article class="card" tabindex="0" role="button" aria-pressed="false">
-        <div class="inner">
-          <div class="face front">
-            <div class="emoji">🎅</div>
-            <h2 class="title">4. San-ta-claus comes once a year</h2>
-            <div class="tap">Tap to open 🎁</div>
-          </div>
-          <div class="face back">
-            <h3>This San helps us throughout the year ❤️</h3>
-            <p>
-              Notes, doubts, panic attacks, last-minute saves — and somehow still making it look easy.
-              Truly the friend version of a miracle.
-            </p>
-          </div>
-        </div>
-      </article>
+  <!-- BELL CURVE -->
+  <div class="curve-wrap">
+    <svg viewBox="0 0 600 140" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="curveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stop-color="#ff6eb4" stop-opacity=".3"/>
+          <stop offset="50%"  stop-color="#00e5ff" stop-opacity=".8"/>
+          <stop offset="100%" stop-color="#c77dff" stop-opacity=".3"/>
+        </linearGradient>
+        <linearGradient id="fillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"  stop-color="#00e5ff" stop-opacity=".35"/>
+          <stop offset="100%" stop-color="#0d0d2b"  stop-opacity="0"/>
+        </linearGradient>
+        <filter id="blur2"><feGaussianBlur stdDeviation="2"/></filter>
+      </defs>
 
-      <article class="card" tabindex="0" role="button" aria-pressed="false">
-        <div class="inner">
-          <div class="face front">
-            <div class="emoji">🎀</div>
-            <h2 class="title">5. You make the group warmer</h2>
-            <div class="tap">Tap to open 🌸</div>
-          </div>
-          <div class="face back">
-            <h3>Heart of the group 💗</h3>
-            <p>
-              Not just part of the group — the heart of it.
-              You bring the laughter, the softness, and the little moments that stay.
-            </p>
-          </div>
-        </div>
-      </article>
+      <!-- grid lines -->
+      <line x1="100" y1="20" x2="100" y2="120" stroke="rgba(255,255,255,.06)" stroke-dasharray="4,4"/>
+      <line x1="200" y1="20" x2="200" y2="120" stroke="rgba(255,255,255,.06)" stroke-dasharray="4,4"/>
+      <line x1="300" y1="20" x2="300" y2="120" stroke="rgba(255,255,255,.1)"  stroke-dasharray="4,4"/>
+      <line x1="400" y1="20" x2="400" y2="120" stroke="rgba(255,255,255,.06)" stroke-dasharray="4,4"/>
+      <line x1="500" y1="20" x2="500" y2="120" stroke="rgba(255,255,255,.06)" stroke-dasharray="4,4"/>
+      <line x1="20"  y1="120" x2="580" y2="120" stroke="rgba(255,255,255,.15)"/>
 
-      <article class="card" tabindex="0" role="button" aria-pressed="false">
-        <div class="inner">
-          <div class="face front">
-            <div class="emoji">💫</div>
-            <h2 class="title">6. More than a birthday wish</h2>
-            <div class="tap">Tap to open ✨</div>
-          </div>
-          <div class="face back">
-            <h3>Have the most amazing birthday 🎂</h3>
-            <p>
-              Here’s to more laughter, music, memories, and endless support.
-              Love always, your group 💜
-            </p>
-          </div>
-        </div>
-      </article>
+      <!-- sigma labels -->
+      <text x="100" y="134" text-anchor="middle" fill="rgba(255,110,180,.7)" font-size="9" font-family="Lato,sans-serif">−3σ</text>
+      <text x="200" y="134" text-anchor="middle" fill="rgba(255,110,180,.7)" font-size="9" font-family="Lato,sans-serif">−2σ</text>
+      <text x="300" y="134" text-anchor="middle" fill="rgba(0,255,179,.9)"   font-size="9" font-family="Lato,sans-serif" font-weight="700">μ (San)</text>
+      <text x="400" y="134" text-anchor="middle" fill="rgba(255,110,180,.7)" font-size="9" font-family="Lato,sans-serif">+2σ</text>
+      <text x="500" y="134" text-anchor="middle" fill="rgba(255,110,180,.7)" font-size="9" font-family="Lato,sans-serif">+3σ</text>
 
-      <article class="card wide" tabindex="0" role="button" aria-pressed="false">
-        <div class="inner">
-          <div class="face front">
-            <div class="emoji">🎉</div>
-            <h2 class="title">Happy Birthday, San!</h2>
-            <div class="tap">Tap to open 💖</div>
-          </div>
-          <div class="face back">
-            <h3>You are our favorite everyday celebration 🌷</h3>
-            <p>
-              You are the reason the group feels fun, safe, and full of little bright surprises.
-              Thank you for being San in every way.
-            </p>
-          </div>
-        </div>
-      </article>
-    </section>
+      <!-- filled area -->
+      <path d="M20,120
+        C 80,120 100,118 120,112
+        C 150,102 170,80  200,60
+        C 230,40  260,16  300,12
+        C 340,16  370,40  400,60
+        C 430,80  450,102 480,112
+        C 500,118 520,120 580,120 Z"
+        fill="url(#fillGrad)"/>
 
-    <section class="note">
-      <strong>Happy Birthday, San! 🥰</strong>
-      <span>
-        You make our group better every single day — with music, kindness, chaos control,
-        and all the moments we never want to forget.
-      </span>
-    </section>
+      <!-- glow (blurred duplicate) -->
+      <path d="M20,120
+        C 80,120 100,118 120,112
+        C 150,102 170,80  200,60
+        C 230,40  260,16  300,12
+        C 340,16  370,40  400,60
+        C 430,80  450,102 480,112
+        C 500,118 520,120 580,120"
+        fill="none" stroke="url(#curveGrad)" stroke-width="6" filter="url(#blur2)" opacity=".6"/>
 
-    <div class="gallery-tip">Tip: on WhatsApp, send this as a link, or screen-record yourself tapping through the cards for a fun reveal.</div>
-  </main>
+      <!-- main curve -->
+      <path d="M20,120
+        C 80,120 100,118 120,112
+        C 150,102 170,80  200,60
+        C 230,40  260,16  300,12
+        C 340,16  370,40  400,60
+        C 430,80  450,102 480,112
+        C 500,118 520,120 580,120"
+        fill="none" stroke="url(#curveGrad)" stroke-width="2.5" stroke-linecap="round"/>
 
-  <script>
-    const cards = document.querySelectorAll('.card');
+      <!-- apex dot -->
+      <circle cx="300" cy="12" r="5" fill="#00ffb3">
+        <animate attributeName="r" values="4;7;4" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;.5;1" dur="2s" repeatCount="indefinite"/>
+      </circle>
 
-    function flipCard(card) {
-      const isFlipped = card.classList.toggle('flipped');
-      card.setAttribute('aria-pressed', String(isFlipped));
-    }
+      <!-- "You are here" arrow -->
+      <line x1="300" y1="30" x2="300" y2="118" stroke="rgba(0,255,179,.4)" stroke-dasharray="3,3" stroke-width="1"/>
+    </svg>
+  </div>
 
-    cards.forEach(card => {
-      card.addEventListener('click', () => flipCard(card));
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          flipCard(card);
-        }
-      });
-    });
+  <!-- MAIN CARD -->
+  <div class="card">
+    <div class="eyebrow">
+      <div class="eyebrow-line"></div>
+      <div class="eyebrow-text">A Statistical Tribute</div>
+      <div class="eyebrow-line"></div>
+    </div>
 
-    const sparkles = document.getElementById('sparkles');
-    const sparkleCount = 36;
-    for (let i = 0; i < sparkleCount; i++) {
-      const s = document.createElement('i');
-      const size = Math.random() * 8 + 4;
-      s.style.left = Math.random() * 100 + 'vw';
-      s.style.top = (-10 - Math.random() * 50) + 'vh';
-      s.style.width = size + 'px';
-      s.style.height = size + 'px';
-      s.style.opacity = String(Math.random() * 0.55 + 0.25);
-      s.style.animationDuration = (Math.random() * 8 + 6) + 's';
-      s.style.animationDelay = (-Math.random() * 10) + 's';
-      s.style.background = ['#ffffff', '#ffd6f0', '#d8e8ff', '#fff4b8', '#dfffe8'][Math.floor(Math.random() * 5)];
-      sparkles.appendChild(s);
-    }
-  </script>
+    <div class="subtitle">The One who keeps everyone San(e) 🧮</div>
+
+    <div class="poem">
+      <p>When friendships scatter, left or right,</p>
+      <p>Like <span class="kw">skewed data</span>, uneven in sight,</p>
+      <p>You stand as the <span class="kw">mean</span>, steady and true,</p>
+      <p>Pulling the tails, aligning the view.</p>
+      <br>
+      <p>Without your bond, we'd drift away,</p>
+      <p>A <span class="kw">skewed distribution</span>, lost in dismay.</p>
+      <p>But with your presence, symmetry stays,</p>
+      <p>Our <span class="kw">normal curve</span>, through all our days.</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-pill">
+        <span class="stat-num">μ</span>
+        The Mean of Us
+      </div>
+      <div class="stat-pill">
+        <span class="stat-num">σ = 0</span>
+        Zero Variance in Love
+      </div>
+      <div class="stat-pill">
+        <span class="stat-num">∞</span>
+        Infinite Warmth
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-msg">Many Many Happy Returns of the Day, San! 🎂</div>
+  <div class="emoji-row">🎉 🎈 🌸 🎂 🥳 🌟 🎊</div>
+
+</div>
+
+<script>
+// ── STARS ──
+const starWrap = document.getElementById('stars');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const sz = Math.random() * 2.5 + .5;
+  s.style.cssText = `
+    width:${sz}px; height:${sz}px;
+    top:${Math.random()*100}%;
+    left:${Math.random()*100}%;
+    --d:${(Math.random()*3+2).toFixed(1)}s;
+    animation-delay:${(Math.random()*4).toFixed(1)}s;
+  `;
+  starWrap.appendChild(s);
+}
+
+// ── CONFETTI ──
+const colors = ['#ff6eb4','#ffe156','#00e5ff','#c77dff','#00ffb3','#ff7b54','#fff'];
+const cWrap = document.getElementById('confetti');
+for (let i = 0; i < 55; i++) {
+  const c = document.createElement('div');
+  c.className = 'c';
+  c.style.cssText = `
+    left:${Math.random()*100}%;
+    background:${colors[Math.floor(Math.random()*colors.length)]};
+    width:${Math.random()*8+5}px;
+    height:${Math.random()*12+8}px;
+    transform:rotate(${Math.random()*360}deg);
+    --fd:${(Math.random()*4+3).toFixed(1)}s;
+    --fd2:${(Math.random()*6).toFixed(1)}s;
+    border-radius:${Math.random()>.5?'50%':'2px'};
+  `;
+  cWrap.appendChild(c);
+}
+</script>
 </body>
 </html>
