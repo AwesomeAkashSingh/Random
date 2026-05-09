@@ -5,95 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BITS M. Tech. AIML Oct. 2025 Batch</title>
   <style>
+    :root {
+      --bg: #f4f7ff;
+      --card: #ffffff;
+      --text: #24324a;
+      --muted: #5e6b82;
+      --primary: #4a90e2;
+      --primary-2: #71b7ff;
+      --telegram: #229ED9;
+      --whatsapp-1: #25D366;
+      --whatsapp-2: #7ff0a4;
+      --shadow: 0 12px 30px rgba(55, 84, 170, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      background: linear-gradient(to right, #eef2ff, #f8fbff);
-      color: #333;
+      background: linear-gradient(180deg, #f7f9ff 0%, #eef4ff 100%);
+      color: var(--text);
     }
 
     header {
-      background: linear-gradient(to right, #4a90e2, #6fc3ff);
+      background: linear-gradient(90deg, var(--primary), var(--primary-2));
       color: white;
-      padding: 25px;
+      padding: 28px 18px;
       text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    header p {
+      margin: 10px 0 0;
+      font-size: 1.05rem;
+      opacity: 0.96;
     }
 
     .banner {
-      background-color: #fff3cd;
-      padding: 15px;
+      background: linear-gradient(90deg, #fff5c9 0%, #fff8da 100%);
+      border-bottom: 1px solid #f2dda0;
+      padding: 20px 16px 24px;
       text-align: center;
-      font-weight: bold;
-      border-bottom: 2px solid #ffeeba;
     }
 
-    .banner a {
-      display: block;
-      margin-top: 8px;
-      color: #d63384;
-      text-decoration: none;
-      font-weight: bold;
+    .banner h2 {
+      margin: 0 0 14px;
+      font-size: 1.55rem;
+      color: #7b5b00;
     }
 
-    .tabs {
+    .banner-row,
+    .tab-row,
+    .button-row {
       display: flex;
       justify-content: center;
-      margin-top: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
     }
 
-    .tab {
-      padding: 12px 25px;
+    .button-row {
+      gap: 18px;
+    }
+
+    .animated-button,
+    .telegram-button,
+    .whatsapp-button,
+    .prof-button {
+      border: none;
+      padding: 21px 33px;
+      border-radius: 15px;
       cursor: pointer;
-      background: #e0e7ff;
-      margin: 0 5px;
-      border-radius: 8px;
+      font-size: 22px;
       font-weight: bold;
-    }
-
-    .tab.active {
-      background: #4a90e2;
-      color: white;
-    }
-
-    .container {
-      max-width: 1000px;
-      margin: 20px auto;
-      padding: 10px;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    }
-
-    .card h2 {
-      margin-top: 0;
-      color: #4a90e2;
-    }
-
-    .announcement {
-      background-color: #e7f1ff;
-      padding: 10px;
-      border-left: 5px solid #4a90e2;
-      margin-bottom: 10px;
-    }
-
-    ul {
-      padding-left: 20px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .animated-button, .telegram-button, .whatsapp-button, .prof-button {
-      background: linear-gradient(to right, #ff9800, #ffd180);
-      color: white;
-      min-width: 320px;
-      text-align: center;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      margin: 9px;
+      line-height: 1;
+      white-space: nowrap;
     }
 
     .animated-button:active,
@@ -101,141 +95,227 @@
     .whatsapp-button:active,
     .prof-button:active {
       transform: scale(0.95);
+      filter: brightness(0.97);
     }
 
-    .button-row {
+    .animated-button {
+      background: linear-gradient(90deg, #4a90e2, #6db8ff);
+      color: white;
+    }
+
+    .telegram-button {
+      background: linear-gradient(90deg, #229ED9, #6ed0ff);
+      color: white;
+    }
+
+    .whatsapp-button,
+    .prof-button {
+      background: linear-gradient(90deg, var(--whatsapp-1), var(--whatsapp-2));
+      color: white;
+      min-width: 180px;
+      text-align: center;
+    }
+
+    .tabs-wrap {
+      padding: 28px 16px 8px;
+      text-align: center;
+    }
+
+    .tab {
+      border: none;
+      padding: 16px 32px;
+      border-radius: 14px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #dfe8ff;
+      color: #24324a;
+      box-shadow: 0 6px 16px rgba(54, 84, 165, 0.10);
+      transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .tab:hover { transform: translateY(-1px); }
+
+    .tab.active {
+      background: linear-gradient(90deg, var(--primary), var(--primary-2));
+      color: white;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 18px auto 30px;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 24px;
+      margin-bottom: 22px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 1.9rem;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+      align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card h3 {
+      color: #3756a5;
+      margin-bottom: 12px;
+    }
+
+    .announcement {
+      background: #eef5ff;
+      padding: 14px 16px;
+      border-left: 5px solid var(--primary);
+      margin-bottom: 12px;
+      border-radius: 10px;
+    }
+
+    ul {
+      padding-left: 22px;
+      margin: 10px 0 0;
+    }
+
+    li { margin: 8px 0; }
+
+    a {
+      color: #235db6;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover { text-decoration: underline; }
+
+    .tab-content.hidden { display: none; }
+
+    .note {
+      display: inline-block;
+      background: #fff1cc;
+      color: #7b5b00;
+      border: 1px solid #f0d98a;
+      padding: 8px 12px;
+      border-radius: 999px;
+      margin-top: 10px;
+      font-weight: bold;
     }
 
     footer {
       text-align: center;
-      padding: 15px;
+      padding: 18px 12px 28px;
       font-size: 14px;
-      color: #777;
+      color: var(--muted);
+    }
+
+    @media (max-width: 720px) {
+      header h1 { font-size: 1.55rem; }
+      header p { font-size: 0.98rem; }
+      .banner h2 { font-size: 1.2rem; }
+      .animated-button,
+      .telegram-button,
+      .whatsapp-button,
+      .prof-button,
+      .tab { font-size: 18px; padding: 16px 24px; }
+      .whatsapp-button,
+      .prof-button { min-width: 160px; }
+      .card h2 { font-size: 1.4rem; }
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1>BITS M. Tech. AIML Oct. 2025 Batch</h1>
+    <p>Resources, updates, and useful links for the batch</p>
+  </header>
 
-<header>
-  <h1>BITS M. Tech. AIML Oct. 2025 Batch</h1>
-  <p>We are currently in <strong>Semester 2</strong></p>
-</header>
-
-<div class="banner">
-  <h2>Everything you need is here.</h2>
-  <div style="display:flex; justify-content:center; flex-wrap:wrap; gap:15px; align-items:center; margin-top:15px;">
-    <button class="animated-button" onclick="window.open('https://drive.google.com/drive/folders/1Yke8TBf7oogMu26w1jZqf-hrjAbPzVH9?usp=drive_link', '_blank')">
-      📁 Open Master Drive
-    </button>
-
-    <button class="telegram-button" onclick="window.open('https://t.me/+yBZ4_b7T_nI4MTBl', '_blank')">
-      📘 Telegram Videos Channel
-    </button>
+  <div class="banner">
+    <h2>Everything you need is here.</h2>
+    <div class="banner-row">
+      <button class="animated-button" onclick="window.open('https://drive.google.com/drive/folders/1Yke8TBf7oogMu26w1jZqf-hrjAbPzVH9?usp=drive_link', '_blank')">📁 Open Master Drive</button>
+      <button class="telegram-button" onclick="window.open('https://t.me/+yBZ4_b7T_nI4MTBl', '_blank')">📘 Telegram Videos Channel</button>
+    </div>
   </div>
 
-  <div style="margin-top:20px; display:flex; justify-content:center; flex-wrap:wrap; gap:15px;">
-    <button class="telegram-button" onclick="window.open('https://t.me/+yBZ4_b7T_nI4MTBl', '_blank')">
-      📘 Telegram Videos Channel
-    </button>
+  <div class="tabs-wrap">
+    <div class="tab-row">
+      <button class="tab" id="tab-sem1" onclick="showTab('sem1', this)">Sem 1</button>
+      <button class="tab active" id="tab-sem2" onclick="showTab('sem2', this)">Sem 2</button>
+    </div>
   </div>
-</div>
 
-<div class="tabs">
-  <div class="tab" onclick="showTab('sem1')">Sem 1</div>
-  <div class="tab active" onclick="showTab('sem2')">Sem 2</div>
-</div>
+  <div class="container">
+    <div id="sem2" class="tab-content">
+      <div class="card">
+        <h2>💬 Semester 2 Elective Groups (WhatsApp)</h2>
+        <div class="button-row">
+          <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/H87Ur0FanjGB5aVT8TuEt7?mode=gi_t', '_blank')">NLP</button>
+          <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/BhyPvSTyT91F1sKPqOHT0L?mode=gi_t', '_blank')">IR</button>
+          <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/D4opK8Fjhh53qnEGD8Un4W?mode=gi_t', '_blank')">UDL</button>
+          <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/GX59yMLFdfD55ovF1HUhWn?mode=gi_t', '_blank')">DML</button>
+          <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/C9QFjN4SCHj99VorLlzVji?mode=gi_t', '_blank')">CV</button>
+          <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/J5uI4fPnVJfFZBmeFshDcn?mode=gi_t', '_blank')">VA</button>
+          <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/CNI6BSLj8WbJBICLTvRTas?mode=hqctcli', '_blank')">Cybersecurity</button>
+          <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/LdSvk1KgSANCWUDiVx9TjE?mode=gi_t', '_blank')">SEML</button>
+          <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/KtYbMWZSAle0WSbJLdoakZ?mode=gi_t', '_blank')">DMML</button>
+        </div>
+      </div>
 
-<div class="container">
+      <div class="card">
+        <h2>👨‍🏫 Professor WhatsApp Groups</h2>
+        <div class="button-row">
+          <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/JKYQOWB1Yb06z9xZRWZul9?mode=gi_t', '_blank')">Saurabh for MFML, NLP</button>
+          <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/FqEhCZPYGVbGZ12eVIN8V3?mode=gi_t', '_blank')">D Venkata Subramanian for DMML</button>
+          <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/H3B09GrcHucGvWYjdsbsD5?mode=gi_t', '_blank')">Samrat for DRL</button>
+          <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/DSzVYhkxPV26yQ4ybdON45?mode=gi_t', '_blank')">T. Vijayakumar for DRL</button>
+          <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/DUSQd0Q6C6Z8bYCL5GEQ5b?mode=gi_t', '_blank')">Thangakumar for UDL</button>
+        </div>
+      </div>
 
-  <div id="sem2" class="tab-content">
-    <div class="card">
-      <h2>💬 Semester 2 Elective Groups (WhatsApp)</h2>
-
-      <div class="button-row">
-        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/H87Ur0FanjGB5aVT8TuEt7?mode=gi_t', '_blank')">NLP</button>
-        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/BhyPvSTyT91F1sKPqOHT0L?mode=gi_t', '_blank')">IR</button>
-        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/D4opK8Fjhh53qnEGD8Un4W?mode=gi_t', '_blank')">UDL</button>
-        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/GX59yMLFdfD55ovF1HUhWn?mode=gi_t', '_blank')">DML</button>
-        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/C9QFjN4SCHj99VorLlzVji?mode=gi_t', '_blank')">CV</button>
-        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/J5uI4fPnVJfFZBmeFshDcn?mode=gi_t', '_blank')">VA</button>
-        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/CNI6BSLj8WbJBICLTvRTas?mode=hqctcli', '_blank')">Cybersecurity</button>
-        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/LdSvk1KgSANCWUDiVx9TjE?mode=gi_t', '_blank')">SEML</button>
-        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/KtYbMWZSAle0WSbJLdoakZ?mode=gi_t', '_blank')">DMML</button>
+      <div class="card">
+        <h2>📚 Sem 2 Subject Abbreviations</h2>
+        <ul>
+          <li><strong>ACI</strong> - Artificial and Computational Intelligence</li>
+          <li><strong>DRL</strong> - Deep Reinforcement Learning</li>
+          <li><strong>CV</strong> - Computer Vision</li>
+          <li><strong>UDL</strong> - Unsupervised Deep Learning</li>
+          <li><strong>NLP</strong> - Natural Language Processing</li>
+          <li><strong>IR</strong> - Information Retrieval</li>
+          <li><strong>SEML</strong> - Software Engineering for Machine Learning</li>
+          <li><strong>AI & ML Techniques for Cybersecurity</strong></li>
+          <li><strong>DML</strong> - Distributed Machine Learning</li>
+          <li><strong>DM4ML</strong> - Data Management for Machine Learning</li>
+          <li><strong>PGM</strong> - Probabilistic Graphical Models</li>
+        </ul>
       </div>
     </div>
 
-    <div class="card">
-      <h2>👨‍🏫 Professor WhatsApp Groups</h2>
-
-      <div class="button-row">
-        <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/JKYQOWB1Yb06z9xZRWZul9?mode=gi_t', '_blank')">Saurabh for MFML, NLP</button>
-
-        <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/FqEhCZPYGVbGZ12eVIN8V3?mode=gi_t', '_blank')">D Venkata Subramanian for DMML</button>
-
-        <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/H3B09GrcHucGvWYjdsbsD5?mode=gi_t', '_blank')">Samrat for DRL</button>
-
-        <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/DSzVYhkxPV26yQ4ybdON45?mode=gi_t', '_blank')">T. Vijayakumar for DRL</button>
-
-        <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/DUSQd0Q6C6Z8bYCL5GEQ5b?mode=gi_t', '_blank')">Thangakumar for UDL</button>
+    <div id="sem1" class="tab-content hidden">
+      <div class="card">
+        <h2>Sem 1</h2>
+        <p>This section can hold your Sem 1 resources, links, and announcements.</p>
+        <div class="note">We are currently in Sem 2.</div>
       </div>
     </div>
-
-    <div class="card">
-      <h2>📚 Sem 2 Subject Abbreviations</h2>
-
-      <ul>
-        <li><strong>ACI</strong> - Artificial and Computational Intelligence</li>
-        <li><strong>DRL</strong> - Deep Reinforcement Learning</li>
-        <li><strong>CV</strong> - Computer Vision</li>
-        <li><strong>UDL</strong> - Unsupervised Deep Learning</li>
-        <li><strong>NLP</strong> - Natural Language Processing</li>
-        <li><strong>IR</strong> - Information Retrieval</li>
-        <li><strong>SEML</strong> - Software Engineering for Machine Learning</li>
-        <li><strong>AI & ML Techniques for Cybersecurity</strong></li>
-        <li><strong>DML</strong> - Distributed Machine Learning</li>
-        <li><strong>DM4ML</strong> - Data Management for Machine Learning</li>
-        <li><strong>PGM</strong> - Probabilistic Graphical Models</li>
-      </ul>
-    </div>
   </div>
 
-    <div class="card">
-      <h2>Sem 2 Resources</h2>
-      <ul>
-        <li><a href="sem2_course_selector_AIML_electives.html">Course Selector Tool</a></li>
-        <li><a href="calculus.html">Calculus Reference</a></li>
-      </ul>
-    </div>
-  </div>
+  <footer>
+    <p>Built for BITS WILP AIML students</p>
+  </footer>
 
-  <div id="sem1" class="tab-content hidden">
-    <div class="card">
-      <h2>Sem 1 Resources</h2>
-      <ul>
-        <li>Add your Sem 1 materials here</li>
-      </ul>
-    </div>
-  </div>
+  <script>
+    function showTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
 
-</div>
-
-<footer>
-  <p>Built for BITS WILP AIML Students</p>
-</footer>
-
-<script>
-function showTab(tabId) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-  document.getElementById(tabId).classList.remove('hidden');
-
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-  event.target.classList.add('active');
-}
-</script>
-
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  </script>
 </body>
 </html>
