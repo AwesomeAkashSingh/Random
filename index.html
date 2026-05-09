@@ -19,7 +19,6 @@
     }
 
     * { box-sizing: border-box; }
-
     html { scroll-behavior: smooth; }
 
     body {
@@ -37,16 +36,8 @@
       box-shadow: var(--shadow);
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-    }
-
-    header p {
-      margin: 10px 0 0;
-      font-size: 1.05rem;
-      opacity: 0.96;
-    }
+    header h1 { margin: 0; font-size: 2rem; }
+    header p { margin: 10px 0 0; font-size: 1.05rem; opacity: 0.96; }
 
     .banner {
       background: linear-gradient(90deg, #fff5c9 0%, #fff8da 100%);
@@ -382,7 +373,7 @@
   <div class="container">
     <div class="card" id="live-updates-card">
       <h2>📢 Live Announcements</h2>
-      <p class="subtle">This moving strip updates from the shared Google Sheet. Add announcement rows in the sheet to see them here.</p>
+      <p class="subtle">This moving strip updates from the shared Google Sheet. Add rows with events in the sheet to see them here.</p>
       <div class="announcement-panel">
         <div class="announcement-label">Announcements</div>
         <div class="ticker">
@@ -476,7 +467,6 @@
     function showTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(tabId).classList.remove('hidden');
-
       document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
       btn.classList.add('active');
     }
@@ -532,23 +522,61 @@
       return obj;
     }
 
+    const MONTHS = {
+      jan: 0, january: 0,
+      feb: 1, february: 1,
+      mar: 2, march: 2,
+      apr: 3, april: 3,
+      may: 4,
+      jun: 5, june: 5,
+      jul: 6, july: 6,
+      aug: 7, august: 7,
+      sep: 8, sept: 8, september: 8,
+      oct: 9, october: 9,
+      nov: 10, november: 10,
+      dec: 11, december: 11
+    };
+
     function parseFlexibleDate(value) {
       if (!value) return null;
       const raw = String(value).trim();
-      if (!raw) return null;
+      if (!raw || raw === '-') return null;
 
-      const direct = new Date(raw);
+      let m = raw.match(/^(\d{1,2})-([A-Za-z]{3,9})-(\d{4})(?:\s+(\d{1,2}):(\d{2})\s*(AM|PM))?(?:\s+[A-Za-z]{2,4})?$/i);
+      if (m) {
+        const day = Number(m[1]);
+        const monthKey = m[2].toLowerCase();
+        const month = MONTHS[monthKey];
+        const year = Number(m[3]);
+        let hour = m[4] ? Number(m[4]) : 23;
+        const minute = m[5] ? Number(m[5]) : 59;
+        const ampm = m[6] ? m[6].toUpperCase() : null;
+
+        if (month === undefined) return null;
+        if (ampm) {
+          if (hour === 12) hour = 0;
+          if (ampm === 'PM') hour += 12;
+        }
+        return new Date(year, month, day, hour, minute, 0, 0);
+      }
+
+      m = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2})(?:\s*(AM|PM))?)?$/i);
+      if (m) {
+        const year = Number(m[1]);
+        const month = Number(m[2]) - 1;
+        const day = Number(m[3]);
+        let hour = m[4] ? Number(m[4]) : 23;
+        const minute = m[5] ? Number(m[5]) : 59;
+        const ampm = m[6] ? m[6].toUpperCase() : null;
+        if (ampm) {
+          if (hour === 12) hour = 0;
+          if (ampm === 'PM') hour += 12;
+        }
+        return new Date(year, month, day, hour, minute, 0, 0);
+      }
+
+      const direct = new Date(raw.replace(/\s+IST$/i, ''));
       if (!Number.isNaN(direct.getTime())) return direct;
-
-      const m1 = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-      if (m1) return new Date(Number(m1[1]), Number(m1[2]) - 1, Number(m1[3]));
-
-      const m2 = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-      if (m2) return new Date(Number(m2[3]), Number(m2[2]) - 1, Number(m2[1]));
-
-      const m3 = raw.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-      if (m3) return new Date(Number(m3[3]), Number(m3[2]) - 1, Number(m3[1]));
-
       return null;
     }
 
@@ -559,40 +587,37 @@
     }
 
     function daysLeft(dateObj) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const target = new Date(dateObj);
-      target.setHours(0, 0, 0, 0);
-      const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
-      if (diff === 0) return 'Today';
-      if (diff === 1) return '1 day left';
-      return `${diff} days left`;
+      const now = new Date();
+      const diffMs = dateObj.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      if (diffDays <= 0) return 'Due today';
+      if (diffDays === 1) return '1 day left';
+      return `${diffDays} days left`;
     }
 
     function isDeadlineRow(row) {
-      const type = String(row.type || row.category || row.kind || '').toLowerCase();
-      const title = String(row.title || row.name || row.subject || row.event || '').toLowerCase();
-      const dateValue = row.date || row.deadline || row.due || row.dueDate || row.startdate;
-      return Boolean(dateValue) && (type.includes('deadline') || type.includes('event') || title.includes('deadline') || title.includes('due') || title.includes('quiz') || title.includes('exam') || title.includes('assignment') || title.includes('test') || title.includes('submission'));
+      const end = row.endtime || row.deadline || row.duedate || row.end || '';
+      const event = String(row.event || '').trim();
+      return Boolean(end && event);
     }
 
     function isAnnouncementRow(row) {
-      const type = String(row.type || row.category || row.kind || '').toLowerCase();
-      const title = String(row.title || row.name || row.subject || row.event || '').trim();
-      const details = String(row.details || row.description || row.message || row.note || '').trim();
-      return type.includes('announcement') || type.includes('notice') || type.includes('update') || details.length > 0 || title.length > 0 && !isDeadlineRow(row);
+      const event = String(row.event || '').trim();
+      const subject = String(row.subject || '').trim();
+      const details = String(row.moredetails || '').trim();
+      return Boolean(event || subject || details);
     }
 
     function renderAnnouncements(items) {
-      const source = items.length ? items : [{ title: 'No announcements yet. Add rows in the Google Sheet to see them move here.' }];
+      const source = items.length ? items : [{ event: 'No announcements yet', subject: '', moredetails: 'Update the Google Sheet to see live items here.' }];
       const buildSet = () => {
         const set = document.createElement('div');
         set.className = 'ticker-set';
         source.forEach(item => {
           const chip = document.createElement('span');
           chip.className = 'ticker-item';
-          const text = [item.title, item.details].filter(Boolean).join(' — ');
-          chip.textContent = text || 'Announcement';
+          const parts = [item.subject, item.event, item.moredetails].filter(Boolean);
+          chip.textContent = parts.join(' • ');
           set.appendChild(chip);
         });
         return set;
@@ -600,8 +625,13 @@
 
       const track = document.getElementById('tickerTrack');
       track.innerHTML = '';
-      track.appendChild(buildSet());
-      track.appendChild(buildSet().cloneNode(true));
+      const a = buildSet();
+      const b = buildSet();
+      a.id = 'tickerSetA';
+      b.id = 'tickerSetB';
+      b.setAttribute('aria-hidden', 'true');
+      track.appendChild(a);
+      track.appendChild(b);
     }
 
     function renderDeadlines(items) {
@@ -626,13 +656,13 @@
         const card = document.createElement('div');
         card.className = 'deadline-card top';
 
-        const title = document.createElement('div');
-        title.className = 'deadline-rank';
-        title.textContent = `Top ${index + 1}`;
+        const rank = document.createElement('div');
+        rank.className = 'deadline-rank';
+        rank.textContent = `Top ${index + 1}`;
 
-        const h3 = document.createElement('h3');
-        h3.className = 'deadline-title';
-        h3.textContent = item.title;
+        const title = document.createElement('h3');
+        title.className = 'deadline-title';
+        title.textContent = `${item.subject ? item.subject + ' — ' : ''}${item.event}`;
 
         const meta1 = document.createElement('div');
         meta1.className = 'deadline-meta';
@@ -640,20 +670,13 @@
 
         const meta2 = document.createElement('div');
         meta2.className = 'deadline-meta';
-        meta2.textContent = item.details || 'No extra details provided.';
+        meta2.textContent = item.moredetails || 'No extra details provided.';
 
         const pill = document.createElement('div');
         pill.className = 'deadline-pill';
         pill.textContent = daysLeft(item.dateObj);
 
-        card.append(title, h3, meta1, meta2, pill);
-
-        if (item.link) {
-          const link = document.createElement('div');
-          link.className = 'deadline-meta';
-          link.innerHTML = `<a href="${item.link}" target="_blank" rel="noopener noreferrer">Open link</a>`;
-          card.appendChild(link);
-        }
+        card.append(rank, title, meta1, meta2, pill);
 
         topGrid.appendChild(card);
       });
@@ -668,21 +691,13 @@
           row.className = 'deadline-row';
 
           const left = document.createElement('div');
-          left.innerHTML = `<strong>${item.title}</strong><br><span>${formatDate(item.dateObj)}</span>${item.details ? `<br><span>${item.details}</span>` : ''}`;
+          left.innerHTML = `<strong>${item.subject ? item.subject + ' — ' : ''}${item.event}</strong><br><span>${formatDate(item.dateObj)}</span>${item.moredetails ? `<br><span>${item.moredetails}</span>` : ''}`;
 
           const right = document.createElement('div');
           right.className = 'right';
           right.textContent = daysLeft(item.dateObj);
 
           row.append(left, right);
-
-          if (item.link) {
-            const link = document.createElement('div');
-            link.style.width = '100%';
-            link.innerHTML = `<a href="${item.link}" target="_blank" rel="noopener noreferrer">Open link</a>`;
-            row.appendChild(link);
-          }
-
           allList.appendChild(row);
         });
       }
@@ -690,8 +705,8 @@
 
     async function loadGoogleSheet() {
       const fallbackAnnouncements = [
-        { title: 'Welcome to the BITS M. Tech. AIML Oct. 2025 batch hub' },
-        { title: 'Add announcements and deadlines in the shared Google Sheet' }
+        { subject: 'Welcome', event: 'BITS M. Tech. AIML Oct. 2025 batch hub', moredetails: 'Add rows in the Google Sheet to see live announcements.' },
+        { subject: 'Tip', event: 'Use Event + End time for deadlines', moredetails: 'The page automatically reads upcoming deadlines.' }
       ];
 
       try {
@@ -704,37 +719,27 @@
         const headers = rows[0];
         const objects = rows.slice(1).map(row => rowToObject(headers, row));
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        const now = new Date();
+        const currentDayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
 
-        const deadlines = objects
-          .map(row => {
-            const title = row.title || row.name || row.subject || row.event || row.deadline || row.task || 'Untitled deadline';
-            const details = row.details || row.description || row.message || row.note || row.sem || '';
-            const link = row.link || row.url || row.hyperlink || '';
-            const dateValue = row.date || row.deadline || row.due || row.duedate || row.startdate || row.enddate;
-            const dateObj = parseFlexibleDate(dateValue);
-            return { ...row, title, details, link, dateObj };
-          })
-          .filter(item => item.dateObj && item.dateObj >= today && isDeadlineRow(item))
+        const normalized = objects.map(row => {
+          const subject = row.subject || '';
+          const event = row.event || row.title || row.name || '';
+          const moredetails = row.moredetails || row.details || row.description || row.message || '';
+          const startRaw = row.starttime || row.start || row.begintime || '';
+          const endRaw = row.endtime || row.deadline || row.duedate || row.end || '';
+          const dateObj = parseFlexibleDate(endRaw || startRaw);
+          return { ...row, subject, event, moredetails, startRaw, endRaw, dateObj };
+        });
+
+        const deadlines = normalized
+          .filter(item => item.dateObj && item.dateObj >= currentDayStart && isDeadlineRow(item))
           .sort((a, b) => a.dateObj - b.dateObj);
 
-        const announcements = objects
-          .map(row => ({
-            title: row.title || row.name || row.subject || row.event || '',
-            details: row.details || row.description || row.message || row.note || ''
-          }))
-          .filter(row => row.title || row.details)
-          .filter((row, index, arr) => {
-            const combined = `${row.title} ${row.details}`.trim().toLowerCase();
-            if (!combined) return false;
-            // Prefer rows that look like announcements; fall back to any non-deadline text if there are none.
-            const original = objects[index] || {};
-            return isAnnouncementRow(original);
-          });
+        const announcements = normalized.filter(item => isAnnouncementRow(item));
 
         renderDeadlines(deadlines);
-        renderAnnouncements(announcements.length ? announcements : fallbackAnnouncements);
+        renderAnnouncements(announcements);
       } catch (error) {
         console.error('Google Sheet load failed:', error);
         document.getElementById('deadlineStatus').textContent = 'Could not load the sheet right now. Check that it is published or publicly accessible.';
