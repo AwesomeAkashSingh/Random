@@ -167,9 +167,9 @@
       background: linear-gradient(90deg, #eef5ff, #f9fbff);
       border: 1px solid #dbe8ff;
       border-radius: 16px;
-      padding: 14px 16px;
-      overflow: hidden;
+      padding: 14px 16px 16px;
       position: relative;
+      overflow: hidden;
     }
 
     .announcement-label {
@@ -182,42 +182,56 @@
       margin-bottom: 10px;
     }
 
-    .ticker {
-      overflow: hidden;
+    .announcement-viewport {
       position: relative;
-      width: 100%;
-    }
-
-    .ticker-track {
-      display: flex;
-      width: max-content;
-      animation: marquee 28s linear infinite;
-      gap: 14px;
-    }
-
-    .ticker-set {
-      display: flex;
-      gap: 14px;
-      padding-right: 14px;
-    }
-
-    .ticker-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: white;
+      height: 126px;
+      overflow: hidden;
+      border-radius: 14px;
       border: 1px solid #dfe8ff;
-      border-radius: 999px;
-      padding: 10px 14px;
-      box-shadow: 0 6px 14px rgba(52, 82, 161, 0.08);
-      white-space: nowrap;
-      font-weight: bold;
-      color: #27436f;
+      background: rgba(255,255,255,0.72);
     }
 
-    @keyframes marquee {
-      from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
+    .announcement-track {
+      display: flex;
+      flex-direction: column;
+      transition: transform 1.15s ease;
+      will-change: transform;
+    }
+
+    .announcement-item {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid #edf2ff;
+      color: #27436f;
+      font-weight: bold;
+      line-height: 1.35;
+      background: white;
+    }
+
+    .announcement-item:nth-child(odd) {
+      background: #fbfdff;
+    }
+
+    .announcement-pill {
+      display: inline-block;
+      margin-right: 10px;
+      background: #e8f1ff;
+      color: #235db6;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      flex: 0 0 auto;
+    }
+
+    .announcement-text {
+      flex: 1 1 auto;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .deadline-grid {
@@ -237,9 +251,7 @@
       overflow: hidden;
     }
 
-    .deadline-card.top {
-      border-left: 6px solid var(--primary);
-    }
+    .deadline-card.top { border-left: 6px solid var(--primary); }
 
     .deadline-rank {
       display: inline-block;
@@ -352,7 +364,7 @@
       .prof-button { min-width: 160px; }
       .card h2 { font-size: 1.4rem; }
       .deadline-row { align-items: flex-start; }
-      .ticker-track { animation-duration: 20s; }
+      .announcement-viewport { height: 112px; }
     }
   </style>
 </head>
@@ -373,15 +385,15 @@
   <div class="container">
     <div class="card" id="live-updates-card">
       <h2>📢 Live Announcements</h2>
-      <p class="subtle">This moving strip updates from the shared Google Sheet. Add rows with events in the sheet to see them here.</p>
+      <p class="subtle">Create rows in the Google Sheet with <strong>Type = Announcement</strong>. Each announcement appears on its own line and scrolls slowly.</p>
       <div class="announcement-panel">
         <div class="announcement-label">Announcements</div>
-        <div class="ticker">
-          <div class="ticker-track" id="tickerTrack">
-            <div class="ticker-set" id="tickerSetA">
-              <span class="ticker-item">Loading announcements…</span>
+        <div class="announcement-viewport">
+          <div class="announcement-track" id="announcementTrack">
+            <div class="announcement-item">
+              <span class="announcement-pill">Info</span>
+              <span class="announcement-text">Loading announcements…</span>
             </div>
-            <div class="ticker-set" id="tickerSetB" aria-hidden="true"></div>
           </div>
         </div>
       </div>
@@ -389,7 +401,7 @@
 
     <div class="card" id="deadlines-card">
       <h2>⏳ Upcoming Deadlines</h2>
-      <p class="subtle">Only upcoming deadlines are shown. The top 3 soonest are highlighted first, and any additional upcoming deadlines appear below. This section is common to both Sem 1 and Sem 2.</p>
+      <p class="subtle">Create rows in the Google Sheet with <strong>Type = Deadline</strong>. The top 3 soonest are highlighted first, and any additional upcoming deadlines appear below. This section is common to both Sem 1 and Sem 2.</p>
       <div class="loading" id="deadlineStatus">Loading deadlines from Google Sheet…</div>
       <div class="deadline-grid" id="topDeadlinesGrid"></div>
       <div class="deadline-list" id="allDeadlinesList"></div>
@@ -545,13 +557,11 @@
       let m = raw.match(/^(\d{1,2})-([A-Za-z]{3,9})-(\d{4})(?:\s+(\d{1,2}):(\d{2})\s*(AM|PM))?(?:\s+[A-Za-z]{2,4})?$/i);
       if (m) {
         const day = Number(m[1]);
-        const monthKey = m[2].toLowerCase();
-        const month = MONTHS[monthKey];
+        const month = MONTHS[m[2].toLowerCase()];
         const year = Number(m[3]);
         let hour = m[4] ? Number(m[4]) : 23;
         const minute = m[5] ? Number(m[5]) : 59;
         const ampm = m[6] ? m[6].toUpperCase() : null;
-
         if (month === undefined) return null;
         if (ampm) {
           if (hour === 12) hour = 0;
@@ -595,43 +605,66 @@
       return `${diffDays} days left`;
     }
 
+    function cleanText(...parts) {
+      return parts.filter(Boolean).join(' • ').replace(/\s+/g, ' ').trim();
+    }
+
     function isDeadlineRow(row) {
-      const end = row.endtime || row.deadline || row.duedate || row.end || '';
+      const type = String(row.type || row.category || row.section || '').toLowerCase();
       const event = String(row.event || '').trim();
-      return Boolean(end && event);
+      const end = row.endtime || row.deadline || row.duedate || row.end || '';
+      if (type) return type.includes('deadline');
+      return Boolean(event && end);
     }
 
     function isAnnouncementRow(row) {
-      const event = String(row.event || '').trim();
-      const subject = String(row.subject || '').trim();
-      const details = String(row.moredetails || '').trim();
-      return Boolean(event || subject || details);
+      const type = String(row.type || row.category || row.section || '').toLowerCase();
+      if (type) return type.includes('announcement');
+      return false;
     }
 
     function renderAnnouncements(items) {
-      const source = items.length ? items : [{ event: 'No announcements yet', subject: '', moredetails: 'Update the Google Sheet to see live items here.' }];
-      const buildSet = () => {
-        const set = document.createElement('div');
-        set.className = 'ticker-set';
-        source.forEach(item => {
-          const chip = document.createElement('span');
-          chip.className = 'ticker-item';
-          const parts = [item.subject, item.event, item.moredetails].filter(Boolean);
-          chip.textContent = parts.join(' • ');
-          set.appendChild(chip);
-        });
-        return set;
-      };
-
-      const track = document.getElementById('tickerTrack');
+      const source = items.length ? items : [{ subject: 'Info', event: 'No announcements yet', moredetails: 'Add rows with Type = Announcement in the Google Sheet.' }];
+      const track = document.getElementById('announcementTrack');
       track.innerHTML = '';
-      const a = buildSet();
-      const b = buildSet();
-      a.id = 'tickerSetA';
-      b.id = 'tickerSetB';
-      b.setAttribute('aria-hidden', 'true');
-      track.appendChild(a);
-      track.appendChild(b);
+
+      source.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'announcement-item';
+
+        const pill = document.createElement('span');
+        pill.className = 'announcement-pill';
+        pill.textContent = item.subject || 'Info';
+
+        const text = document.createElement('span');
+        text.className = 'announcement-text';
+        text.textContent = cleanText(item.event, item.moredetails);
+
+        row.append(pill, text);
+        track.appendChild(row);
+      });
+
+      if (source.length > 1) {
+        let index = 0;
+        const itemHeight = 42;
+        const visibleCount = Math.min(3, source.length);
+        const maxOffset = Math.max(0, source.length - visibleCount);
+        const viewportHeight = visibleCount * itemHeight;
+        document.querySelector('.announcement-viewport').style.height = `${viewportHeight}px`;
+
+        const rotate = () => {
+          const offset = Math.min(index, maxOffset) * itemHeight;
+          track.style.transform = `translateY(-${offset}px)`;
+          index = (index + 1) % (maxOffset + 1 || 1);
+        };
+
+        rotate();
+        clearInterval(window.__announcementInterval);
+        window.__announcementInterval = setInterval(rotate, 6000);
+      } else {
+        track.style.transform = 'translateY(0)';
+        clearInterval(window.__announcementInterval);
+      }
     }
 
     function renderDeadlines(items) {
@@ -677,7 +710,6 @@
         pill.textContent = daysLeft(item.dateObj);
 
         card.append(rank, title, meta1, meta2, pill);
-
         topGrid.appendChild(card);
       });
 
@@ -705,8 +737,8 @@
 
     async function loadGoogleSheet() {
       const fallbackAnnouncements = [
-        { subject: 'Welcome', event: 'BITS M. Tech. AIML Oct. 2025 batch hub', moredetails: 'Add rows in the Google Sheet to see live announcements.' },
-        { subject: 'Tip', event: 'Use Event + End time for deadlines', moredetails: 'The page automatically reads upcoming deadlines.' }
+        { subject: 'Info', event: 'Welcome to the BITS M. Tech. AIML Oct. 2025 batch hub', moredetails: 'Add rows with Type = Announcement in the Google Sheet.' },
+        { subject: 'Info', event: 'Announcements and deadlines are read separately now', moredetails: 'Use Type = Deadline for deadlines.' }
       ];
 
       try {
@@ -726,10 +758,10 @@
           const subject = row.subject || '';
           const event = row.event || row.title || row.name || '';
           const moredetails = row.moredetails || row.details || row.description || row.message || '';
-          const startRaw = row.starttime || row.start || row.begintime || '';
           const endRaw = row.endtime || row.deadline || row.duedate || row.end || '';
-          const dateObj = parseFlexibleDate(endRaw || startRaw);
-          return { ...row, subject, event, moredetails, startRaw, endRaw, dateObj };
+          const dateObj = parseFlexibleDate(endRaw);
+          const type = String(row.type || row.category || row.section || '').trim().toLowerCase();
+          return { ...row, subject, event, moredetails, endRaw, dateObj, type };
         });
 
         const deadlines = normalized
