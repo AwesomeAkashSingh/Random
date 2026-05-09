@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BITS M. Tech. AIML Oct. 2025 Batch</title>
+  <title>BITS M. Tech. AIML Oct. 2025 Batch (unofficial)</title>
   <style>
     :root {
       --bg: #f4f7ff;
@@ -68,7 +68,8 @@
     .telegram-button,
     .whatsapp-button,
     .prof-button,
-    .tab {
+    .tab,
+    .modal-close {
       border: none;
       padding: 21px 33px;
       border-radius: 15px;
@@ -86,7 +87,8 @@
     .telegram-button:active,
     .whatsapp-button:active,
     .prof-button:active,
-    .tab:active {
+    .tab:active,
+    .modal-close:active {
       transform: scale(0.95);
       filter: brightness(0.97);
     }
@@ -184,7 +186,7 @@
 
     .announcement-viewport {
       position: relative;
-      height: 126px;
+      height: 105px;
       overflow: hidden;
       border-radius: 14px;
       border: 1px solid #dfe8ff;
@@ -194,7 +196,7 @@
     .announcement-track {
       display: flex;
       flex-direction: column;
-      transition: transform 1.15s ease;
+      transition: transform 1.2s ease;
       will-change: transform;
     }
 
@@ -253,17 +255,6 @@
 
     .deadline-card.top { border-left: 6px solid var(--primary); }
 
-    .deadline-rank {
-      display: inline-block;
-      background: linear-gradient(90deg, #ffca66, #ffe08f);
-      color: #6b4d00;
-      border-radius: 999px;
-      padding: 5px 10px;
-      font-size: 0.9rem;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
     .deadline-title {
       margin: 0 0 8px;
       font-size: 1.15rem;
@@ -287,28 +278,6 @@
       font-size: 0.9rem;
       font-weight: bold;
     }
-
-    .deadline-list {
-      margin-top: 18px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .deadline-row {
-      background: #ffffff;
-      border: 1px solid #e5edff;
-      border-radius: 14px;
-      padding: 14px 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      display: flex;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .deadline-row strong { color: #21314d; }
-    .deadline-row .right { color: #3756a5; font-weight: bold; }
 
     .note {
       display: inline-block;
@@ -351,6 +320,76 @@
       padding: 10px 0 4px;
     }
 
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(25, 36, 57, 0.38);
+      padding: 22px;
+      overflow-y: auto;
+    }
+
+    .modal.show { display: flex; align-items: center; justify-content: center; }
+
+    .modal-box {
+      width: min(900px, 100%);
+      background: white;
+      border-radius: 22px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 22px;
+      background: linear-gradient(90deg, #4a90e2, #6db8ff);
+      color: white;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: white;
+    }
+
+    .modal-close {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      border-radius: 12px;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 18px 22px 22px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .modal-item {
+      background: #f7faff;
+      border: 1px solid #dfe8ff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 6px 14px rgba(52, 82, 161, 0.08);
+    }
+
+    .modal-item strong { color: #21314d; }
+    .modal-item .small { color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
     @media (max-width: 720px) {
       header h1 { font-size: 1.55rem; }
       header p { font-size: 0.98rem; }
@@ -359,18 +398,18 @@
       .telegram-button,
       .whatsapp-button,
       .prof-button,
-      .tab { font-size: 18px; padding: 16px 24px; }
+      .tab,
+      .modal-close { font-size: 18px; padding: 16px 24px; }
       .whatsapp-button,
       .prof-button { min-width: 160px; }
       .card h2 { font-size: 1.4rem; }
       .deadline-row { align-items: flex-start; }
-      .announcement-viewport { height: 112px; }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>BITS M. Tech. AIML Oct. 2025 Batch</h1>
+    <h1>BITS M. Tech. AIML Oct. 2025 Batch (unofficial)</h1>
     <p>Resources, updates, and useful links for the batch</p>
   </header>
 
@@ -385,7 +424,6 @@
   <div class="container">
     <div class="card" id="live-updates-card">
       <h2>📢 Live Announcements</h2>
-      <p class="subtle">Create rows in the Google Sheet with <strong>Type = Announcement</strong>. Each announcement appears on its own line and scrolls slowly.</p>
       <div class="announcement-panel">
         <div class="announcement-label">Announcements</div>
         <div class="announcement-viewport">
@@ -401,10 +439,9 @@
 
     <div class="card" id="deadlines-card">
       <h2>⏳ Upcoming Deadlines</h2>
-      <p class="subtle">Create rows in the Google Sheet with <strong>Type = Deadline</strong>. The top 3 soonest are highlighted first, and any additional upcoming deadlines appear below. This section is common to both Sem 1 and Sem 2.</p>
+      <p class="subtle">Only upcoming deadlines are shown. This section is common to both Sem 1 and Sem 2.</p>
       <div class="loading" id="deadlineStatus">Loading deadlines from Google Sheet…</div>
       <div class="deadline-grid" id="topDeadlinesGrid"></div>
-      <div class="deadline-list" id="allDeadlinesList"></div>
     </div>
 
     <div class="tabs-wrap">
@@ -463,7 +500,6 @@
       <div class="card">
         <h2>Sem 1</h2>
         <p>This section can hold your Sem 1 resources, links, and announcements.</p>
-        <div class="note">We are currently in Sem 2.</div>
       </div>
     </div>
   </div>
@@ -471,6 +507,30 @@
   <footer>
     <p>Built for BITS WILP AIML students</p>
   </footer>
+
+  <div class="modal" id="announcementsModal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="announcementsModalTitle">
+      <div class="modal-header">
+        <h3 id="announcementsModalTitle">Announcements</h3>
+        <button class="modal-close" onclick="closeModal('announcementsModal')" aria-label="Close announcements">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-list" id="announcementsModalList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="deadlinesModal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="deadlinesModalTitle">
+      <div class="modal-header">
+        <h3 id="deadlinesModalTitle">Upcoming Deadlines</h3>
+        <button class="modal-close" onclick="closeModal('deadlinesModal')" aria-label="Close deadlines">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-list" id="deadlinesModalList"></div>
+      </div>
+    </div>
+  </div>
 
   <script>
     const SHEET_ID = '1YJqISqU7KNN3mv-Vs1x6iTBfsNFcckOT1a_9ENnFmAA';
@@ -482,6 +542,25 @@
       document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
       btn.classList.add('active');
     }
+
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    document.getElementById('announcementsModal').addEventListener('click', (e) => {
+      if (e.target.id === 'announcementsModal') closeModal('announcementsModal');
+    });
+    document.getElementById('deadlinesModal').addEventListener('click', (e) => {
+      if (e.target.id === 'deadlinesModal') closeModal('deadlinesModal');
+    });
 
     function parseCSV(text) {
       const rows = [];
@@ -596,15 +675,6 @@
       });
     }
 
-    function daysLeft(dateObj) {
-      const now = new Date();
-      const diffMs = dateObj.getTime() - now.getTime();
-      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-      if (diffDays <= 0) return 'Due today';
-      if (diffDays === 1) return '1 day left';
-      return `${diffDays} days left`;
-    }
-
     function cleanText(...parts) {
       return parts.filter(Boolean).join(' • ').replace(/\s+/g, ' ').trim();
     }
@@ -647,20 +717,22 @@
       if (source.length > 1) {
         let index = 0;
         const itemHeight = 42;
-        const visibleCount = Math.min(3, source.length);
+        const visibleCount = 2.5;
+        const step = 1;
         const maxOffset = Math.max(0, source.length - visibleCount);
-        const viewportHeight = visibleCount * itemHeight;
-        document.querySelector('.announcement-viewport').style.height = `${viewportHeight}px`;
+        const viewport = document.querySelector('.announcement-viewport');
+        viewport.style.height = `${Math.round(visibleCount * itemHeight)}px`;
 
         const rotate = () => {
           const offset = Math.min(index, maxOffset) * itemHeight;
           track.style.transform = `translateY(-${offset}px)`;
-          index = (index + 1) % (maxOffset + 1 || 1);
+          index = (index + step);
+          if (index > maxOffset) index = 0;
         };
 
         rotate();
         clearInterval(window.__announcementInterval);
-        window.__announcementInterval = setInterval(rotate, 6000);
+        window.__announcementInterval = setInterval(rotate, 8000);
       } else {
         track.style.transform = 'translateY(0)';
         clearInterval(window.__announcementInterval);
@@ -668,12 +740,9 @@
     }
 
     function renderDeadlines(items) {
-      const topGrid = document.getElementById('topDeadlinesGrid');
-      const allList = document.getElementById('allDeadlinesList');
+      const grid = document.getElementById('topDeadlinesGrid');
       const status = document.getElementById('deadlineStatus');
-
-      topGrid.innerHTML = '';
-      allList.innerHTML = '';
+      grid.innerHTML = '';
 
       if (!items.length) {
         status.textContent = 'No upcoming deadlines found in the Google Sheet.';
@@ -682,16 +751,10 @@
 
       status.textContent = `${items.length} upcoming deadline${items.length === 1 ? '' : 's'} loaded.`;
 
-      const topThree = items.slice(0, 3);
-      const remaining = items.slice(3);
-
-      topThree.forEach((item, index) => {
+      items.forEach((item, index) => {
         const card = document.createElement('div');
-        card.className = 'deadline-card top';
-
-        const rank = document.createElement('div');
-        rank.className = 'deadline-rank';
-        rank.textContent = `Top ${index + 1}`;
+        card.className = 'deadline-card';
+        if (index < 3) card.classList.add('top');
 
         const title = document.createElement('h3');
         title.className = 'deadline-title';
@@ -707,32 +770,34 @@
 
         const pill = document.createElement('div');
         pill.className = 'deadline-pill';
-        pill.textContent = daysLeft(item.dateObj);
+        pill.textContent = item.dateObj.getTime() - Date.now() <= 0 ? 'Due today' : `${Math.ceil((item.dateObj.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left`;
 
-        card.append(rank, title, meta1, meta2, pill);
-        topGrid.appendChild(card);
+        card.append(title, meta1, meta2, pill);
+        grid.appendChild(card);
       });
+    }
 
-      if (remaining.length) {
-        const heading = document.createElement('h3');
-        heading.textContent = 'All upcoming deadlines';
-        allList.appendChild(heading);
+    function fillModalList(elementId, items, kind) {
+      const list = document.getElementById(elementId);
+      list.innerHTML = '';
 
-        remaining.forEach(item => {
-          const row = document.createElement('div');
-          row.className = 'deadline-row';
-
-          const left = document.createElement('div');
-          left.innerHTML = `<strong>${item.subject ? item.subject + ' — ' : ''}${item.event}</strong><br><span>${formatDate(item.dateObj)}</span>${item.moredetails ? `<br><span>${item.moredetails}</span>` : ''}`;
-
-          const right = document.createElement('div');
-          right.className = 'right';
-          right.textContent = daysLeft(item.dateObj);
-
-          row.append(left, right);
-          allList.appendChild(row);
-        });
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'modal-item';
+        empty.innerHTML = `<strong>No ${kind.toLowerCase()} yet</strong><div class="small">Add matching rows in the Google Sheet to populate this box.</div>`;
+        list.appendChild(empty);
+        return;
       }
+
+      items.forEach(item => {
+        const box = document.createElement('div');
+        box.className = 'modal-item';
+        const title = `${item.subject ? item.subject + ' — ' : ''}${item.event}`;
+        const body = item.moredetails ? `<div class="small">${item.moredetails}</div>` : '';
+        const dateLine = kind === 'Deadline' && item.dateObj ? `<div class="small"><strong>Due:</strong> ${formatDate(item.dateObj)}</div>` : '';
+        box.innerHTML = `<strong>${title}</strong>${dateLine}${body}`;
+        list.appendChild(box);
+      });
     }
 
     async function loadGoogleSheet() {
@@ -771,12 +836,21 @@
         const announcements = normalized.filter(item => isAnnouncementRow(item));
 
         renderDeadlines(deadlines);
-        renderAnnouncements(announcements);
+        renderAnnouncements(announcements.length ? announcements : fallbackAnnouncements);
+        fillModalList('announcementsModalList', announcements.length ? announcements : fallbackAnnouncements, 'Announcement');
+        fillModalList('deadlinesModalList', deadlines, 'Deadline');
+
+        openModal('announcementsModal');
+        openModal('deadlinesModal');
       } catch (error) {
         console.error('Google Sheet load failed:', error);
         document.getElementById('deadlineStatus').textContent = 'Could not load the sheet right now. Check that it is published or publicly accessible.';
         renderAnnouncements(fallbackAnnouncements);
         renderDeadlines([]);
+        fillModalList('announcementsModalList', fallbackAnnouncements, 'Announcement');
+        fillModalList('deadlinesModalList', [], 'Deadline');
+        openModal('announcementsModal');
+        openModal('deadlinesModal');
       }
     }
 
