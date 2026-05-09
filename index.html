@@ -89,6 +89,55 @@
       display: none;
     }
 
+    .animated-button, .telegram-button, .whatsapp-button, .prof-button {
+      border: none;
+      padding: 14px 22px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+      margin: 6px;
+    }
+
+    .animated-button {
+      background: linear-gradient(to right, #4a90e2, #6fc3ff);
+      color: white;
+    }
+
+    .telegram-button {
+      background: linear-gradient(to right, #229ED9, #66cfff);
+      color: white;
+    }
+
+    .whatsapp-button {
+      background: linear-gradient(to right, #25D366, #7ff0a4);
+      color: white;
+      min-width: 120px;
+    }
+
+    .prof-button {
+      background: linear-gradient(to right, #ff9800, #ffd180);
+      color: white;
+      width: 100%;
+      text-align: left;
+    }
+
+    .animated-button:active,
+    .telegram-button:active,
+    .whatsapp-button:active,
+    .prof-button:active {
+      transform: scale(0.95);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
     footer {
       text-align: center;
       padding: 15px;
@@ -105,8 +154,16 @@
 </header>
 
 <div class="banner">
-  Everything you need is here.
-  <a href="https://drive.google.com/drive/folders/1Yke8TBf7oogMu26w1jZqf-hrjAbPzVH9?usp=drive_link" target="_blank">Open Master Drive</a>
+  <h2>Everything you need is here.</h2>
+  <button class="animated-button" onclick="window.open('https://drive.google.com/drive/folders/1Yke8TBf7oogMu26w1jZqf-hrjAbPzVH9?usp=drive_link', '_blank')">
+    📁 Open Master Drive
+  </button>
+
+  <div style="margin-top:20px;">
+    <button class="telegram-button" onclick="window.open('https://t.me/+yBZ4_b7T_nI4MTBl', '_blank')">
+      📘 Telegram Videos Channel
+    </button>
+  </div>
 </div>
 
 <div class="tabs">
@@ -117,6 +174,35 @@
 <div class="container">
 
   <div id="sem2" class="tab-content">
+    <div class="card">
+      <h2>💬 Semester 2 Elective Groups (WhatsApp)</h2>
+
+      <div class="button-row">
+        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/H87Ur0FanjGB5aVT8TuEt7?mode=gi_t', '_blank')">NLP</button>
+        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/BhyPvSTyT91F1sKPqOHT0L?mode=gi_t', '_blank')">IR</button>
+        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/D4opK8Fjhh53qnEGD8Un4W?mode=gi_t', '_blank')">UDL</button>
+        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/GX59yMLFdfD55ovF1HUhWn?mode=gi_t', '_blank')">DML</button>
+        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/C9QFjN4SCHj99VorLlzVji?mode=gi_t', '_blank')">CV</button>
+        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/J5uI4fPnVJfFZBmeFshDcn?mode=gi_t', '_blank')">VA</button>
+        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/CNI6BSLj8WbJBICLTvRTas?mode=hqctcli', '_blank')">Cybersecurity</button>
+        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/LdSvk1KgSANCWUDiVx9TjE?mode=gi_t', '_blank')">SEML</button>
+        <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/KtYbMWZSAle0WSbJLdoakZ?mode=gi_t', '_blank')">DMML</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>👨‍🏫 Professor WhatsApp Groups</h2>
+
+      <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/JKYQOWB1Yb06z9xZRWZul9?mode=gi_t', '_blank')">Saurabh for MFML, NLP</button>
+
+      <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/FqEhCZPYGVbGZ12eVIN8V3?mode=gi_t', '_blank')">D Venkata Subramanian for DMML</button>
+
+      <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/H3B09GrcHucGvWYjdsbsD5?mode=gi_t', '_blank')">Samrat for DRL</button>
+
+      <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/DSzVYhkxPV26yQ4ybdON45?mode=gi_t', '_blank')">T. Vijayakumar for DRL</button>
+
+      <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/DUSQd0Q6C6Z8bYCL5GEQ5b?mode=gi_t', '_blank')">Thangakumar for UDL</button>
+    </div>
     <div class="card">
       <h2>Sem 2 Announcements</h2>
       <div class="announcement">Add latest updates here.</div>
