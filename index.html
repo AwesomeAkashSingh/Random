@@ -12,10 +12,14 @@
       --muted: #5e6b82;
       --primary: #4a90e2;
       --primary-2: #71b7ff;
+      --primary-3: #dfeaff;
+      --soft: #f8fbff;
       --telegram: #229ED9;
       --whatsapp-1: #25D366;
       --whatsapp-2: #7ff0a4;
       --shadow: 0 12px 30px rgba(55, 84, 170, 0.12);
+      --shadow-soft: 0 8px 18px rgba(55, 84, 170, 0.09);
+      --border: #dbe8ff;
     }
 
     * { box-sizing: border-box; }
@@ -69,16 +73,17 @@
     .whatsapp-button,
     .prof-button,
     .tab,
-    .modal-close {
+    .modal-close,
+    .ghost-button {
       border: none;
-      padding: 21px 33px;
+      padding: 18px 28px;
       border-radius: 15px;
       cursor: pointer;
-      font-size: 22px;
+      font-size: 18px;
       font-weight: bold;
       transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease, background 0.2s ease;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-      margin: 9px;
+      margin: 6px;
       line-height: 1;
       white-space: nowrap;
     }
@@ -88,8 +93,9 @@
     .whatsapp-button:active,
     .prof-button:active,
     .tab:active,
-    .modal-close:active {
-      transform: scale(0.95);
+    .modal-close:active,
+    .ghost-button:active {
+      transform: scale(0.96);
       filter: brightness(0.97);
     }
 
@@ -111,15 +117,158 @@
       text-align: center;
     }
 
+    .ghost-button {
+      background: white;
+      color: var(--primary);
+      border: 1px solid var(--border);
+      box-shadow: none;
+      padding: 10px 14px;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 18px auto 30px;
+      padding: 0 16px 16px;
+    }
+
+    .section {
+      background: var(--card);
+      padding: 24px;
+      margin-bottom: 22px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .section h2 {
+      margin: 0 0 10px;
+      color: var(--primary);
+      font-size: 1.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .section h3 {
+      color: #3756a5;
+      margin: 0 0 12px;
+    }
+
+    .subtle {
+      color: var(--muted);
+      margin-top: -2px;
+      margin-bottom: 16px;
+      line-height: 1.55;
+    }
+
+    .tag-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #e8f1ff;
+      color: #235db6;
+      font-weight: bold;
+      font-size: 0.82rem;
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .schedule-card {
+      background: linear-gradient(180deg, #f8fbff, #edf4ff);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .schedule-card::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 5px;
+      background: linear-gradient(180deg, var(--primary), var(--primary-2));
+    }
+
+    .course-code {
+      font-size: 0.88rem;
+      color: #5a7192;
+      font-weight: bold;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .course-name {
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: #1e2d49;
+      margin: 8px 0 12px;
+      line-height: 1.35;
+    }
+
+    .exam-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .exam-box {
+      background: white;
+      border: 1px solid #dbe6ff;
+      border-radius: 14px;
+      padding: 10px 11px;
+      min-height: 68px;
+    }
+
+    .exam-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #4f6daa;
+      margin-bottom: 5px;
+    }
+
+    .exam-value {
+      display: block;
+      font-size: 0.92rem;
+      line-height: 1.3;
+      color: #22314d;
+      font-weight: 700;
+    }
+
     .tabs-wrap {
-      padding: 28px 16px 8px;
+      padding: 4px 0 4px;
       text-align: center;
+    }
+
+    .tab-row {
+      gap: 12px;
     }
 
     .tab {
       background: #dfe8ff;
       color: #24324a;
       box-shadow: 0 6px 16px rgba(54, 84, 165, 0.10);
+      min-width: 120px;
     }
 
     .tab:hover { transform: translateY(-1px); }
@@ -129,46 +278,10 @@
       color: white;
     }
 
-    .container {
-      max-width: 1280px;
-      margin: 18px auto 30px;
-      padding: 0 16px;
-    }
-
-    .card {
-      background: var(--card);
-      padding: 24px;
-      margin-bottom: 22px;
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-    }
-
-    .card h2 {
-      margin-top: 0;
-      color: var(--primary);
-      font-size: 1.9rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .card h3 {
-      color: #3756a5;
-      margin: 0 0 12px;
-    }
-
-    .subtle {
-      color: var(--muted);
-      margin-top: -6px;
-      margin-bottom: 16px;
-      line-height: 1.55;
-    }
-
     .announcement-panel {
       background: linear-gradient(90deg, #eef5ff, #f9fbff);
-      border: 1px solid #dbe8ff;
-      border-radius: 16px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
       padding: 14px 16px 16px;
       position: relative;
       overflow: hidden;
@@ -186,17 +299,17 @@
 
     .announcement-viewport {
       position: relative;
-      height: 105px;
+      min-height: 94px;
       overflow: hidden;
       border-radius: 14px;
       border: 1px solid #dfe8ff;
-      background: rgba(255,255,255,0.72);
+      background: rgba(255,255,255,0.75);
     }
 
     .announcement-track {
       display: flex;
       flex-direction: column;
-      transition: transform 1.2s ease;
+      transition: transform 0.8s ease;
       will-change: transform;
     }
 
@@ -210,6 +323,7 @@
       font-weight: bold;
       line-height: 1.35;
       background: white;
+      gap: 10px;
     }
 
     .announcement-item:nth-child(odd) {
@@ -218,7 +332,6 @@
 
     .announcement-pill {
       display: inline-block;
-      margin-right: 10px;
       background: #e8f1ff;
       color: #235db6;
       padding: 5px 10px;
@@ -236,32 +349,59 @@
       text-overflow: ellipsis;
     }
 
-    .deadline-grid {
+    .empty-state {
+      padding: 18px 16px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.55;
+      background: #f8fbff;
+      border: 1px dashed #dbe8ff;
+      border-radius: 14px;
+      font-weight: bold;
+    }
+
+    .section-header-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .deadline-grid,
+    .webinar-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 16px;
       margin-top: 16px;
     }
 
-    .deadline-card {
+    .deadline-card,
+    .webinar-card {
       background: linear-gradient(180deg, #f8fbff, #edf4ff);
-      border: 1px solid #dbe8ff;
-      border-radius: 16px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
       padding: 16px;
-      box-shadow: 0 6px 14px rgba(52, 82, 161, 0.08);
+      box-shadow: var(--shadow-soft);
       position: relative;
       overflow: hidden;
     }
 
-    .deadline-card.top { border-left: 6px solid var(--primary); }
-
-    .deadline-title {
-      margin: 0 0 8px;
-      font-size: 1.15rem;
-      color: #20314f;
+    .deadline-card.top {
+      border-left: 6px solid var(--primary);
     }
 
-    .deadline-meta {
+    .deadline-title,
+    .webinar-title {
+      margin: 0 0 8px;
+      font-size: 1.08rem;
+      color: #20314f;
+      line-height: 1.35;
+    }
+
+    .deadline-meta,
+    .webinar-meta {
       color: var(--muted);
       font-size: 0.95rem;
       line-height: 1.5;
@@ -333,7 +473,7 @@
     .modal.show { display: flex; align-items: center; justify-content: center; }
 
     .modal-box {
-      width: min(900px, 100%);
+      width: min(920px, 100%);
       background: white;
       border-radius: 22px;
       box-shadow: 0 24px 60px rgba(0,0,0,0.22);
@@ -390,6 +530,13 @@
     .modal-item strong { color: #21314d; }
     .modal-item .small { color: var(--muted); margin-top: 6px; line-height: 1.5; }
 
+    .badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     @media (max-width: 720px) {
       header h1 { font-size: 1.55rem; }
       header p { font-size: 0.98rem; }
@@ -399,11 +546,15 @@
       .whatsapp-button,
       .prof-button,
       .tab,
-      .modal-close { font-size: 18px; padding: 16px 24px; }
+      .modal-close { font-size: 16px; padding: 14px 18px; }
       .whatsapp-button,
       .prof-button { min-width: 160px; }
-      .card h2 { font-size: 1.4rem; }
-      .deadline-row { align-items: flex-start; }
+      .section { padding: 18px; }
+      .section h2 { font-size: 1.35rem; }
+      .exam-pair { grid-template-columns: 1fr; }
+      .deadline-grid,
+      .webinar-grid,
+      .schedule-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -422,8 +573,27 @@
   </div>
 
   <div class="container">
-    <div class="card" id="live-updates-card">
-      <h2>📢 Live Announcements</h2>
+    <div class="section" id="ec-schedule-section">
+      <div class="section-header-line">
+        <h2>🗓️ EC2 / EC3 Schedule</h2>
+        <span class="note">11 courses • EC2 and EC3 dates</span>
+      </div>
+      <p class="subtle">Each box shows the regular and make-up dates for EC2 and EC3. The dates are kept separate so they are easy to read on mobile and desktop.</p>
+      <div class="schedule-grid" id="ecScheduleGrid"></div>
+    </div>
+
+    <div class="tabs-wrap">
+      <div class="tab-row">
+        <button class="tab active" id="tab-sem2" onclick="showTab('sem2', this)">Sem 2</button>
+        <button class="tab" id="tab-sem1" onclick="showTab('sem1', this)">Sem 1</button>
+      </div>
+    </div>
+
+    <div class="section" id="live-updates-card">
+      <div class="section-header-line">
+        <h2>📢 Live Announcements</h2>
+        <span class="note">Auto-refreshes from Google Sheet</span>
+      </div>
       <div class="announcement-panel">
         <div class="announcement-label">Announcements</div>
         <div class="announcement-viewport">
@@ -437,22 +607,27 @@
       </div>
     </div>
 
-    <div class="card" id="deadlines-card">
-      <h2>⏳ Upcoming Deadlines</h2>
-      <p class="subtle">Only upcoming deadlines are shown. This section is common to both Sem 1 and Sem 2.</p>
+    <div class="section" id="deadlines-card">
+      <div class="section-header-line">
+        <h2>⏳ Upcoming Deadlines</h2>
+        <span class="note">First upcoming deadline per subject</span>
+      </div>
+      <p class="subtle">This section shows the earliest upcoming deadline for each subject. If more than one deadline falls on the same calendar day, they are kept together. The popup (if triggered) is limited to deadlines ending within the next 48 hours.</p>
       <div class="loading" id="deadlineStatus">Loading deadlines from Google Sheet…</div>
       <div class="deadline-grid" id="topDeadlinesGrid"></div>
     </div>
 
-    <div class="tabs-wrap">
-      <div class="tab-row">
-        <button class="tab" id="tab-sem1" onclick="showTab('sem1', this)">Sem 1</button>
-        <button class="tab active" id="tab-sem2" onclick="showTab('sem2', this)">Sem 2</button>
+    <div class="section" id="webinar-card">
+      <div class="section-header-line">
+        <h2>🎓 Webinar</h2>
+        <span class="note">Separate webinar section</span>
       </div>
+      <p class="subtle">Webinar entries are shown separately below the upcoming deadlines section.</p>
+      <div class="webinar-grid" id="webinarGrid"></div>
     </div>
 
     <div id="sem2" class="tab-content">
-      <div class="card">
+      <div class="section">
         <h2>💬 Semester 2 Elective Groups (WhatsApp)</h2>
         <div class="button-row">
           <button class="whatsapp-button" onclick="window.open('https://chat.whatsapp.com/H87Ur0FanjGB5aVT8TuEt7?mode=gi_t', '_blank')">NLP</button>
@@ -467,7 +642,7 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="section">
         <h2>👨‍🏫 Professor WhatsApp Groups</h2>
         <div class="button-row">
           <button class="prof-button" onclick="window.open('https://chat.whatsapp.com/JKYQOWB1Yb06z9xZRWZul9?mode=gi_t', '_blank')">Saurabh for MFML, NLP</button>
@@ -478,7 +653,7 @@
         </div>
       </div>
 
-      <div class="card">
+      <div class="section">
         <h2>📚 Sem 2 Subject Abbreviations</h2>
         <ul>
           <li><strong>ACI</strong> - Artificial and Computational Intelligence</li>
@@ -497,7 +672,7 @@
     </div>
 
     <div id="sem1" class="tab-content hidden">
-      <div class="card">
+      <div class="section">
         <h2>Sem 1</h2>
         <p>This section can hold your Sem 1 resources, links, and announcements.</p>
       </div>
@@ -523,7 +698,7 @@
   <div class="modal" id="deadlinesModal" aria-hidden="true">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="deadlinesModalTitle">
       <div class="modal-header">
-        <h3 id="deadlinesModalTitle">Upcoming Deadlines</h3>
+        <h3 id="deadlinesModalTitle">Deadlines Ending Within 48 Hours</h3>
         <button class="modal-close" onclick="closeModal('deadlinesModal')" aria-label="Close deadlines">×</button>
       </div>
       <div class="modal-body">
@@ -535,22 +710,26 @@
   <script>
     const SHEET_ID = '1YJqISqU7KNN3mv-Vs1x6iTBfsNFcckOT1a_9ENnFmAA';
     const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+    const COURSE_DATA = [{"courseNumber": "AIMLCZG557", "course": "Artificial and Computational Intelligence (Core)", "ec2Regular": "21-06-2026 (AN)", "ec2MakeUp": "28-06-2026 (AN)", "ec3Regular": "06-09-2026 (AN)", "ec3MakeUp": "13-09-2026 (AN)"}, {"courseNumber": "AIMLCZG512", "course": "Deep Reinforcement Learning (Core)", "ec2Regular": "21-06-2026 (FN)", "ec2MakeUp": "28-06-2026 (FN)", "ec3Regular": "06-09-2026 (FN)", "ec3MakeUp": "13-09-2026 (FN)"}, {"courseNumber": "AIML ZG540", "course": "Video Analysis", "ec2Regular": "21-06-2026 (EN)", "ec2MakeUp": "28-06-2026 (EN)", "ec3Regular": "06-09-2026 (EN)", "ec3MakeUp": "13-09-2026 (EN)"}, {"courseNumber": "AIMLCZG533", "course": "Unsupervised Deep learning", "ec2Regular": "21-06-2026 (EN)", "ec2MakeUp": "28-06-2026 (EN)", "ec3Regular": "06-09-2026 (EN)", "ec3MakeUp": "13-09-2026 (EN)"}, {"courseNumber": "AIMLCZG530", "course": "Natural Language Processing", "ec2Regular": "20-06-2026 (FN)", "ec2MakeUp": "27-06-2026 (FN)", "ec3Regular": "05-09-2026 (FN)", "ec3MakeUp": "12-09-2026 (FN)"}, {"courseNumber": "AIMLCZG567", "course": "AI and ML Techniques for Cyber Security", "ec2Regular": "20-06-2026 (AN)", "ec2MakeUp": "27-06-2026 (AN)", "ec3Regular": "05-09-2026 (AN)", "ec3MakeUp": "12-09-2026 (AN)"}, {"courseNumber": "AIMLCZG525", "course": "Computer Vision", "ec2Regular": "20-06-2026 (AN)", "ec2MakeUp": "27-06-2026 (AN)", "ec3Regular": "05-09-2026 (AN)", "ec3MakeUp": "12-09-2026 (AN)"}, {"courseNumber": "AIMLCZG546", "course": "Software Engineering for Machine Learning", "ec2Regular": "20-06-2026 (AN)", "ec2MakeUp": "27-06-2026 (AN)", "ec3Regular": "05-09-2026 (AN)", "ec3MakeUp": "12-09-2026 (AN)"}, {"courseNumber": "AIMLCZG537", "course": "Information Retrieval", "ec2Regular": "20-06-2026 (EN)", "ec2MakeUp": "27-06-2026 (EN)", "ec3Regular": "05-09-2026 (EN)", "ec3MakeUp": "12-09-2026 (EN)"}, {"courseNumber": "AIMLCZG529", "course": "Data Management for Machine Learning", "ec2Regular": "20-06-2026 (EN)", "ec2MakeUp": "27-06-2026 (EN)", "ec3Regular": "05-09-2026 (EN)", "ec3MakeUp": "12-09-2026 (EN)"}, {"courseNumber": "AIMLCZG515", "course": "Distributed Machine Learning", "ec2Regular": "20-06-2026 (EN)", "ec2MakeUp": "27-06-2026 (EN)", "ec3Regular": "05-09-2026 (EN)", "ec3MakeUp": "12-09-2026 (EN)"}];
 
     function showTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById(tabId).classList.remove('hidden');
+      const tab = document.getElementById(tabId);
+      if (tab) tab.classList.remove('hidden');
       document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
       btn.classList.add('active');
     }
 
     function openModal(id) {
       const modal = document.getElementById(id);
+      if (!modal) return;
       modal.classList.add('show');
       modal.setAttribute('aria-hidden', 'false');
     }
 
     function closeModal(id) {
       const modal = document.getElementById(id);
+      if (!modal) return;
       modal.classList.remove('show');
       modal.setAttribute('aria-hidden', 'true');
     }
@@ -561,6 +740,34 @@
     document.getElementById('deadlinesModal').addEventListener('click', (e) => {
       if (e.target.id === 'deadlinesModal') closeModal('deadlinesModal');
     });
+
+    function renderCourseSchedule() {
+      const grid = document.getElementById('ecScheduleGrid');
+      grid.innerHTML = COURSE_DATA.map(item => `
+        <article class="schedule-card">
+          <div class="course-code">${item.courseNumber}</div>
+          <div class="course-name">${item.course}</div>
+          <div class="exam-pair">
+            <div class="exam-box">
+              <span class="exam-label">EC2 Regular</span>
+              <span class="exam-value">${item.ec2Regular}</span>
+            </div>
+            <div class="exam-box">
+              <span class="exam-label">EC2 Make-up</span>
+              <span class="exam-value">${item.ec2MakeUp}</span>
+            </div>
+            <div class="exam-box">
+              <span class="exam-label">EC3 Regular</span>
+              <span class="exam-value">${item.ec3Regular}</span>
+            </div>
+            <div class="exam-box">
+              <span class="exam-label">EC3 Make-up</span>
+              <span class="exam-value">${item.ec3MakeUp}</span>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
 
     function parseCSV(text) {
       const rows = [];
@@ -628,53 +835,31 @@
       dec: 11, december: 11
     };
 
-    
-function parseFlexibleDate(value) {
-      if (!value) return null;
-
-      let raw = String(value).trim();
-      if (!raw || raw === '-') return null;
-
-      raw = raw.replace(/\([^)]*\)/g, '');
-      raw = raw.replace(/\bIST\b/gi, '');
-      raw = raw.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
-      raw = raw.replace(/\s+/g, ' ').trim();
-
-      let parsed = new Date(raw);
-      if (!isNaN(parsed.getTime())) {
-        return parsed;
-      }
-
-      const match = raw.match(
-        /^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})(?:\s+(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i
-      );
-
-      if (match) {
-        const day = Number(match[1]);
-        const monthName = match[2].toLowerCase();
-        const year = Number(match[3]);
-
-        const month = MONTHS[monthName];
-        if (month === undefined) return null;
-
-        let hour = match[4] ? Number(match[4]) : 23;
-        let minute = match[5] ? Number(match[5]) : 59;
-        const ampm = match[6] ? match[6].toUpperCase() : null;
-
-        if (ampm) {
-          if (hour === 12) hour = 0;
-          if (ampm === 'PM') hour += 12;
-        }
-
-        return new Date(year, month, day, hour, minute, 0, 0);
-      }
-
-      return null;
+    function toDateKey(dateObj) {
+      if (!dateObj) return '';
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
     }
 
-function formatDate(dateObj) {
+    function startOfLocalDay(dateObj) {
+      return new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 0, 0, 0, 0);
+    }
+
+    function formatDate(dateObj) {
       return dateObj.toLocaleDateString(undefined, {
         year: 'numeric', month: 'short', day: 'numeric'
+      });
+    }
+
+    function formatDateTime(dateObj) {
+      return dateObj.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
       });
     }
 
@@ -682,26 +867,121 @@ function formatDate(dateObj) {
       return parts.filter(Boolean).join(' • ').replace(/\s+/g, ' ').trim();
     }
 
-    function isDeadlineRow(row) {
-      const type = String(row.type || row.category || row.section || '').toLowerCase();
-      const event = String(row.event || '').trim();
-      const end = row.endtime || row.deadline || row.duedate || row.end || '';
-      if (type) return type.includes('deadline');
-      return Boolean(event && end);
+    function normalizeText(value) {
+      return String(value || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+    }
+
+    function parseFlexibleDate(value) {
+      if (!value) return null;
+
+      let raw = String(value).trim();
+      if (!raw || raw === '-') return null;
+
+      raw = raw.replace(/\([^)]*\)/g, ' ');
+      raw = raw.replace(/\b(?:IST|GMT|UTC)\b/gi, ' ');
+      raw = raw.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+      raw = raw.replace(/\s+/g, ' ').trim();
+
+      const direct = new Date(raw);
+      if (!Number.isNaN(direct.getTime())) return direct;
+
+      const patterns = [
+        /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
+        /^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
+        /^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
+        /^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i
+      ];
+
+      const buildDate = (year, monthIdx, day, hour, minute, ampm) => {
+        if (monthIdx === undefined || monthIdx === null || Number.isNaN(monthIdx)) return null;
+        if (Number.isNaN(year) || Number.isNaN(day)) return null;
+
+        let h = hour === undefined || hour === null || hour === '' ? 23 : Number(hour);
+        let m = minute === undefined || minute === null || minute === '' ? 59 : Number(minute);
+        if (Number.isNaN(h)) h = 23;
+        if (Number.isNaN(m)) m = 59;
+
+        const suffix = ampm ? String(ampm).toUpperCase() : null;
+        if (suffix) {
+          if (h === 12) h = 0;
+          if (suffix === 'PM') h += 12;
+        }
+        return new Date(Number(year), Number(monthIdx), Number(day), h, m, 0, 0);
+      };
+
+      for (const pattern of patterns) {
+        const m = raw.match(pattern);
+        if (!m) continue;
+
+        if (pattern === patterns[0]) {
+          const year = Number(m[1]);
+          const month = Number(m[2]) - 1;
+          const day = Number(m[3]);
+          return buildDate(year, month, day, m[4], m[5], m[6]);
+        }
+
+        if (pattern === patterns[1]) {
+          const day = Number(m[1]);
+          const month = Number(m[2]) - 1;
+          const year = Number(m[3]);
+          return buildDate(year, month, day, m[4], m[5], m[6]);
+        }
+
+        if (pattern === patterns[2]) {
+          const day = Number(m[1]);
+          const monthName = m[2].toLowerCase();
+          const year = Number(m[3]);
+          return buildDate(year, MONTHS[monthName], day, m[4], m[5], m[6]);
+        }
+
+        if (pattern === patterns[3]) {
+          const monthName = m[1].toLowerCase();
+          const day = Number(m[2]);
+          const year = Number(m[3]);
+          return buildDate(year, MONTHS[monthName], day, m[4], m[5], m[6]);
+        }
+      }
+
+      return null;
     }
 
     function isAnnouncementRow(row) {
-      const type = String(row.type || row.category || row.section || '').toLowerCase();
-      if (type) return type.includes('announcement');
-      return false;
+      const type = normalizeText(row.type || row.category || row.section || '');
+      const event = normalizeText(row.event || row.title || row.name || '');
+      return type.includes('announcement') || event.includes('announcement');
+    }
+
+    function isWebinarRow(row) {
+      const type = normalizeText(row.type || row.category || row.section || '');
+      const event = normalizeText(row.event || row.title || row.name || '');
+      return type.includes('webinar') || event.includes('webinar');
+    }
+
+    function isDeadlineRow(row) {
+      const type = normalizeText(row.type || row.category || row.section || '');
+      const event = normalizeText(row.event || row.title || row.name || '');
+      if (type.includes('announcement') || event.includes('announcement')) return false;
+      if (type.includes('webinar') || event.includes('webinar')) return false;
+      if (type.includes('deadline')) return true;
+      return Boolean(row.endObj);
     }
 
     function renderAnnouncements(items) {
-      const source = items.length ? items : [{ subject: 'Info', event: 'No announcements yet', moredetails: 'Add rows with Type = Announcement in the Google Sheet.' }];
       const track = document.getElementById('announcementTrack');
       track.innerHTML = '';
 
-      source.forEach(item => {
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = 'No announcements at the moment.';
+        track.appendChild(empty);
+        return;
+      }
+
+      items.forEach(item => {
         const row = document.createElement('div');
         row.className = 'announcement-item';
 
@@ -717,19 +997,18 @@ function formatDate(dateObj) {
         track.appendChild(row);
       });
 
-      if (source.length > 1) {
+      if (items.length > 1) {
         let index = 0;
         const itemHeight = 42;
         const visibleCount = 2.5;
-        const step = 1;
-        const maxOffset = Math.max(0, source.length - visibleCount);
+        const maxOffset = Math.max(0, items.length - visibleCount);
         const viewport = document.querySelector('.announcement-viewport');
-        viewport.style.height = `${Math.round(visibleCount * itemHeight)}px`;
+        viewport.style.minHeight = `${Math.round(visibleCount * itemHeight)}px`;
 
         const rotate = () => {
           const offset = Math.min(index, maxOffset) * itemHeight;
           track.style.transform = `translateY(-${offset}px)`;
-          index = (index + step);
+          index += 1;
           if (index > maxOffset) index = 0;
         };
 
@@ -765,7 +1044,7 @@ function formatDate(dateObj) {
 
         const meta1 = document.createElement('div');
         meta1.className = 'deadline-meta';
-        meta1.textContent = `Due: ${formatDate(item.dateObj)}`;
+        meta1.textContent = `Due: ${formatDateTime(item.endObj)}`;
 
         const meta2 = document.createElement('div');
         meta2.className = 'deadline-meta';
@@ -773,9 +1052,48 @@ function formatDate(dateObj) {
 
         const pill = document.createElement('div');
         pill.className = 'deadline-pill';
-        pill.textContent = item.dateObj.getTime() - Date.now() <= 0 ? 'Due today' : `${Math.ceil((item.dateObj.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left`;
+        const diffMs = item.endObj.getTime() - Date.now();
+        const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+        pill.textContent = diffMs <= 0 ? 'Due now' : `${diffHours} hours left`;
 
         card.append(title, meta1, meta2, pill);
+        grid.appendChild(card);
+      });
+    }
+
+    function renderWebinars(items) {
+      const grid = document.getElementById('webinarGrid');
+      grid.innerHTML = '';
+
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = 'No webinar entries found.';
+        grid.appendChild(empty);
+        return;
+      }
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'webinar-card';
+
+        const title = document.createElement('h3');
+        title.className = 'webinar-title';
+        title.textContent = `${item.subject ? item.subject + ' — ' : ''}${item.event || 'Webinar'}`;
+
+        const meta1 = document.createElement('div');
+        meta1.className = 'webinar-meta';
+        meta1.textContent = item.startObj ? `Starts: ${formatDateTime(item.startObj)}` : 'Starts: Not available';
+
+        const meta2 = document.createElement('div');
+        meta2.className = 'webinar-meta';
+        meta2.textContent = item.endObj ? `Ends: ${formatDateTime(item.endObj)}` : 'Ends: Not available';
+
+        const meta3 = document.createElement('div');
+        meta3.className = 'webinar-meta';
+        meta3.textContent = item.moredetails || 'No extra details provided.';
+
+        card.append(title, meta1, meta2, meta3);
         grid.appendChild(card);
       });
     }
@@ -787,7 +1105,7 @@ function formatDate(dateObj) {
       if (!items.length) {
         const empty = document.createElement('div');
         empty.className = 'modal-item';
-        empty.innerHTML = `<strong>No ${kind.toLowerCase()} yet</strong><div class="small">Add matching rows in the Google Sheet to populate this box.</div>`;
+        empty.innerHTML = `<strong>No ${kind.toLowerCase()} yet</strong><div class="small">Nothing to show right now.</div>`;
         list.appendChild(empty);
         return;
       }
@@ -795,20 +1113,45 @@ function formatDate(dateObj) {
       items.forEach(item => {
         const box = document.createElement('div');
         box.className = 'modal-item';
-        const title = `${item.subject ? item.subject + ' — ' : ''}${item.event}`;
+        const title = `${item.subject ? item.subject + ' — ' : ''}${item.event || item.title || 'Item'}`;
         const body = item.moredetails ? `<div class="small">${item.moredetails}</div>` : '';
-        const dateLine = kind === 'Deadline' && item.dateObj ? `<div class="small"><strong>Due:</strong> ${formatDate(item.dateObj)}</div>` : '';
-        box.innerHTML = `<strong>${title}</strong>${dateLine}${body}`;
+        const deadlineLine = kind === 'Deadline' && item.endObj ? `<div class="small"><strong>Due:</strong> ${formatDateTime(item.endObj)}</div>` : '';
+        const webinarLines = kind === 'Webinar'
+          ? `${item.startObj ? `<div class="small"><strong>Starts:</strong> ${formatDateTime(item.startObj)}</div>` : ''}${item.endObj ? `<div class="small"><strong>Ends:</strong> ${formatDateTime(item.endObj)}</div>` : ''}`
+          : '';
+        box.innerHTML = `<strong>${title}</strong>${deadlineLine}${webinarLines}${body}`;
         list.appendChild(box);
       });
     }
 
-    async function loadGoogleSheet() {
-      const fallbackAnnouncements = [
-        { subject: 'Info', event: 'Welcome to the BITS M. Tech. AIML Oct. 2025 batch hub', moredetails: 'Add rows with Type = Announcement in the Google Sheet.' },
-        { subject: 'Info', event: 'Announcements and deadlines are read separately now', moredetails: 'Use Type = Deadline for deadlines.' }
-      ];
+    function getUpcomingDeadlines(deadlineRows) {
+      const now = Date.now();
+      const active = deadlineRows
+        .filter(item => item.endObj && item.endObj.getTime() >= now)
+        .sort((a, b) => a.endObj - b.endObj);
 
+      const buckets = new Map();
+
+      for (const item of active) {
+        const subject = (item.subject || 'General').trim() || 'General';
+        const dayKey = toDateKey(item.endObj);
+        if (!buckets.has(subject)) buckets.set(subject, []);
+        buckets.get(subject).push({ ...item, dayKey });
+      }
+
+      const selected = [];
+
+      for (const [subject, items] of buckets.entries()) {
+        items.sort((a, b) => a.endObj - b.endObj);
+        const earliestDay = items[0].dayKey;
+        selected.push(...items.filter(item => item.dayKey === earliestDay));
+      }
+
+      selected.sort((a, b) => a.endObj - b.endObj);
+      return selected;
+    }
+
+    async function loadGoogleSheet() {
       try {
         const response = await fetch(SHEET_URL, { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -819,44 +1162,54 @@ function formatDate(dateObj) {
         const headers = rows[0];
         const objects = rows.slice(1).map(row => rowToObject(headers, row));
 
-        const now = new Date();
-        const currentDayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-
         const normalized = objects.map(row => {
           const subject = row.subject || '';
           const event = row.event || row.title || row.name || '';
           const moredetails = row.moredetails || row.details || row.description || row.message || '';
+          const startRaw = row.starttime || row.start || row.begins || '';
           const endRaw = row.endtime || row.deadline || row.duedate || row.end || '';
-          const dateObj = parseFlexibleDate(endRaw);
+          const startObj = parseFlexibleDate(startRaw);
+          const endObj = parseFlexibleDate(endRaw);
           const type = String(row.type || row.category || row.section || '').trim().toLowerCase();
-          return { ...row, subject, event, moredetails, endRaw, dateObj, type };
+          return { ...row, subject, event, moredetails, startRaw, endRaw, startObj, endObj, type };
         });
 
-        const deadlines = normalized
-          .filter(item => item.dateObj && item.dateObj >= currentDayStart && isDeadlineRow(item))
-          .sort((a, b) => a.dateObj - b.dateObj);
+        const announcements = normalized.filter(isAnnouncementRow);
+        const webinarRows = normalized.filter(isWebinarRow);
+        const deadlineRows = normalized.filter(isDeadlineRow);
 
-        const announcements = normalized.filter(item => isAnnouncementRow(item));
+        const upcomingDeadlines = getUpcomingDeadlines(deadlineRows);
 
-        renderDeadlines(deadlines);
-        renderAnnouncements(announcements.length ? announcements : fallbackAnnouncements);
-        fillModalList('announcementsModalList', announcements.length ? announcements : fallbackAnnouncements, 'Announcement');
-        fillModalList('deadlinesModalList', deadlines, 'Deadline');
+        const fortyEightHoursMs = 48 * 60 * 60 * 1000;
+        const nowMs = Date.now();
+        const nearTermDeadlines = deadlineRows
+          .filter(item => item.endObj && item.endObj.getTime() >= nowMs && item.endObj.getTime() <= nowMs + fortyEightHoursMs)
+          .sort((a, b) => a.endObj - b.endObj);
 
-        openModal('announcementsModal');
-        openModal('deadlinesModal');
+        renderAnnouncements(announcements);
+        renderDeadlines(upcomingDeadlines);
+        renderWebinars(webinarRows);
+
+        fillModalList('announcementsModalList', announcements, 'Announcement');
+        fillModalList('deadlinesModalList', nearTermDeadlines, 'Deadline');
+
+        if (nearTermDeadlines.length) {
+          openModal('deadlinesModal');
+        } else if (announcements.length) {
+          openModal('announcementsModal');
+        }
       } catch (error) {
         console.error('Google Sheet load failed:', error);
         document.getElementById('deadlineStatus').textContent = 'Could not load the sheet right now. Check that it is published or publicly accessible.';
-        renderAnnouncements(fallbackAnnouncements);
+        renderAnnouncements([]);
         renderDeadlines([]);
-        fillModalList('announcementsModalList', fallbackAnnouncements, 'Announcement');
+        renderWebinars([]);
+        fillModalList('announcementsModalList', [], 'Announcement');
         fillModalList('deadlinesModalList', [], 'Deadline');
-        openModal('announcementsModal');
-        openModal('deadlinesModal');
       }
     }
 
+    renderCourseSchedule();
     loadGoogleSheet();
   </script>
 </body>
