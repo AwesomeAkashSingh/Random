@@ -759,8 +759,7 @@
       if (e.target.id === 'deadlinesModal') closeModal('deadlinesModal');
     });
 
-    
-function renderCourseSchedule() {
+ function renderCourseSchedule() {
   const map = {
     'Artificial and Computational Intelligence (Core)':'ACI',
     'Deep Reinforcement Learning (Core)':'DRL',
@@ -829,6 +828,384 @@ function renderCourseSchedule() {
       <tbody>${rows}</tbody>
     </table>`;
 }
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let field = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"' && inQuotes && next === '"') {
+          field += '"';
+          i++;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          row.push(field);
+          field = '';
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (char === '\r' && next === '\n') continue;
+          row.push(field);
+          if (row.some(cell => cell.trim() !== '')) rows.push(row);
+          row = [];
+          field = '';
+        } else {
+          field += char;
+        }
+      }
+
+      if (field.length || row.length) {
+        row.push(field);
+        if (row.some(cell => cell.trim() !== '')) rows.push(row);
+      }
+      return rows;
+    }
+
+    function normalizeHeader(h) {
+      return String(h || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '');
+    }
+
+    function rowToObject(headers, row) {
+      const obj = {};
+      headers.forEach((header, index) => {
+        obj[normalizeHeader(header)] = (row[index] || '').trim();
+      });
+      return obj;
+    }
+
+    const MONTHS = {
+      jan: 0, january: 0,
+      feb: 1, february: 1,
+      mar: 2, march: 2,
+      apr: 3, april: 3,
+      may: 4,
+      jun: 5, june: 5,
+      jul: 6, july: 6,
+      aug: 7, august: 7,
+      sep: 8, sept: 8, september: 8,
+      oct: 9, october: 9,
+      nov: 10, november: 10,
+      dec: 11, december: 11
+    };
+
+    function toDateKey(dateObj) {
+      if (!dateObj) return '';
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function startOfLocalDay(dateObj) {
+      return new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(), 0, 0, 0, 0);
+    }
+
+    function formatDate(dateObj) {
+      return dateObj.toLocaleDateString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric'
+      });
+    }
+
+    function formatDateTime(dateObj) {
+      return dateObj.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    function cleanText(...parts) {
+      return parts.filter(Boolean).join(' • ').replace(/\s+/g, ' ').trim();
+    }
+
+    function normalizeText(value) {
+      return String(value || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+    }
+
+    function parseFlexibleDate(value) {
+      if (!value) return null;
+
+      let raw = String(value).trim();
+      if (!raw || raw === '-') return null;
+
+      raw = raw.replace(/\([^)]*\)/g, ' ');
+      raw = raw.replace(/\b(?:IST|GMT|UTC)\b/gi, ' ');
+      raw = raw.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+      raw = raw.replace(/\s+/g, ' ').trim();
+
+      const direct = new Date(raw);
+      if (!Number.isNaN(direct.getTime())) return direct;
+
+      const patterns = [
+        /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
+        /^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
+        /^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
+        /^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i
+      ];
+
+      const buildDate = (year, monthIdx, day, hour, minute, ampm) => {
+        if (monthIdx === undefined || monthIdx === null || Number.isNaN(monthIdx)) return null;
+        if (Number.isNaN(year) || Number.isNaN(day)) return null;
+
+        let h = hour === undefined || hour === null || hour === '' ? 23 : Number(hour);
+        let m = minute === undefined || minute === null || minute === '' ? 59 : Number(minute);
+        if (Number.isNaN(h)) h = 23;
+        if (Number.isNaN(m)) m = 59;
+
+        const suffix = ampm ? String(ampm).toUpperCase() : null;
+        if (suffix) {
+          if (h === 12) h = 0;
+          if (suffix === 'PM') h += 12;
+        }
+        return new Date(Number(year), Number(monthIdx), Number(day), h, m, 0, 0);
+      };
+
+      for (const pattern of patterns) {
+        const m = raw.match(pattern);
+        if (!m) continue;
+
+        if (pattern === patterns[0]) {
+          const year = Number(m[1]);
+          const month = Number(m[2]) - 1;
+          const day = Number(m[3]);
+          return buildDate(year, month, day, m[4], m[5], m[6]);
+        }
+
+        if (pattern === patterns[1]) {
+          const day = Number(m[1]);
+          const month = Number(m[2]) - 1;
+          const year = Number(m[3]);
+          return buildDate(year, month, day, m[4], m[5], m[6]);
+        }
+
+        if (pattern === patterns[2]) {
+          const day = Number(m[1]);
+          const monthName = m[2].toLowerCase();
+          const year = Number(m[3]);
+          return buildDate(year, MONTHS[monthName], day, m[4], m[5], m[6]);
+        }
+
+        if (pattern === patterns[3]) {
+          const monthName = m[1].toLowerCase();
+          const day = Number(m[2]);
+          const year = Number(m[3]);
+          return buildDate(year, MONTHS[monthName], day, m[4], m[5], m[6]);
+        }
+      }
+
+      return null;
+    }
+
+    function isAnnouncementRow(row) {
+      const type = normalizeText(row.type || row.category || row.section || '');
+      const event = normalizeText(row.event || row.title || row.name || '');
+      return type.includes('announcement') || event.includes('announcement');
+    }
+
+    function isWebinarRow(row) {
+      const type = normalizeText(row.type || row.category || row.section || '');
+      const event = normalizeText(row.event || row.title || row.name || '');
+      return type.includes('webinar') || event.includes('webinar');
+    }
+
+    function isDeadlineRow(row) {
+      const type = normalizeText(row.type || row.category || row.section || '');
+      const event = normalizeText(row.event || row.title || row.name || '');
+      if (type.includes('announcement') || event.includes('announcement')) return false;
+      if (type.includes('webinar') || event.includes('webinar')) return false;
+      if (type.includes('deadline')) return true;
+      return Boolean(row.endObj);
+    }
+
+    function renderAnnouncements(items) {
+      const track = document.getElementById('announcementTrack');
+      track.innerHTML = '';
+
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = 'No announcements at the moment.';
+        track.appendChild(empty);
+        return;
+      }
+
+      items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'announcement-item';
+
+        const pill = document.createElement('span');
+        pill.className = 'announcement-pill';
+        pill.textContent = item.subject || 'Info';
+
+        const text = document.createElement('span');
+        text.className = 'announcement-text';
+        text.textContent = cleanText(item.event, item.moredetails);
+
+        row.append(pill, text);
+        track.appendChild(row);
+      });
+
+      if (items.length > 1) {
+        let index = 0;
+        const itemHeight = 42;
+        const visibleCount = 2.5;
+        const maxOffset = Math.max(0, items.length - visibleCount);
+        const viewport = document.querySelector('.announcement-viewport');
+        viewport.style.minHeight = `${Math.round(visibleCount * itemHeight)}px`;
+
+        const rotate = () => {
+          const offset = Math.min(index, maxOffset) * itemHeight;
+          track.style.transform = `translateY(-${offset}px)`;
+          index += 1;
+          if (index > maxOffset) index = 0;
+        };
+
+        rotate();
+        clearInterval(window.__announcementInterval);
+        window.__announcementInterval = setInterval(rotate, 8000);
+      } else {
+        track.style.transform = 'translateY(0)';
+        clearInterval(window.__announcementInterval);
+      }
+    }
+
+    function renderDeadlines(items) {
+      const grid = document.getElementById('topDeadlinesGrid');
+      const status = document.getElementById('deadlineStatus');
+      grid.innerHTML = '';
+
+      if (!items.length) {
+        status.textContent = 'No upcoming deadlines found in the Google Sheet.';
+        return;
+      }
+
+      status.textContent = `${items.length} upcoming deadline${items.length === 1 ? '' : 's'} loaded.`;
+
+      items.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'deadline-card';
+        if (index < 3) card.classList.add('top');
+
+        const title = document.createElement('h3');
+        title.className = 'deadline-title';
+        title.textContent = `${item.subject ? item.subject + ' — ' : ''}${item.event}`;
+
+        const meta1 = document.createElement('div');
+        meta1.className = 'deadline-meta';
+        meta1.textContent = `Due: ${formatDateTime(item.endObj)}`;
+
+        card.append(title, meta1);
+        if (item.moredetails) {
+          const meta2 = document.createElement('div');
+          meta2.className = 'deadline-meta';
+          meta2.textContent = item.moredetails;
+          card.appendChild(meta2);
+        }
+
+        grid.appendChild(card);
+      });
+    }
+
+    function renderWebinars(items) {
+      const grid = document.getElementById('webinarGrid');
+      grid.innerHTML = '';
+
+      if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = 'No webinars are scheduled in the next 3 days.';
+        grid.appendChild(empty);
+        return;
+      }
+
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'webinar-card';
+
+        const title = document.createElement('h3');
+        title.className = 'webinar-title';
+        title.textContent = `${item.subject ? item.subject + ' — ' : ''}${item.event || 'Webinar'}`;
+
+        const meta1 = document.createElement('div');
+        meta1.className = 'webinar-meta';
+        meta1.textContent = item.startObj ? `Starts: ${formatDateTime(item.startObj)}` : '';
+
+        const meta2 = document.createElement('div');
+        meta2.className = 'webinar-meta';
+        meta2.textContent = item.endObj ? `Ends: ${formatDateTime(item.endObj)}` : '';
+
+        card.append(title);
+        if (meta1.textContent) card.appendChild(meta1);
+        if (meta2.textContent) card.appendChild(meta2);
+        if (item.moredetails) {
+          const meta3 = document.createElement('div');
+          meta3.className = 'webinar-meta';
+          meta3.textContent = item.moredetails;
+          card.appendChild(meta3);
+        }
+
+        grid.appendChild(card);
+      });
+    }
+
+    function fillModalList(elementId, items, kind) {
+      const list = document.getElementById(elementId);
+      list.innerHTML = '';
+
+      if (!items.length) {
+        return;
+      }
+
+      items.forEach(item => {
+        const box = document.createElement('div');
+        box.className = 'modal-item';
+        const title = `${item.subject ? item.subject + ' — ' : ''}${item.event || item.title || 'Item'}`;
+        const body = item.moredetails ? `<div class="small">${item.moredetails}</div>` : '';
+        const deadlineLine = kind === 'Deadline' && item.endObj ? `<div class="small"><strong>Due:</strong> ${formatDateTime(item.endObj)}</div>` : '';
+        const webinarLines = kind === 'Webinar'
+          ? `${item.startObj ? `<div class="small"><strong>Starts:</strong> ${formatDateTime(item.startObj)}</div>` : ''}${item.endObj ? `<div class="small"><strong>Ends:</strong> ${formatDateTime(item.endObj)}</div>` : ''}`
+          : '';
+        box.innerHTML = `<strong>${title}</strong>${deadlineLine}${webinarLines}${body}`;
+        list.appendChild(box);
+      });
+    }
+
+    function getUpcomingDeadlines(deadlineRows) {
+      const now = Date.now();
+      const active = deadlineRows
+        .filter(item => item.endObj && item.endObj.getTime() >= now)
+        .sort((a, b) => a.endObj - b.endObj);
+
+      const buckets = new Map();
+
+      for (const item of active) {
+        const subject = (item.subject || 'General').trim() || 'General';
+        const dayKey = toDateKey(item.endObj);
+        if (!buckets.has(subject)) buckets.set(subject, []);
+        buckets.get(subject).push({ ...item, dayKey });
+      }
+
+      const selected = [];
+      for (const items of buckets.values()) {
+        items.sort((a, b) => a.endObj - b.endObj);
+        const earliestDay = items[0].dayKey;
+        selected.push(...items.filter(item => item.dayKey === earliestDay));
+      }
+
+      selected.sort((a, b) => a.endObj - b.endObj);
+      return selected;
+    }
 
     async function loadGoogleSheet() {
       try {
