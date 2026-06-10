@@ -758,40 +758,30 @@
     });
 
     
-
-function formatExamSlot(value, examType) {
-  const slotMap = {
-    FN: examType === 'EC2' ? '9:00 AM–11:00 AM' : '9:00 AM–11:30 AM',
-    AN: examType === 'EC2' ? '1:00 PM–3:00 PM' : '1:00 PM–3:30 PM',
-    EN: examType === 'EC2' ? '4:30 PM–6:30 PM' : '4:30 PM–7:00 PM'
+function renderCourseSchedule() {
+  const map = {
+    'Artificial and Computational Intelligence (Core)':'ACI',
+    'Deep Reinforcement Learning (Core)':'DRL',
+    'Video Analysis':'VA',
+    'Unsupervised Deep learning':'UDL',
+    'Natural Language Processing':'NLP',
+    'AI and ML Techniques for Cyber Security':'Cyber',
+    'Computer Vision':'CV',
+    'Software Engineering for Machine Learning':'SEML',
+    'Information Retrieval':'IR',
+    'Data Management for Machine Learning':'DMML',
+    'Distributed Machine Learning':'DML'
   };
 
-  const match = String(value).match(/(.*)\((FN|AN|EN)\)/);
-  if (!match) return value;
-
-  let datePart = match[1].trim();
-  datePart = datePart
-    .replace('20-06-2026','20 Jun')
-    .replace('21-06-2026','21 Jun')
-    .replace('27-06-2026','27 Jun')
-    .replace('28-06-2026','28 Jun')
-    .replace('05-09-2026','05 Sep')
-    .replace('06-09-2026','06 Sep')
-    .replace('12-09-2026','12 Sep')
-    .replace('13-09-2026','13 Sep');
-
-  return `${datePart}<br><small>${slotMap[match[2]]}</small>`;
-}
-
-function renderCourseSchedule() {
+  const shortDate = (v) => v.replace('-2026','').replace('-06',' Jun').replace('-09',' Sep');
 
   const rows = COURSE_DATA.map(c => `
     <tr>
       <td>${map[c.course] || c.course}</td>
-      <td>${formatExamSlot(c.ec2Regular,'EC2')}</td>
-      <td>${formatExamSlot(c.ec2MakeUp,'EC2')}</td>
-      <td>${formatExamSlot(c.ec3Regular,'EC3')}</td>
-      <td>${formatExamSlot(c.ec3MakeUp,'EC3')}</td>
+      <td>${shortDate(c.ec2Regular)}</td>
+      <td>${shortDate(c.ec2MakeUp)}</td>
+      <td>${shortDate(c.ec3Regular)}</td>
+      <td>${shortDate(c.ec3MakeUp)}</td>
     </tr>
   `).join('');
 
