@@ -579,7 +579,13 @@
       .webinar-grid,
       .schedule-grid { grid-template-columns: 1fr; }
     }
-  </style>
+  
+.ec-table{width:100%;border-collapse:collapse;font-size:0.9rem}
+.ec-table th,.ec-table td{border:1px solid #dbe8ff;padding:8px;text-align:center}
+.ec-table th{background:#eef5ff}
+.ec-table td:first-child,.ec-table th:first-child{text-align:left;font-weight:bold}
+
+</style>
 </head>
 <body>
   <header>
@@ -600,7 +606,7 @@
       <div class="section-header-line">
         <h2>🗓️ EC2 / EC3 Schedule</h2>
               </div>
-            <div class="schedule-grid" id="ecScheduleGrid"></div>
+            <div id="ecScheduleGrid"></div>
     </div>
 
     <div class="tabs-wrap">
@@ -670,23 +676,16 @@
         </div>
       </div>
 
-      <div class="section">
-        <h2>📚 Sem 2 Subject Abbreviations</h2>
-        <ul>
-          <li><strong>ACI</strong> - Artificial and Computational Intelligence</li>
-          <li><strong>DRL</strong> - Deep Reinforcement Learning</li>
-          <li><strong>CV</strong> - Computer Vision</li>
-          <li><strong>UDL</strong> - Unsupervised Deep Learning</li>
-          <li><strong>NLP</strong> - Natural Language Processing</li>
-          <li><strong>IR</strong> - Information Retrieval</li>
-          <li><strong>SEML</strong> - Software Engineering for Machine Learning</li>
-          <li><strong>AI &amp; ML Techniques for Cybersecurity</strong></li>
-          <li><strong>DML</strong> - Distributed Machine Learning</li>
-          <li><strong>DM4ML</strong> - Data Management for Machine Learning</li>
-          <li><strong>PGM</strong> - Probabilistic Graphical Models</li>
-        </ul>
-      </div>
-    </div>
+      
+<div class="section">
+  <h2>📚 Sem 2 Subject Abbreviations</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
+    <div class="abbr-line">• <strong>ACI</strong> – Artificial & Computational Intelligence<br>• <strong>DRL</strong> – Deep Reinforcement Learning<br>• <strong>VA</strong> – Video Analysis<br>• <strong>UDL</strong> – Unsupervised Deep Learning</div>
+    <div class="abbr-line">• <strong>Cyber</strong> – AI & ML for Cyber Security<br>• <strong>CV</strong> – Computer Vision<br>• <strong>SEML</strong> – Software Engineering for ML<br>• <strong>NLP</strong> – Natural Language Processing</div>
+    <div class="abbr-line">• <strong>IR</strong> – Information Retrieval<br>• <strong>DMML</strong> – Data Management for ML<br>• <strong>DML</strong> – Distributed Machine Learning<br>• <strong>PGM</strong> – Probabilistic Graphical Models</div>
+  </div>
+</div>
+
 
     <div id="sem1" class="tab-content hidden">
       <div class="section">
@@ -758,33 +757,59 @@
       if (e.target.id === 'deadlinesModal') closeModal('deadlinesModal');
     });
 
-    function renderCourseSchedule() {
-      const grid = document.getElementById('ecScheduleGrid');
-      grid.innerHTML = COURSE_DATA.map(item => `
-        <article class="schedule-card">
-          <div class="course-code">${item.courseNumber}</div>
-          <div class="course-name">${item.course}</div>
-          <div class="exam-pair">
-            <div class="exam-box">
-              <span class="exam-label">EC2 Regular</span>
-              <span class="exam-value">${item.ec2Regular}</span>
-            </div>
-            <div class="exam-box">
-              <span class="exam-label">EC2 Make-up</span>
-              <span class="exam-value">${item.ec2MakeUp}</span>
-            </div>
-            <div class="exam-box">
-              <span class="exam-label">EC3 Regular</span>
-              <span class="exam-value">${item.ec3Regular}</span>
-            </div>
-            <div class="exam-box">
-              <span class="exam-label">EC3 Make-up</span>
-              <span class="exam-value">${item.ec3MakeUp}</span>
-            </div>
-          </div>
-        </article>
-      `).join('');
-    }
+    
+
+function formatExamSlot(value, examType) {
+  const slotMap = {
+    FN: examType === 'EC2' ? '9:00 AM–11:00 AM' : '9:00 AM–11:30 AM',
+    AN: examType === 'EC2' ? '1:00 PM–3:00 PM' : '1:00 PM–3:30 PM',
+    EN: examType === 'EC2' ? '4:30 PM–6:30 PM' : '4:30 PM–7:00 PM'
+  };
+
+  const match = String(value).match(/(.*)\((FN|AN|EN)\)/);
+  if (!match) return value;
+
+  let datePart = match[1].trim();
+  datePart = datePart
+    .replace('20-06-2026','20 Jun')
+    .replace('21-06-2026','21 Jun')
+    .replace('27-06-2026','27 Jun')
+    .replace('28-06-2026','28 Jun')
+    .replace('05-09-2026','05 Sep')
+    .replace('06-09-2026','06 Sep')
+    .replace('12-09-2026','12 Sep')
+    .replace('13-09-2026','13 Sep');
+
+  return `${datePart}<br><small>${slotMap[match[2]]}</small>`;
+}
+
+function renderCourseSchedule() {
+
+  const rows = COURSE_DATA.map(c => `
+    <tr>
+      <td>${map[c.course] || c.course}</td>
+      <td>${formatExamSlot(c.ec2Regular,'EC2')}</td>
+      <td>${formatExamSlot(c.ec2MakeUp,'EC2')}</td>
+      <td>${formatExamSlot(c.ec3Regular,'EC3')}</td>
+      <td>${formatExamSlot(c.ec3MakeUp,'EC3')}</td>
+    </tr>
+  `).join('');
+
+  document.getElementById('ecScheduleGrid').innerHTML = `
+    <table class="ec-table">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>EC2 Regular</th>
+          <th>EC2 Make-up</th>
+          <th>EC3 Regular</th>
+          <th>EC3 Make-up</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
 
     function parseCSV(text) {
       const rows = [];
@@ -1082,7 +1107,7 @@
       if (!items.length) {
         const empty = document.createElement('div');
         empty.className = 'empty-state';
-        empty.textContent = 'No webinar entries found.';
+        empty.textContent = 'No webinars are scheduled in the next 3 days.';
         grid.appendChild(empty);
         return;
       }
