@@ -135,16 +135,16 @@
 
     .section {
       background: var(--card);
-      padding: 24px;
-      margin-bottom: 22px;
-      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 18px;
+      border-radius: 18px;
       box-shadow: var(--shadow);
     }
 
     .section h2 {
-      margin: 0 0 10px;
+      margin: 0 0 8px;
       color: var(--primary);
-      font-size: 1.85rem;
+      font-size: 1.65rem;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -184,16 +184,16 @@
 
     .schedule-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 16px;
-      margin-top: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
     }
 
     .schedule-card {
       background: linear-gradient(180deg, #f8fbff, #edf4ff);
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 16px;
+      border-radius: 16px;
+      padding: 12px;
       box-shadow: var(--shadow-soft);
       overflow: hidden;
       position: relative;
@@ -216,41 +216,64 @@
     }
 
     .course-name {
-      font-size: 1.08rem;
-      font-weight: 800;
+      font-size: 1.02rem;
+      font-weight: 900;
       color: #1e2d49;
-      margin: 8px 0 12px;
-      line-height: 1.35;
+      margin: 6px 0 10px;
+      line-height: 1.2;
+    }
+
+    .course-code {
+      font-size: 0.82rem;
+      color: #5a7192;
+      font-weight: bold;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .abbr-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .abbr-line {
+      background: #f7fbff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      line-height: 1.45;
+      font-size: 0.95rem;
+      color: #24324a;
     }
 
     .exam-pair {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
     }
 
     .exam-box {
       background: white;
       border: 1px solid #dbe6ff;
-      border-radius: 14px;
-      padding: 10px 11px;
-      min-height: 68px;
+      border-radius: 12px;
+      padding: 8px 9px;
+      min-height: 60px;
     }
 
     .exam-label {
       display: block;
-      font-size: 0.75rem;
+      font-size: 0.70rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       color: #4f6daa;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
     }
 
     .exam-value {
       display: block;
-      font-size: 0.92rem;
-      line-height: 1.3;
+      font-size: 0.85rem;
+      line-height: 1.25;
       color: #22314d;
       font-weight: 700;
     }
@@ -299,7 +322,7 @@
 
     .announcement-viewport {
       position: relative;
-      min-height: 94px;
+      min-height: 82px;
       overflow: hidden;
       border-radius: 14px;
       border: 1px solid #dfe8ff;
@@ -372,17 +395,17 @@
     .deadline-grid,
     .webinar-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 16px;
-      margin-top: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
     }
 
     .deadline-card,
     .webinar-card {
       background: linear-gradient(180deg, #f8fbff, #edf4ff);
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 16px;
+      border-radius: 14px;
+      padding: 12px 13px;
       box-shadow: var(--shadow-soft);
       position: relative;
       overflow: hidden;
@@ -394,28 +417,28 @@
 
     .deadline-title,
     .webinar-title {
-      margin: 0 0 8px;
-      font-size: 1.08rem;
+      margin: 0 0 6px;
+      font-size: 0.98rem;
       color: #20314f;
-      line-height: 1.35;
+      line-height: 1.25;
     }
 
     .deadline-meta,
     .webinar-meta {
       color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.5;
-      margin: 4px 0;
+      font-size: 0.88rem;
+      line-height: 1.35;
+      margin: 2px 0;
     }
 
     .deadline-pill {
       display: inline-block;
-      margin-top: 10px;
-      padding: 6px 10px;
+      margin-top: 8px;
+      padding: 5px 9px;
       border-radius: 999px;
       background: #e8f1ff;
       color: #235db6;
-      font-size: 0.9rem;
+      font-size: 0.82rem;
       font-weight: bold;
     }
 
@@ -576,10 +599,8 @@
     <div class="section" id="ec-schedule-section">
       <div class="section-header-line">
         <h2>🗓️ EC2 / EC3 Schedule</h2>
-        <span class="note">11 courses • EC2 and EC3 dates</span>
-      </div>
-      <p class="subtle">Each box shows the regular and make-up dates for EC2 and EC3. The dates are kept separate so they are easy to read on mobile and desktop.</p>
-      <div class="schedule-grid" id="ecScheduleGrid"></div>
+              </div>
+            <div class="schedule-grid" id="ecScheduleGrid"></div>
     </div>
 
     <div class="tabs-wrap">
@@ -610,20 +631,16 @@
     <div class="section" id="deadlines-card">
       <div class="section-header-line">
         <h2>⏳ Upcoming Deadlines</h2>
-        <span class="note">First upcoming deadline per subject</span>
-      </div>
-      <p class="subtle">This section shows the earliest upcoming deadline for each subject. If more than one deadline falls on the same calendar day, they are kept together. The popup (if triggered) is limited to deadlines ending within the next 48 hours.</p>
-      <div class="loading" id="deadlineStatus">Loading deadlines from Google Sheet…</div>
+              </div>
+            <div class="loading" id="deadlineStatus">Loading deadlines from Google Sheet…</div>
       <div class="deadline-grid" id="topDeadlinesGrid"></div>
     </div>
 
     <div class="section" id="webinar-card">
       <div class="section-header-line">
         <h2>🎓 Webinar</h2>
-        <span class="note">Separate webinar section</span>
-      </div>
-      <p class="subtle">Webinar entries are shown separately below the upcoming deadlines section.</p>
-      <div class="webinar-grid" id="webinarGrid"></div>
+              </div>
+            <div class="webinar-grid" id="webinarGrid"></div>
     </div>
 
     <div id="sem2" class="tab-content">
@@ -1046,17 +1063,14 @@
         meta1.className = 'deadline-meta';
         meta1.textContent = `Due: ${formatDateTime(item.endObj)}`;
 
-        const meta2 = document.createElement('div');
-        meta2.className = 'deadline-meta';
-        meta2.textContent = item.moredetails || 'No extra details provided.';
+        card.append(title, meta1);
+        if (item.moredetails) {
+          const meta2 = document.createElement('div');
+          meta2.className = 'deadline-meta';
+          meta2.textContent = item.moredetails;
+          card.appendChild(meta2);
+        }
 
-        const pill = document.createElement('div');
-        pill.className = 'deadline-pill';
-        const diffMs = item.endObj.getTime() - Date.now();
-        const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
-        pill.textContent = diffMs <= 0 ? 'Due now' : `${diffHours} hours left`;
-
-        card.append(title, meta1, meta2, pill);
         grid.appendChild(card);
       });
     }
@@ -1083,17 +1097,22 @@
 
         const meta1 = document.createElement('div');
         meta1.className = 'webinar-meta';
-        meta1.textContent = item.startObj ? `Starts: ${formatDateTime(item.startObj)}` : 'Starts: Not available';
+        meta1.textContent = item.startObj ? `Starts: ${formatDateTime(item.startObj)}` : '';
 
         const meta2 = document.createElement('div');
         meta2.className = 'webinar-meta';
-        meta2.textContent = item.endObj ? `Ends: ${formatDateTime(item.endObj)}` : 'Ends: Not available';
+        meta2.textContent = item.endObj ? `Ends: ${formatDateTime(item.endObj)}` : '';
 
-        const meta3 = document.createElement('div');
-        meta3.className = 'webinar-meta';
-        meta3.textContent = item.moredetails || 'No extra details provided.';
+        card.append(title);
+        if (meta1.textContent) card.appendChild(meta1);
+        if (meta2.textContent) card.appendChild(meta2);
+        if (item.moredetails) {
+          const meta3 = document.createElement('div');
+          meta3.className = 'webinar-meta';
+          meta3.textContent = item.moredetails;
+          card.appendChild(meta3);
+        }
 
-        card.append(title, meta1, meta2, meta3);
         grid.appendChild(card);
       });
     }
@@ -1103,10 +1122,6 @@
       list.innerHTML = '';
 
       if (!items.length) {
-        const empty = document.createElement('div');
-        empty.className = 'modal-item';
-        empty.innerHTML = `<strong>No ${kind.toLowerCase()} yet</strong><div class="small">Nothing to show right now.</div>`;
-        list.appendChild(empty);
         return;
       }
 
@@ -1140,8 +1155,7 @@
       }
 
       const selected = [];
-
-      for (const [subject, items] of buckets.entries()) {
+      for (const items of buckets.values()) {
         items.sort((a, b) => a.endObj - b.endObj);
         const earliestDay = items[0].dayKey;
         selected.push(...items.filter(item => item.dayKey === earliestDay));
@@ -1175,7 +1189,13 @@
         });
 
         const announcements = normalized.filter(isAnnouncementRow);
-        const webinarRows = normalized.filter(isWebinarRow);
+        const webinarRows = normalized.filter(isWebinarRow)
+          .filter(item => {
+            const base = item.startObj || item.endObj;
+            if (!base) return false;
+            return base.getTime() >= Date.now() && base.getTime() <= Date.now() + (3 * 24 * 60 * 60 * 1000);
+          })
+          .sort((a, b) => (a.startObj || a.endObj) - (b.startObj || b.endObj));
         const deadlineRows = normalized.filter(isDeadlineRow);
 
         const upcomingDeadlines = getUpcomingDeadlines(deadlineRows);
