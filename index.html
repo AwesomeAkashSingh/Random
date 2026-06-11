@@ -370,6 +370,12 @@
   text-overflow: unset;
   line-height: 1.4;
 }
+    .announcement-detail {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.9em;
+  color: #5d6b85;
+}
 
     .empty-state {
       padding: 18px 16px;
@@ -1078,17 +1084,21 @@ const buildDate = (year, monthIdx, day, hour, minute, ampm) => {
 const text = document.createElement('span');
 text.className = 'announcement-text';
 
-const parts = [item.event];
+const summary = [item.event];
 
 if (item.startObj) {
-  parts.push(`Starts: ${formatDateTime(item.startObj)}`);
+  summary.push(`Starts: ${formatDateTime(item.startObj)}`);
 }
 
 if (item.endObj) {
-  parts.push(`Ends: ${formatDateTime(item.endObj)}`);
+  summary.push(`Ends: ${formatDateTime(item.endObj)}`);
 }
 
-text.textContent = parts.join(' • ');
+text.innerHTML =
+  summary.join(' • ') +
+  (item.moredetails
+    ? `<br><span class="announcement-detail">${item.moredetails}</span>`
+    : '');
 
 row.append(pill, text);
 track.appendChild(row);
