@@ -954,8 +954,14 @@ function formatDateTime(dateObj) {
       raw = raw.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
       raw = raw.replace(/\s+/g, ' ').trim();
 
-      const direct = new Date(raw);
-      if (!Number.isNaN(direct.getTime())) return direct;
+const direct = new Date(raw);
+if (!Number.isNaN(direct.getTime())) {
+  const hasTime = /\d{1,2}:\d{2}\s*(AM|PM)?/i.test(raw);
+
+  direct._hasExplicitTime = hasTime;
+
+  return direct;
+}
 
       const patterns = [
         /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
