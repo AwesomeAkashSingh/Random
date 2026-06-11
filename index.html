@@ -1094,8 +1094,20 @@ if (item.endObj) {
   summary.push(`Ends: ${formatDateTime(item.endObj)}`);
 }
 
+const lines = [];
+
+lines.push(item.event);
+
+if (item.startObj) {
+  lines.push(`• Starts: ${formatDateTime(item.startObj)}`);
+}
+
+if (item.endObj) {
+  lines.push(`• Ends: ${formatDateTime(item.endObj)}`);
+}
+
 text.innerHTML =
-  summary.join(' • ') +
+  lines.join('<br>') +
   (item.moredetails
     ? `<br><span class="announcement-detail">${item.moredetails}</span>`
     : '');
