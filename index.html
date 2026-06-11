@@ -1201,10 +1201,13 @@ const buildDate = (year, monthIdx, day, hour, minute, ampm) => {
         const title = `${item.subject ? item.subject + ' — ' : ''}${item.event || item.title || 'Item'}`;
         const body = item.moredetails ? `<div class="small">${item.moredetails}</div>` : '';
         const deadlineLine = kind === 'Deadline' && item.endObj ? `<div class="small"><strong>Due:</strong> ${formatDateTime(item.endObj)}</div>` : '';
-        const webinarLines = kind === 'Webinar'
-          ? `${item.startObj ? `<div class="small"><strong>Starts:</strong> ${formatDateTime(item.startObj)}</div>` : ''}${item.endObj ? `<div class="small"><strong>Ends:</strong> ${formatDateTime(item.endObj)}</div>` : ''}`
-          : '';
-        box.innerHTML = `<strong>${title}</strong>${deadlineLine}${webinarLines}${body}`;
+const webinarLines = kind === 'Webinar'
+  ? `${item.startObj ? `<div class="small"><strong>Starts:</strong> ${formatDateTime(item.startObj)}</div>` : ''}${item.endObj ? `<div class="small"><strong>Ends:</strong> ${formatDateTime(item.endObj)}</div>` : ''}`
+  : '';
+const announcementLines = kind === 'Announcement'
+  ? `${item.startObj ? `<div class="small"><strong>Starts:</strong> ${formatDateTime(item.startObj)}</div>` : ''}${item.endObj ? `<div class="small"><strong>Ends:</strong> ${formatDateTime(item.endObj)}</div>` : ''}`
+  : '';
+box.innerHTML = `<strong>${title}</strong>${announcementLines}${deadlineLine}${webinarLines}${body}`;
         list.appendChild(box);
       });
     }
@@ -1283,11 +1286,11 @@ const buildDate = (year, monthIdx, day, hour, minute, ampm) => {
         fillModalList('announcementsModalList', announcements, 'Announcement');
         fillModalList('deadlinesModalList', nearTermDeadlines, 'Deadline');
 
-        if (nearTermDeadlines.length) {
-          openModal('deadlinesModal');
-        } else if (announcements.length) {
-          openModal('announcementsModal');
-        }
+        if (announcements.length) {
+  openModal('announcementsModal');
+} else if (nearTermDeadlines.length) {
+  openModal('deadlinesModal');
+}
       } catch (error) {
         console.error('Google Sheet load failed:', error);
         document.getElementById('deadlineStatus').textContent = 'Could not load the sheet right now. Check that it is published or publicly accessible.';
