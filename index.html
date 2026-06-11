@@ -1076,12 +1076,27 @@ const buildDate = (year, monthIdx, day, hour, minute, ampm) => {
         pill.className = 'announcement-pill';
         pill.textContent = item.subject || 'Info';
 
-        const text = document.createElement('span');
-        text.className = 'announcement-text';
-        text.textContent = cleanText(item.event, item.moredetails);
+const text = document.createElement('span');
+text.className = 'announcement-text';
 
-        row.append(pill, text);
-        track.appendChild(row);
+const parts = [item.event];
+
+if (item.startObj) {
+  parts.push(`Starts: ${formatDateTime(item.startObj)}`);
+}
+
+if (item.endObj) {
+  parts.push(`Ends: ${formatDateTime(item.endObj)}`);
+}
+
+if (item.moredetails) {
+  parts.push(item.moredetails);
+}
+
+text.textContent = parts.join(' • ');
+
+row.append(pill, text);
+track.appendChild(row);
       });
 
       if (items.length > 1) {
