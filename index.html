@@ -365,12 +365,11 @@
     }
 
     .announcement-text {
-      flex: 1 1 auto;
-      min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  line-height: 1.4;
+}
 
     .empty-state {
       padding: 18px 16px;
@@ -1087,10 +1086,6 @@ if (item.startObj) {
 
 if (item.endObj) {
   parts.push(`Ends: ${formatDateTime(item.endObj)}`);
-}
-
-if (item.moredetails) {
-  parts.push(item.moredetails);
 }
 
 text.textContent = parts.join(' • ');
