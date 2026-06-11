@@ -688,11 +688,14 @@
     <div class="abbr-line">• <strong>ACI</strong> – Artificial & Computational Intelligence<br>• <strong>DRL</strong> – Deep Reinforcement Learning<br>• <strong>VA</strong> – Video Analysis<br>• <strong>UDL</strong> – Unsupervised Deep Learning</div>
     <div class="abbr-line">• <strong>Cyber</strong> – AI & ML for Cyber Security<br>• <strong>CV</strong> – Computer Vision<br>• <strong>SEML</strong> – Software Engineering for ML<br>• <strong>NLP</strong> – Natural Language Processing</div>
     <div class="abbr-line">• <strong>IR</strong> – Information Retrieval<br>• <strong>DMML</strong> – Data Management for ML<br>• <strong>DML</strong> – Distributed Machine Learning<br>• <strong>PGM</strong> – Probabilistic Graphical Models</div>
-  </div>
-</div>    <div id="sem1" class="tab-content hidden">
-    </div>
-    </div>
-  </div>
+</div>
+
+</div>
+
+<div id="sem1" class="tab-content hidden">
+</div>
+
+</div>
 
   <footer>
     <p>Built for BITS WILP AIML students</p>
@@ -909,15 +912,25 @@
       });
     }
 
-    function formatDateTime(dateObj) {
-      return dateObj.toLocaleString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
+function formatDateTime(dateObj) {
+  if (!dateObj) return '';
+
+  if (!dateObj._hasExplicitTime) {
+    return dateObj.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+
+  return dateObj.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
 
     function cleanText(...parts) {
       return parts.filter(Boolean).join(' • ').replace(/\s+/g, ' ').trim();
@@ -951,22 +964,33 @@
         /^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i
       ];
 
-      const buildDate = (year, monthIdx, day, hour, minute, ampm) => {
-        if (monthIdx === undefined || monthIdx === null || Number.isNaN(monthIdx)) return null;
-        if (Number.isNaN(year) || Number.isNaN(day)) return null;
+const buildDate = (year, monthIdx, day, hour, minute, ampm) => {
+  if (monthIdx === undefined || monthIdx === null || Number.isNaN(monthIdx)) return null;
+  if (Number.isNaN(year) || Number.isNaN(day)) return null;
 
-        let h = hour === undefined || hour === null || hour === '' ? 23 : Number(hour);
-        let m = minute === undefined || minute === null || minute === '' ? 59 : Number(minute);
-        if (Number.isNaN(h)) h = 23;
-        if (Number.isNaN(m)) m = 59;
+  const hasTime =
+    hour !== undefined &&
+    hour !== null &&
+    hour !== '';
 
-        const suffix = ampm ? String(ampm).toUpperCase() : null;
-        if (suffix) {
-          if (h === 12) h = 0;
-          if (suffix === 'PM') h += 12;
-        }
-        return new Date(Number(year), Number(monthIdx), Number(day), h, m, 0, 0);
-      };
+  let h = hasTime ? Number(hour) : 0;
+  let m = hasTime && minute !== undefined && minute !== null && minute !== ''
+    ? Number(minute)
+    : 0;
+
+  if (Number.isNaN(h)) h = 0;
+  if (Number.isNaN(m)) m = 0;
+
+  const suffix = ampm ? String(ampm).toUpperCase() : null;
+  if (suffix) {
+    if (h === 12) h = 0;
+    if (suffix === 'PM') h += 12;
+  }
+
+  const date = new Date(Number(year), Number(monthIdx), Number(day), h, m, 0, 0);
+  date._hasExplicitTime = hasTime;
+  return date;
+};
 
       for (const pattern of patterns) {
         const m = raw.match(pattern);
