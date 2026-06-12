@@ -1053,42 +1053,6 @@ function formatDateTime(dateObj) {
   return null;
 }
 
-      for (const pattern of patterns) {
-        const m = raw.match(pattern);
-        if (!m) continue;
-
-        if (pattern === patterns[0]) {
-          const year = Number(m[1]);
-          const month = Number(m[2]) - 1;
-          const day = Number(m[3]);
-          return buildDate(year, month, day, m[4], m[5], m[6]);
-        }
-
-        if (pattern === patterns[1]) {
-          const day = Number(m[1]);
-          const month = Number(m[2]) - 1;
-          const year = Number(m[3]);
-          return buildDate(year, month, day, m[4], m[5], m[6]);
-        }
-
-        if (pattern === patterns[2]) {
-          const day = Number(m[1]);
-          const monthName = m[2].toLowerCase();
-          const year = Number(m[3]);
-          return buildDate(year, MONTHS[monthName], day, m[4], m[5], m[6]);
-        }
-
-        if (pattern === patterns[3]) {
-          const monthName = m[1].toLowerCase();
-          const day = Number(m[2]);
-          const year = Number(m[3]);
-          return buildDate(year, MONTHS[monthName], day, m[4], m[5], m[6]);
-        }
-      }
-
-      return null;
-    }
-
     function isAnnouncementRow(row) {
       const type = normalizeText(row.type || row.category || row.section || '');
       const event = normalizeText(row.event || row.title || row.name || '');
