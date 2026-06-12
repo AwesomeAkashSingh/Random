@@ -1335,8 +1335,9 @@ box.innerHTML = `<strong>${title}</strong>${announcementLines}${deadlineLine}${w
           const event = row.event || row.title || row.name || '';
           const moredetails = row.moredetails || row.details || row.description || row.message || '';
           const startRaw = row.starttime || row.start || row.begins || '';
-          const endRaw = row.endtime || row.deadline || row.duedate || row.end || '';
-          const startObj = parseFlexibleDate(startRaw, 'start');
+const endRaw = row.endtime || row.deadline || row.duedate || row.end || '';
+
+const startObj = parseFlexibleDate(startRaw, 'start');
 const endObj = parseFlexibleDate(endRaw, 'end');
           const type = String(row.type || row.category || row.section || '').trim().toLowerCase();
           return { ...row, subject, event, moredetails, startRaw, endRaw, startObj, endObj, type };
