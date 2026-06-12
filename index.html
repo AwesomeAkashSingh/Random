@@ -949,60 +949,109 @@ function formatDateTime(dateObj) {
         .toLowerCase();
     }
 
-    function parseFlexibleDate(value) {
-      if (!value) return null;
+    function parseFlexibleDate(value, defaultMode = 'start') {
+  if (!value) return null;
 
-      let raw = String(value).trim();
-      if (!raw || raw === '-') return null;
+  let raw = String(value).trim();
+  if (!raw || raw === '-') return null;
 
-      raw = raw.replace(/\([^)]*\)/g, ' ');
-      raw = raw.replace(/\b(?:IST|GMT|UTC)\b/gi, ' ');
-      raw = raw.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
-      raw = raw.replace(/\s+/g, ' ').trim();
+  raw = raw.replace(/\([^)]*\)/g, ' ');
+  raw = raw.replace(/\b(?:IST|GMT|UTC)\b/gi, ' ');
+  raw = raw.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+  raw = raw.replace(/\s+/g, ' ').trim();
 
-const direct = new Date(raw);
-if (!Number.isNaN(direct.getTime())) {
-  const hasTime = /\d{1,2}:\d{2}\s*(AM|PM)?/i.test(raw);
+  const applyDefaultTime = (dateObj, hasTime) => {
+    if (hasTime) {
+      dateObj._hasExplicitTime = true;
+      return dateObj;
+    }
 
-  direct._hasExplicitTime = hasTime;
+    if (defaultMode === 'end') {
+      dateObj.setHours(23, 59, 0, 0);
+    } else {
+      dateObj.setHours(0, 0, 0, 0);
+    }
 
-  return direct;
-}
+    dateObj._hasExplicitTime = true;
+    return dateObj;
+  };
 
-      const patterns = [
-        /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
-        /^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
-        /^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
-        /^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i
-      ];
-
-const buildDate = (year, monthIdx, day, hour, minute, ampm) => {
-  if (monthIdx === undefined || monthIdx === null || Number.isNaN(monthIdx)) return null;
-  if (Number.isNaN(year) || Number.isNaN(day)) return null;
-
-  const hasTime =
-    hour !== undefined &&
-    hour !== null &&
-    hour !== '';
-
-  let h = hasTime ? Number(hour) : 0;
-  let m = hasTime && minute !== undefined && minute !== null && minute !== ''
-    ? Number(minute)
-    : 0;
-
-  if (Number.isNaN(h)) h = 0;
-  if (Number.isNaN(m)) m = 0;
-
-  const suffix = ampm ? String(ampm).toUpperCase() : null;
-  if (suffix) {
-    if (h === 12) h = 0;
-    if (suffix === 'PM') h += 12;
+  const direct = new Date(raw);
+  if (!Number.isNaN(direct.getTime())) {
+    const hasTime = /\d{1,2}:\d{2}\s*(AM|PM)?/i.test(raw);
+    return applyDefaultTime(direct, hasTime);
   }
 
-  const date = new Date(Number(year), Number(monthIdx), Number(day), h, m, 0, 0);
-  date._hasExplicitTime = hasTime;
-  return date;
-};
+  const patterns = [
+    /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
+    /^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
+    /^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i,
+    /^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})(?:\s+(?:at\s+)?)?(?:(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?)?$/i
+  ];
+
+  const buildDate = (year, monthIdx, day, hour, minute, ampm) => {
+    if (monthIdx === undefined || monthIdx === null || Number.isNaN(monthIdx)) return null;
+    if (Number.isNaN(year) || Number.isNaN(day)) return null;
+
+    const hasTime =
+      hour !== undefined &&
+      hour !== null &&
+      hour !== '';
+
+    let h = hasTime ? Number(hour) : (defaultMode === 'end' ? 23 : 0);
+    let m = hasTime && minute !== undefined && minute !== null && minute !== ''
+      ? Number(minute)
+      : (defaultMode === 'end' ? 59 : 0);
+
+    if (Number.isNaN(h)) h = defaultMode === 'end' ? 23 : 0;
+    if (Number.isNaN(m)) m = defaultMode === 'end' ? 59 : 0;
+
+    const suffix = ampm ? String(ampm).toUpperCase() : null;
+    if (suffix) {
+      if (h === 12) h = 0;
+      if (suffix === 'PM') h += 12;
+    }
+
+    const date = new Date(Number(year), Number(monthIdx), Number(day), h, m, 0, 0);
+    date._hasExplicitTime = true;
+    return date;
+  };
+
+  for (const pattern of patterns) {
+    const m = raw.match(pattern);
+    if (!m) continue;
+
+    if (pattern === patterns[0]) {
+      const year = Number(m[1]);
+      const month = Number(m[2]) - 1;
+      const day = Number(m[3]);
+      return buildDate(year, month, day, m[4], m[5], m[6]);
+    }
+
+    if (pattern === patterns[1]) {
+      const day = Number(m[1]);
+      const month = Number(m[2]) - 1;
+      const year = Number(m[3]);
+      return buildDate(year, month, day, m[4], m[5], m[6]);
+    }
+
+    if (pattern === patterns[2]) {
+      const day = Number(m[1]);
+      const monthName = m[2].toLowerCase();
+      const year = Number(m[3]);
+      return buildDate(year, MONTHS[monthName], day, m[4], m[5], m[6]);
+    }
+
+    if (pattern === patterns[3]) {
+      const monthName = m[1].toLowerCase();
+      const day = Number(m[2]);
+      const year = Number(m[3]);
+      return buildDate(year, MONTHS[monthName], day, m[4], m[5], m[6]);
+    }
+  }
+
+  return null;
+}
 
       for (const pattern of patterns) {
         const m = raw.match(pattern);
@@ -1287,8 +1336,8 @@ box.innerHTML = `<strong>${title}</strong>${announcementLines}${deadlineLine}${w
           const moredetails = row.moredetails || row.details || row.description || row.message || '';
           const startRaw = row.starttime || row.start || row.begins || '';
           const endRaw = row.endtime || row.deadline || row.duedate || row.end || '';
-          const startObj = parseFlexibleDate(startRaw);
-          const endObj = parseFlexibleDate(endRaw);
+          const startObj = parseFlexibleDate(startRaw, 'start');
+const endObj = parseFlexibleDate(endRaw, 'end');
           const type = String(row.type || row.category || row.section || '').trim().toLowerCase();
           return { ...row, subject, event, moredetails, startRaw, endRaw, startObj, endObj, type };
         });
