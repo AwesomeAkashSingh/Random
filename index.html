@@ -68,6 +68,45 @@
 
     .button-row { gap: 18px; }
 
+.study-links{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.study-link{
+  text-decoration:none;
+  padding:10px 16px;
+  border-radius:10px;
+  font-weight:600;
+  border:1px solid #c7d8f5;
+  background:#f7faff;
+  color:#2855a6;
+  transition:.2s;
+}
+
+.study-link:hover{
+  transform:translateY(-1px);
+}
+
+    .subject-buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:10px;
+}
+
+.subject-btn{
+  border:none;
+  border-radius:10px;
+  padding:10px 18px;
+  font-weight:600;
+  cursor:pointer;
+  background:#4c88e8;
+  color:white;
+}
+    
     .animated-button,
     .telegram-button,
     .whatsapp-button,
@@ -619,6 +658,48 @@
     </div>
 
     <div id="sem2" class="tab-content">
+      <div class="section study-material-section">
+  <div class="section-header-line">
+    <h2>📚 Exam Study Material / Course Contents</h2>
+  </div>
+
+  <div class="study-links">
+    <a class="study-link" target="_blank"
+       href="https://docs.google.com/document/d/1nN6OlFz8NhbYSxi2E4sMdQSyYz6IuX3DdLtIX8KH1XM/edit?usp=sharing">
+       📄 Exam Syllabus & Tips
+    </a>
+
+    <a class="study-link" target="_blank"
+       href="https://learning.bansal-ai.in">
+       🎓 Interactive Learning Site
+    </a>
+  </div>
+</div>
+
+      <div class="section">
+  <div class="section-header-line">
+    <h2>📖 Sem 2 Subjects</h2>
+  </div>
+
+  <div class="subject-buttons">
+
+    <button class="subject-btn">ACI</button>
+    <button class="subject-btn">DRL</button>
+    <button class="subject-btn">VA</button>
+    <button class="subject-btn">UDL</button>
+    <button class="subject-btn">NLP</button>
+
+    <button class="subject-btn">Cyber</button>
+    <button class="subject-btn">CV</button>
+    <button class="subject-btn">SEML</button>
+    <button class="subject-btn">IR</button>
+
+    <button class="subject-btn">DMML</button>
+    <button class="subject-btn">DML</button>
+
+  </div>
+</div>
+      
           <div class="section" id="ec-schedule-section">
       <div class="section-header-line">
         <h2>🗓️ EC2 / EC3 Schedule</h2>
@@ -699,6 +780,18 @@
 </div>
 
 <div id="sem1" class="tab-content hidden">
+  <div class="section">
+  <div class="section-header-line">
+    <h2>📖 Sem 1 Subjects</h2>
+  </div>
+
+  <div class="subject-buttons">
+    <button class="subject-btn">ML</button>
+    <button class="subject-btn">MFML</button>
+    <button class="subject-btn">DNN</button>
+    <button class="subject-btn">ISM</button>
+  </div>
+</div>
 </div>
 
 </div>
