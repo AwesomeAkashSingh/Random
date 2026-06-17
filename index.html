@@ -998,10 +998,15 @@ function formatDateTime(dateObj) {
       hour !== null &&
       hour !== '';
 
-    let h = hasTime ? Number(hour) : (defaultMode === 'end' ? 23 : 0);
-    let m = hasTime && minute !== undefined && minute !== null && minute !== ''
-      ? Number(minute)
-      : (defaultMode === 'end' ? 59 : 0);
+    let m;
+
+if (hasTime) {
+  m = minute !== undefined && minute !== null && minute !== ''
+    ? Number(minute)
+    : 0;
+} else {
+  m = defaultMode === 'end' ? 59 : 0;
+}
 
     if (Number.isNaN(h)) h = defaultMode === 'end' ? 23 : 0;
     if (Number.isNaN(m)) m = defaultMode === 'end' ? 59 : 0;
