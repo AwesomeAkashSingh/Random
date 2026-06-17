@@ -997,7 +997,7 @@ function formatDateTime(dateObj) {
       hour !== undefined &&
       hour !== null &&
       hour !== '';
-
+let h = hasTime ? Number(hour) : (defaultMode === 'end' ? 23 : 0);
     let m;
 
 if (hasTime) {
