@@ -1060,12 +1060,21 @@
     const COURSE_DATA = [{"courseNumber": "AIMLCZG557", "course": "Artificial and Computational Intelligence (Core)", "ec2Regular": "21-06-2026 (AN)", "ec2MakeUp": "28-06-2026 (AN)", "ec3Regular": "06-09-2026 (AN)", "ec3MakeUp": "13-09-2026 (AN)"}, {"courseNumber": "AIMLCZG512", "course": "Deep Reinforcement Learning (Core)", "ec2Regular": "21-06-2026 (FN)", "ec2MakeUp": "28-06-2026 (FN)", "ec3Regular": "06-09-2026 (FN)", "ec3MakeUp": "13-09-2026 (FN)"}, {"courseNumber": "AIML ZG540", "course": "Video Analysis", "ec2Regular": "21-06-2026 (EN)", "ec2MakeUp": "28-06-2026 (EN)", "ec3Regular": "06-09-2026 (EN)", "ec3MakeUp": "13-09-2026 (EN)"}, {"courseNumber": "AIMLCZG533", "course": "Unsupervised Deep learning", "ec2Regular": "21-06-2026 (EN)", "ec2MakeUp": "28-06-2026 (EN)", "ec3Regular": "06-09-2026 (EN)", "ec3MakeUp": "13-09-2026 (EN)"}, {"courseNumber": "AIMLCZG530", "course": "Natural Language Processing", "ec2Regular": "20-06-2026 (FN)", "ec2MakeUp": "27-06-2026 (FN)", "ec3Regular": "05-09-2026 (FN)", "ec3MakeUp": "12-09-2026 (FN)"}, {"courseNumber": "AIMLCZG567", "course": "AI and ML Techniques for Cyber Security", "ec2Regular": "20-06-2026 (AN)", "ec2MakeUp": "27-06-2026 (AN)", "ec3Regular": "05-09-2026 (AN)", "ec3MakeUp": "12-09-2026 (AN)"}, {"courseNumber": "AIMLCZG525", "course": "Computer Vision", "ec2Regular": "20-06-2026 (AN)", "ec2MakeUp": "27-06-2026 (AN)", "ec3Regular": "05-09-2026 (AN)", "ec3MakeUp": "12-09-2026 (AN)"}, {"courseNumber": "AIMLCZG546", "course": "Software Engineering for Machine Learning", "ec2Regular": "20-06-2026 (AN)", "ec2MakeUp": "27-06-2026 (AN)", "ec3Regular": "05-09-2026 (AN)", "ec3MakeUp": "12-09-2026 (AN)"}, {"courseNumber": "AIMLCZG537", "course": "Information Retrieval", "ec2Regular": "20-06-2026 (EN)", "ec2MakeUp": "27-06-2026 (EN)", "ec3Regular": "05-09-2026 (EN)", "ec3MakeUp": "12-09-2026 (EN)"}, {"courseNumber": "AIMLCZG529", "course": "Data Management for Machine Learning", "ec2Regular": "20-06-2026 (EN)", "ec2MakeUp": "27-06-2026 (EN)", "ec3Regular": "05-09-2026 (EN)", "ec3MakeUp": "12-09-2026 (EN)"}, {"courseNumber": "AIMLCZG515", "course": "Distributed Machine Learning", "ec2Regular": "20-06-2026 (EN)", "ec2MakeUp": "27-06-2026 (EN)", "ec3Regular": "05-09-2026 (EN)", "ec3MakeUp": "12-09-2026 (EN)"}];
 
     function showTab(tabId, btn) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      const tab = document.getElementById(tabId);
-      if (tab) tab.classList.remove('hidden');
-      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-      btn.classList.add('active');
-    }
+
+  // Hide all subject placeholders
+  document.querySelectorAll('.subject-content').forEach(el => {
+    el.style.display = 'none';
+  });
+
+  // Switch tabs
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+
+  const tab = document.getElementById(tabId);
+  if (tab) tab.classList.remove('hidden');
+
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  btn.classList.add('active');
+}
 
     function openModal(id) {
       const modal = document.getElementById(id);
