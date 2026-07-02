@@ -1061,18 +1061,29 @@
 
     function showTab(tabId, btn) {
 
-  // Hide all subject placeholders
   document.querySelectorAll('.subject-content').forEach(el => {
     el.style.display = 'none';
   });
 
-  // Switch tabs
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab-content').forEach(el => {
+    el.classList.add('hidden');
+  });
 
   const tab = document.getElementById(tabId);
-  if (tab) tab.classList.remove('hidden');
 
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  if (tab) {
+    tab.classList.remove('hidden');
+
+    tab.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+
+  document.querySelectorAll('.tab').forEach(el => {
+    el.classList.remove('active');
+  });
+
   btn.classList.add('active');
 }
 
