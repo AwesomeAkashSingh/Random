@@ -894,7 +894,8 @@
     </div>
 
 </div>
-      
+
+<div id="sem2-main-content">
           <div class="section" id="ec-schedule-section">
       <div class="section-header-line">
         <h2>🗓️ EC2 / EC3 Schedule</h2>
@@ -973,6 +974,7 @@
 </div>
 
 </div>
+</div> <!-- sem2-main-content -->
 </div> <!-- closes sem2 -->
 <div id="sem1" class="tab-content hidden">
   <div class="section">
@@ -1065,6 +1067,11 @@
     el.style.display = 'none';
   });
 
+const main = document.getElementById('sem2-main-content');
+if (main && tabId === 'sem2') {
+    main.style.display = '';
+}
+      
   document.querySelectorAll('.tab-content').forEach(el => {
     el.classList.add('hidden');
   });
@@ -1707,10 +1714,17 @@ function showSubject(subjectId) {
     el.style.display = 'none';
   });
 
+  const main = document.getElementById('sem2-main-content');
+
+  if (main) {
+    main.style.display = 'none';
+  }
+
   const target = document.getElementById(subjectId);
 
   if (target) {
     target.style.display = 'block';
+
     target.scrollIntoView({
       behavior: 'smooth',
       block: 'start'
