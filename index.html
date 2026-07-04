@@ -629,10 +629,11 @@
 ======================================================*/
 
 .ec-wrapper{
-    display:flex;
-    flex-direction:column;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(520px,1fr));
     gap:28px;
     margin-top:12px;
+    align-items:start;
 }
 
 .ec-card{
@@ -672,13 +673,19 @@
 
 .ec-day{
     display:grid;
-    grid-template-columns:150px 1fr;
-    margin:14px;
-    border:2px solid #c8dafd;
-    border-radius:16px;
+    grid-template-columns:165px 1fr;
+    margin:18px;
+    border:2px solid #d7e6ff;
+    border-radius:18px;
     overflow:hidden;
     background:#ffffff;
-    box-shadow:0 4px 10px rgba(59,130,246,.06);
+    box-shadow:0 8px 18px rgba(59,130,246,.10);
+    transition:.25s;
+}
+
+.ec-day:hover{
+    transform:translateY(-3px);
+    box-shadow:0 14px 28px rgba(59,130,246,.16);
 }
 
 .ec-day:first-child{
@@ -686,15 +693,18 @@
 }
 
 .ec-date{
-    background:linear-gradient(180deg,#eef5ff,#dfeeff);
+    background:linear-gradient(180deg,#edf5ff,#dbeafe);
     display:flex;
+    flex-direction:column;
     justify-content:center;
     align-items:center;
+    text-align:center;
+    gap:14px;
+    padding:22px;
     font-size:1.45rem;
     font-weight:700;
-    color:#2855a6;
-    border-right:2px solid #c8dafd;
-    padding:18px;
+    color:#1d4ed8;
+    border-right:2px solid #d7e6ff;
 }
 
 .ec-slots{
@@ -771,11 +781,12 @@
 }
 
 .ec-note{
-    padding:18px;
-    background:#fafcff;
-    border-top:1px solid #e5eeff;
-    color:#5f6d85;
-    font-size:.93rem;
+    padding:16px 20px;
+    background:#f7fbff;
+    border-top:1px solid #dbeafe;
+    color:#52627d;
+    font-size:.92rem;
+    line-height:1.6;
 }
 
 @media(max-width:850px){
@@ -1395,8 +1406,9 @@ if (main && tabId === 'sem2') {
             <div class="ec-day">
 
               <div class="ec-date">
-                ${day.date}
-              </div>
+    <div style="font-size:2.3rem;">📅</div>
+    <div>${day.date}</div>
+</div>
 
               <div class="ec-slots">
 
