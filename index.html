@@ -107,6 +107,24 @@
   background:#4c88e8;
   color:white;
 }
+
+.aci-btn{background:#2F80ED;}
+.drl-btn{background:#8E44AD;}
+.va-btn{background:#27AE60;}
+.udl-btn{background:#F39C12;}
+.nlp-btn{background:#3498DB;}
+.cyber-btn{background:#E74C3C;}
+.cv-btn{background:#16A085;}
+.seml-btn{background:#D35400;}
+.ir-btn{background:#1ABC9C;}
+.dmml-btn{background:#9B59B6;}
+.dml-btn{background:#34495E;}
+
+.subject-btn.active{
+    transform:scale(1.08);
+    box-shadow:0 0 18px rgba(0,0,0,.25);
+    border:3px solid white;
+}
     
     .animated-button,
     .telegram-button,
@@ -849,59 +867,17 @@
 
   <div class="subject-buttons">
 
-    <button class="subject-btn"
-        onclick="showSubject('aci-content')">
-    ACI
-</button>
-    <button class="subject-btn"
-        onclick="showSubject('drl-content')">
-    DRL
-</button>
-
-<button class="subject-btn"
-        onclick="showSubject('va-content')">
-    VA
-</button>
-
-<button class="subject-btn"
-        onclick="showSubject('udl-content')">
-    UDL
-</button>
-
-<button class="subject-btn"
-        onclick="showSubject('nlp-content')">
-    NLP
-</button>
-
-<button class="subject-btn"
-        onclick="showSubject('cyber-content')">
-    Cyber
-</button>
-
-<button class="subject-btn"
-        onclick="showSubject('cv-content')">
-    CV
-</button>
-
-<button class="subject-btn"
-        onclick="showSubject('seml-content')">
-    SEML
-</button>
-
-<button class="subject-btn"
-        onclick="showSubject('ir-content')">
-    IR
-</button>
-
-<button class="subject-btn"
-        onclick="showSubject('dmml-content')">
-    DMML
-</button>
-
-<button class="subject-btn"
-        onclick="showSubject('dml-content')">
-    DML
-</button>
+<button class="subject-btn aci-btn" onclick="showSubject('aci-content', this)">ACI</button>
+<button class="subject-btn drl-btn" onclick="showSubject('drl-content', this)">DRL</button>
+<button class="subject-btn va-btn" onclick="showSubject('va-content', this)">VA</button>
+<button class="subject-btn udl-btn" onclick="showSubject('udl-content', this)">UDL</button>
+<button class="subject-btn nlp-btn" onclick="showSubject('nlp-content', this)">NLP</button>
+<button class="subject-btn cyber-btn" onclick="showSubject('cyber-content', this)">Cyber</button>
+<button class="subject-btn cv-btn" onclick="showSubject('cv-content', this)">CV</button>
+<button class="subject-btn seml-btn" onclick="showSubject('seml-content', this)">SEML</button>
+<button class="subject-btn ir-btn" onclick="showSubject('ir-content', this)">IR</button>
+<button class="subject-btn dmml-btn" onclick="showSubject('dmml-content', this)">DMML</button>
+<button class="subject-btn dml-btn" onclick="showSubject('dml-content', this)">DML</button>
 
   </div>
 </div>
@@ -1967,8 +1943,14 @@ if (nearTermDeadlines.length) {
     renderCourseSchedule();
     loadGoogleSheet();
 
-function showSubject(subjectId) {
+function showSubject(subjectId, btn) {
 
+document.querySelectorAll('.subject-btn').forEach(b=>{
+    b.classList.remove('active');
+});
+
+btn.classList.add('active');
+  
   document.querySelectorAll('.subject-content').forEach(el => {
     el.style.display = 'none';
   });
