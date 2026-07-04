@@ -673,7 +673,12 @@
 .ec-day{
     display:grid;
     grid-template-columns:150px 1fr;
-    border-top:1px solid #edf3ff;
+    margin:14px;
+    border:2px solid #c8dafd;
+    border-radius:16px;
+    overflow:hidden;
+    background:#ffffff;
+    box-shadow:0 4px 10px rgba(59,130,246,.06);
 }
 
 .ec-day:first-child{
@@ -681,14 +686,15 @@
 }
 
 .ec-date{
-    background:#f5f9ff;
+    background:linear-gradient(180deg,#eef5ff,#dfeeff);
     display:flex;
     justify-content:center;
     align-items:center;
     font-size:1.45rem;
     font-weight:700;
     color:#2855a6;
-    border-right:1px solid #e2ebff;
+    border-right:2px solid #c8dafd;
+    padding:18px;
 }
 
 .ec-slots{
