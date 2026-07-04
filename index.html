@@ -734,18 +734,20 @@
 
 .subject-list{
     display:flex;
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
     gap:8px;
+    align-items:center;
 }
 
 .subject-pill{
-    padding:8px 14px;
+    padding:6px 12px;
     border-radius:999px;
     color:white;
     font-weight:700;
-    font-size:.86rem;
-    letter-spacing:.3px;
+    font-size:.82rem;
+    letter-spacing:.2px;
     transition:.2s;
+    white-space:nowrap;
 }
 
 .subject-pill:hover{
@@ -774,15 +776,6 @@
 
 .makeup .slot-evening .subject-pill{
     background:#06b6d4;
-}
-
-.ec-note{
-    padding:16px 20px;
-    background:#f7fbff;
-    border-top:1px solid #dbeafe;
-    color:#52627d;
-    font-size:.92rem;
-    line-height:1.6;
 }
 
 @media(max-width:850px){
@@ -1395,7 +1388,7 @@ if (main && tabId === 'sem2') {
           ${cssClass === "regular" ? "📘" : "🟣"} ${title}
         </div>
 
-        <div class="ec-days">
+        <div class="ec-days" style="padding-bottom:16px;">
 
           ${data.map(day => `
 
@@ -1438,12 +1431,6 @@ if (main && tabId === 'sem2') {
 
           `).join("")}
 
-        </div>
-
-        <div class="ec-note">
-          <strong>Note:</strong>
-          Timings shown above are the official EC3 examination timings.
-          Students should verify venue and seat allocation on ERP before the examination.
         </div>
 
       </div>
