@@ -624,12 +624,180 @@
       .schedule-grid { grid-template-columns: 1fr; }
     }
   
-.ec-table{width:100%;border-collapse:collapse;font-size:0.9rem}
-.ec-table th,.ec-table td{border:1px solid #dbe8ff;padding:8px;text-align:center;vertical-align:middle}
-.ec-table th{background:#eef5ff}
-.ec-table td:first-child,.ec-table th:first-child{text-align:left;font-weight:bold}
-.ec-slot-date{display:inline;font-weight:700;color:#24324a;line-height:1.2}
-.ec-slot-time{display:inline;margin-left:6px;font-size:0.76rem;font-weight:700;color:#235db6;line-height:1.15}
+/*======================================================
+                NEW EC SCHEDULE
+======================================================*/
+
+.ec-wrapper{
+    display:flex;
+    flex-direction:column;
+    gap:28px;
+    margin-top:12px;
+}
+
+.ec-card{
+    background:#ffffff;
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 14px 35px rgba(52,82,161,.12);
+    border:1px solid #dbe7ff;
+    transition:.25s;
+}
+
+.ec-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 20px 42px rgba(52,82,161,.18);
+}
+
+.ec-title{
+    padding:16px 22px;
+    color:white;
+    font-size:1.35rem;
+    font-weight:bold;
+    letter-spacing:.5px;
+}
+
+.ec-title.regular{
+    background:linear-gradient(90deg,#3b82f6,#60a5fa);
+}
+
+.ec-title.makeup{
+    background:linear-gradient(90deg,#8b5cf6,#a78bfa);
+}
+
+.ec-days{
+    display:flex;
+    flex-direction:column;
+}
+
+.ec-day{
+    display:grid;
+    grid-template-columns:150px 1fr;
+    border-top:1px solid #edf3ff;
+}
+
+.ec-day:first-child{
+    border-top:none;
+}
+
+.ec-date{
+    background:#f5f9ff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:1.45rem;
+    font-weight:700;
+    color:#2855a6;
+    border-right:1px solid #e2ebff;
+}
+
+.ec-slots{
+    display:flex;
+    flex-direction:column;
+}
+
+.ec-slot{
+    display:grid;
+    grid-template-columns:230px 1fr;
+    align-items:center;
+    gap:20px;
+    padding:16px 20px;
+    border-top:1px solid #edf3ff;
+    transition:.25s;
+}
+
+.ec-slot:first-child{
+    border-top:none;
+}
+
+.ec-slot:hover{
+    background:#f8fbff;
+}
+
+.slot-time{
+    font-size:1rem;
+    font-weight:700;
+    color:#1d4ed8;
+}
+
+.subject-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+
+.subject-pill{
+    padding:8px 14px;
+    border-radius:999px;
+    color:white;
+    font-weight:700;
+    font-size:.86rem;
+    letter-spacing:.3px;
+    transition:.2s;
+}
+
+.subject-pill:hover{
+    transform:scale(1.08);
+}
+
+.slot-morning .subject-pill{
+    background:#3b82f6;
+}
+
+.slot-afternoon .subject-pill{
+    background:#f59e0b;
+}
+
+.slot-evening .subject-pill{
+    background:#10b981;
+}
+
+.makeup .slot-morning .subject-pill{
+    background:#8b5cf6;
+}
+
+.makeup .slot-afternoon .subject-pill{
+    background:#ec4899;
+}
+
+.makeup .slot-evening .subject-pill{
+    background:#06b6d4;
+}
+
+.ec-note{
+    padding:18px;
+    background:#fafcff;
+    border-top:1px solid #e5eeff;
+    color:#5f6d85;
+    font-size:.93rem;
+}
+
+@media(max-width:850px){
+
+.ec-day{
+    grid-template-columns:1fr;
+}
+
+.ec-date{
+    padding:14px;
+    border-right:none;
+    border-bottom:1px solid #e8efff;
+}
+
+.ec-slot{
+    grid-template-columns:1fr;
+    gap:10px;
+}
+
+.slot-time{
+    text-align:center;
+}
+
+.subject-list{
+    justify-content:center;
+}
+
+}
 
 </style>
 </head>
@@ -1116,73 +1284,177 @@ if (main && tabId === 'sem2') {
     });
 
  function renderCourseSchedule() {
-  const map = {
-    'Artificial and Computational Intelligence (Core)':'ACI',
-    'Deep Reinforcement Learning (Core)':'DRL',
-    'Video Analysis':'VA',
-    'Unsupervised Deep learning':'UDL',
-    'Natural Language Processing':'NLP',
-    'AI and ML Techniques for Cyber Security':'Cyber',
-    'Computer Vision':'CV',
-    'Software Engineering for Machine Learning':'SEML',
-    'Information Retrieval':'IR',
-    'Data Management for Machine Learning':'DMML',
-    'Distributed Machine Learning':'DML'
+
+  const schedule = {
+    regular: [
+      {
+        date: "5 Sep 2026 (Sat)",
+        slots: [
+          {
+            time: "9:00 AM – 11:30 AM",
+            cls: "slot-morning",
+            subjects: ["NLP"]
+          },
+          {
+            time: "1:00 PM – 3:30 PM",
+            cls: "slot-afternoon",
+            subjects: ["Cyber", "CV", "SEML"]
+          },
+          {
+            time: "4:30 PM – 7:00 PM",
+            cls: "slot-evening",
+            subjects: ["IR", "DMML", "DML"]
+          }
+        ]
+      },
+      {
+        date: "6 Sep 2026 (Sun)",
+        slots: [
+          {
+            time: "9:00 AM – 11:30 AM",
+            cls: "slot-morning",
+            subjects: ["DRL"]
+          },
+          {
+            time: "1:00 PM – 3:30 PM",
+            cls: "slot-afternoon",
+            subjects: ["ACI"]
+          },
+          {
+            time: "4:30 PM – 7:00 PM",
+            cls: "slot-evening",
+            subjects: ["VA", "UDL"]
+          }
+        ]
+      }
+    ],
+
+    makeup: [
+      {
+        date: "12 Sep 2026 (Sat)",
+        slots: [
+          {
+            time: "9:00 AM – 11:30 AM",
+            cls: "slot-morning",
+            subjects: ["NLP"]
+          },
+          {
+            time: "1:00 PM – 3:30 PM",
+            cls: "slot-afternoon",
+            subjects: ["Cyber", "CV", "SEML"]
+          },
+          {
+            time: "4:30 PM – 7:00 PM",
+            cls: "slot-evening",
+            subjects: ["IR", "DMML", "DML"]
+          }
+        ]
+      },
+      {
+        date: "13 Sep 2026 (Sun)",
+        slots: [
+          {
+            time: "9:00 AM – 11:30 AM",
+            cls: "slot-morning",
+            subjects: ["DRL"]
+          },
+          {
+            time: "1:00 PM – 3:30 PM",
+            cls: "slot-afternoon",
+            subjects: ["ACI"]
+          },
+          {
+            time: "4:30 PM – 7:00 PM",
+            cls: "slot-evening",
+            subjects: ["VA", "UDL"]
+          }
+        ]
+      }
+    ]
   };
 
-  const monthMap = {
-    '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr', '05': 'May', '06': 'Jun',
-    '07': 'Jul', '08': 'Aug', '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'
-  };
+  function buildCard(title, cssClass, data) {
 
-  const slotMap = {
-    EC2: {
-      FN: '9:00 AM to 11:00 AM',
-      AN: '1:00 PM to 3:00 PM',
-      EN: '4:30 PM to 6:30 PM'
-    },
-    EC3: {
-      FN: '9:00 AM to 11:30 AM',
-      AN: '1:00 PM to 3:30 PM',
-      EN: '4:30 PM to 7:00 PM'
-    }
-  };
+    return `
+      <div class="ec-card ${cssClass}">
 
-  function formatExamSlot(value, examType) {
-    const match = String(value || '').match(/^(\d{2})-(\d{2})-(\d{4})\s*\((FN|AN|EN)\)$/i);
-    if (!match) return `<span class="ec-slot-date">${String(value || '')}</span>`;
+        <div class="ec-title ${cssClass}">
+          ${cssClass === "regular" ? "📘" : "🟣"} ${title}
+        </div>
 
-    const day = match[1];
-    const month = monthMap[match[2]] || match[2];
-    const code = match[4].toUpperCase();
-    const time = slotMap[examType] && slotMap[examType][code] ? slotMap[examType][code] : '';
+        <div class="ec-days">
 
-    return `<span class="ec-slot-date">${day} ${month}</span>${time ? `<span class="ec-slot-time">${time}</span>` : ''}`;
+          ${data.map(day => `
+
+            <div class="ec-day">
+
+              <div class="ec-date">
+                ${day.date}
+              </div>
+
+              <div class="ec-slots">
+
+                ${day.slots.map(slot => `
+
+                  <div class="ec-slot ${slot.cls}">
+
+                    <div class="slot-time">
+                      ${slot.time}
+                    </div>
+
+                    <div class="subject-list">
+
+                      ${slot.subjects.map(subject => `
+
+                        <span class="subject-pill">
+                          ${subject}
+                        </span>
+
+                      `).join("")}
+
+                    </div>
+
+                  </div>
+
+                `).join("")}
+
+              </div>
+
+            </div>
+
+          `).join("")}
+
+        </div>
+
+        <div class="ec-note">
+          <strong>Note:</strong>
+          Timings shown above are the official EC3 examination timings.
+          Students should verify venue and seat allocation on ERP before the examination.
+        </div>
+
+      </div>
+    `;
   }
 
-  const rows = COURSE_DATA.map(c => `
-    <tr>
-      <td>${map[c.course] || c.course}</td>
-      <td>${formatExamSlot(c.ec2Regular, 'EC2')}</td>
-      <td>${formatExamSlot(c.ec2MakeUp, 'EC2')}</td>
-      <td>${formatExamSlot(c.ec3Regular, 'EC3')}</td>
-      <td>${formatExamSlot(c.ec3MakeUp, 'EC3')}</td>
-    </tr>
-  `).join('');
+  document.getElementById("ecScheduleGrid").innerHTML = `
 
-  document.getElementById('ecScheduleGrid').innerHTML = `
-    <table class="ec-table">
-      <thead>
-        <tr>
-          <th>Subject</th>
-          <th>EC2 Regular</th>
-          <th>EC2 Make-up</th>
-          <th>EC3 Regular</th>
-          <th>EC3 Make-up</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+    <div class="ec-wrapper">
+
+      ${buildCard(
+        "EC3 Regular Examination",
+        "regular",
+        schedule.regular
+      )}
+
+      ${buildCard(
+        "EC3 Make-up Examination",
+        "makeup",
+        schedule.makeup
+      )}
+
+    </div>
+
+  `;
 }
     function parseCSV(text) {
       const rows = [];
