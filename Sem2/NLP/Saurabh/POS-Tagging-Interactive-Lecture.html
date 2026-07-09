@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part-of-Speech Tagging — An Interactive Lecture</title>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-svg.min.js"></script>
+
+<style>
+:root{
+  --bg:#070b16; --bg2:#0b1120; --panel:#0e1729; --panel2:#121d36; --line:#1f2d4d;
+  --ink:#e7edf9; --muted:#93a4c8; --dim:#64759c;
+  --cyan:#38f0d8; --cyan2:#19c4ff; --violet:#9b8cff; --pink:#ff6ec7;
+  --amber:#ffcb6b; --green:#62e88a; --red:#ff6b81;
+  --glow: 0 0 18px rgba(56,240,216,.45); --r:16px;
+  --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{overflow-x:hidden}
+body{
+  margin:0;background:
+    radial-gradient(1200px 600px at 80% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 10%, rgba(155,140,255,.10), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:16px;
+}
+a{color:var(--cyan2);text-decoration:none}
+p,li,td,th{overflow-wrap:anywhere;word-break:break-word}
+
+.shell{display:grid;grid-template-columns:288px 1fr;max-width:1500px;margin:0 auto}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+  border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),transparent)}
+.brand{font-weight:800;letter-spacing:.3px;font-size:15px;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow)}
+.brand small{display:block;color:var(--dim);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.toc{margin-top:18px;display:flex;flex-direction:column;gap:1px}
+.toc a{color:var(--muted);font-size:13.5px;padding:7px 12px;border-radius:9px;display:flex;gap:9px;align-items:center;border:1px solid transparent;transition:.15s}
+.toc a .n{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:20px}
+.toc a:hover{background:var(--panel);color:var(--ink)}
+.toc a.active{background:linear-gradient(90deg,rgba(56,240,216,.16),rgba(56,240,216,.02));color:#fff;border-color:rgba(56,240,216,.35)}
+.toc a.active .n{color:var(--cyan)}
+.toc .grp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:14px 12px 5px;font-weight:700}
+
+main{padding:0 0 120px}
+.progress{position:fixed;top:0;left:288px;right:0;height:3px;background:transparent;z-index:50}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:var(--glow)}
+
+section{padding:64px 56px;border-bottom:1px solid var(--line);scroll-margin-top:10px}
+section:nth-child(even){background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+.wrap{max-width:920px;margin:0 auto}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:26px;height:2px;background:var(--cyan);display:inline-block;border-radius:2px}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin:.35em 0 .2em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,34px);margin:.25em 0 .5em;font-weight:800;letter-spacing:-.01em;color:#fff}
+h3{font-size:19px;margin:1.6em 0 .5em;color:#fff;font-weight:700}
+h4{font-size:15px;margin:1.2em 0 .4em;color:var(--cyan);font-weight:700;letter-spacing:.02em}
+p{color:var(--ink)}
+.lead{font-size:18.5px;color:var(--muted)}
+.muted{color:var(--muted)}
+strong{color:#fff}
+code{font-family:var(--mono);background:var(--panel2);padding:.12em .42em;border-radius:6px;font-size:.88em;color:var(--cyan)}
+ul.muted li{margin:4px 0}
+
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:22px 0}
+.lab{background:linear-gradient(180deg,#0c1830,#0a1322);border:1px solid rgba(56,240,216,.28);border-radius:var(--r);padding:22px 24px;margin:26px 0;position:relative;overflow:hidden}
+.lab::before{content:"\26A1 INTERACTIVE";position:absolute;top:0;right:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:#06241f;background:var(--cyan);padding:4px 12px;border-bottom-left-radius:10px;font-weight:800}
+.note{border-left:3px solid var(--violet);background:rgba(155,140,255,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0;color:var(--muted)}
+.note b,.note strong{color:#cdc4ff}
+.key{border-left:3px solid var(--amber);background:rgba(255,203,107,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0}
+.key b{color:var(--amber)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:880px){.grid2,.grid3{grid-template-columns:1fr}}
+
+.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:14px;flex-wrap:wrap}
+.ctrl label{min-width:62px;font-family:var(--mono);color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;background:var(--line);flex:1;min-width:120px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow);cursor:pointer;border:2px solid #06241f}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--cyan);cursor:pointer;border:2px solid #06241f}
+.val{font-family:var(--mono);color:var(--cyan);min-width:54px;text-align:right;font-size:13.5px}
+button.btn{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13px;transition:.15s}
+button.btn:hover{border-color:var(--cyan);color:#fff}
+button.btn.active{background:var(--cyan);color:#06241f;border-color:var(--cyan);font-weight:700}
+button.btn:focus-visible,.toc a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+
+table.tt{border-collapse:collapse;font-family:var(--mono);font-size:14px;margin:8px 0}
+table.tt th,table.tt td{border:1px solid var(--line);padding:8px 16px;text-align:center}
+table.tt th{background:var(--panel2);color:var(--muted)}
+table.tt td.one{color:var(--green);font-weight:700}
+table.tt td.zero{color:var(--dim)}
+.readout{font-family:var(--mono);font-size:13.5px;background:#06101f;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;white-space:pre-wrap;color:var(--cyan);overflow-x:auto}
+.readout .hl{color:var(--amber)}
+.readout .g{color:var(--green)}
+canvas{display:block;max-width:100%}
+.eqbox{background:#06101f;border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:16px 0;overflow-x:auto;color:#e7edf9}
+mjx-container[display="true"]{overflow-x:auto;max-width:100%}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted);margin:2px 4px 2px 0}
+.foot{max-width:920px;margin:40px auto 0;color:var(--dim);font-size:13px;padding:0 56px}
+.pill{font-family:var(--mono);font-size:11px;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 10px;color:var(--muted)}
+.hero-net{margin:34px 0 6px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);font-family:var(--mono);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.wbtn{font-family:var(--mono);font-size:13px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:7px 11px;border-radius:8px;cursor:pointer;margin:3px;transition:.15s}
+.wbtn:hover{border-color:var(--cyan)}
+.wbtn.ok{background:rgba(98,232,138,.18);border-color:var(--green);color:#bfeccb}
+.wbtn.bad{background:rgba(255,107,129,.16);border-color:var(--red);color:#ffc6ce}
+.wbtn.sel{border-color:var(--cyan);color:#fff}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .65s ease, transform .65s cubic-bezier(.2,.8,.3,1)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1 !important;transform:none !important;transition:none}}
+body{transition:background .35s ease,color .35s ease}
+
+.topctl{position:fixed;top:14px;right:18px;z-index:60;display:flex;gap:9px}
+.topbtn{font-family:var(--mono);font-size:12.5px;background:rgba(18,29,54,.82);border:1px solid var(--line);color:var(--ink);
+  padding:9px 14px;border-radius:30px;cursor:pointer;display:flex;align-items:center;gap:7px;backdrop-filter:blur(8px);transition:.18s}
+.topbtn:hover{border-color:var(--cyan);color:#fff}
+.topbtn.primary{background:linear-gradient(90deg,var(--violet),var(--cyan));color:#06241f;border:none;font-weight:700}
+[data-theme="light"] .topbtn{background:rgba(255,255,255,.9);border-color:#dde4f0;color:#16223d}
+
+.spot{position:fixed;z-index:71;border:2px solid var(--cyan);border-radius:16px;
+  box-shadow:0 0 0 9999px rgba(2,5,12,.66), 0 0 28px rgba(56,240,216,.55);
+  transition:all .5s cubic-bezier(.3,.9,.3,1);pointer-events:none}
+.storycard{position:fixed;z-index:73;left:50%;bottom:28px;transform:translateX(-50%);width:min(640px,92vw);
+  background:linear-gradient(180deg,#0f1b33,#0a1322);border:1px solid rgba(56,240,216,.42);border-radius:18px;padding:20px 24px;
+  box-shadow:0 22px 64px rgba(0,0,0,.55);color:#e7edf9;animation:popcard .35s cubic-bezier(.2,.9,.3,1)}
+@keyframes popcard{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+.storycard .stp{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan)}
+.storycard h3{margin:6px 0 6px;color:#fff;font-size:21px}
+.storycard p{color:#aebbd6;font-size:14.5px;margin:0;line-height:1.6}
+.storynav{display:flex;align-items:center;gap:8px;margin-top:16px}
+.storynav .sp{flex:1}
+.storynav .btn{padding:7px 12px}
+.storydots{display:flex;gap:5px;flex-wrap:wrap;max-width:260px}
+.storydots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.2s;cursor:pointer}
+.storydots i.on{background:var(--cyan);transform:scale(1.35)}
+
+[data-theme="light"] body{
+  background:
+    radial-gradient(1200px 600px at 82% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 8%, rgba(155,140,255,.13), transparent 55%),
+    #eef2f8;
+  color:#16223d;
+}
+[data-theme="light"] h1,[data-theme="light"] h2{color:#0d1730}
+[data-theme="light"] h3{color:#16223d}
+[data-theme="light"] h4{color:#0a8198}
+[data-theme="light"] p{color:#28364f}
+[data-theme="light"] .lead{color:#46566f}
+[data-theme="light"] .muted{color:#586a8a}
+[data-theme="light"] strong{color:#0a1326}
+[data-theme="light"] .kicker{color:#0a8198}
+[data-theme="light"] .kicker::before{background:#0a8198}
+[data-theme="light"] a{color:#0a72b8}
+[data-theme="light"] section{border-bottom-color:#dde4f0}
+[data-theme="light"] section:nth-child(even){background:linear-gradient(180deg,rgba(13,23,48,.025),transparent)}
+[data-theme="light"] .card{background:linear-gradient(180deg,#ffffff,#f5f8fe);border-color:#dde4f0;box-shadow:0 1px 3px rgba(20,40,80,.05)}
+[data-theme="light"] .card h4{color:#0a8198}
+[data-theme="light"] .card .muted,[data-theme="light"] .card p{color:#43516e}
+[data-theme="light"] .note{background:rgba(124,108,255,.09);color:#3a3357}
+[data-theme="light"] .note b,[data-theme="light"] .note strong{color:#4b3bb0}
+[data-theme="light"] .key{background:rgba(214,158,46,.11)}
+[data-theme="light"] .key b{color:#946708}
+[data-theme="light"] .sidebar{background:linear-gradient(180deg,#ffffff,transparent);border-right-color:#dde4f0}
+[data-theme="light"] .brand{color:#0d1730}
+[data-theme="light"] .toc a{color:#46566f}
+[data-theme="light"] .toc a:hover{background:#eef2fb;color:#0d1730}
+[data-theme="light"] .toc a.active{background:linear-gradient(90deg,rgba(10,129,152,.14),transparent);color:#0a4a57;border-color:rgba(10,129,152,.4)}
+[data-theme="light"] .toc a.active .n{color:#0a8198}
+[data-theme="light"] .toc .grp{color:#8693b0}
+[data-theme="light"] table.tt th{background:#eef2f9;color:#46566f}
+[data-theme="light"] table.tt td{color:#16223d;border-color:#d8e0ee}
+[data-theme="light"] .foot{color:#7a89a8}
+[data-theme="light"] .tag{color:#43516e;border-color:#d2dcec}
+[data-theme="light"] .pill{color:#43516e;background:#eef2f9;border-color:#d8e0ee}
+[data-theme="light"] .legend{color:#586a8a}
+[data-theme="light"] .lab h4{color:#38f0d8}
+[data-theme="light"] .lab p,[data-theme="light"] .lab .muted{color:#93a4c8}
+[data-theme="light"] .lab strong,[data-theme="light"] .lab b{color:#fff}
+</style>
+</head>
+<body>
+<script>(function(){try{var t=localStorage.getItem('postheme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<div class="progress"><i id="progbar"></i></div>
+
+<div class="topctl">
+  <button class="topbtn primary" id="tourBtn">&#9654; Guided tour</button>
+  <button class="topbtn" id="themeBtn">&#9728; Light</button>
+</div>
+
+<div class="spot" id="storyspot" style="display:none"></div>
+<div class="storycard" id="storycard" style="display:none">
+  <div class="stp" id="storyStep"></div>
+  <h3 id="storyTitle"></h3>
+  <p id="storyText"></p>
+  <div class="storynav">
+    <div class="storydots" id="storyDots"></div>
+    <div class="sp"></div>
+    <button class="btn" id="storyPrev">&#9664; prev</button>
+    <button class="btn" id="storyPlay">&#9208; pause</button>
+    <button class="btn" id="storyNext">next &#9654;</button>
+    <button class="btn" id="storyExit">&#10005; exit</button>
+  </div>
+</div>
+
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span><div>POS Tagging<small>Session 6 &middot; Interactive</small></div></div>
+  <nav class="toc" id="toc">
+    <div class="grp">Foundations</div>
+    <a href="#intro"><span class="n">00</span> Overview</a>
+    <a href="#c1"><span class="n">01</span> What tagging is</a>
+    <a href="#c2"><span class="n">02</span> Word classes</a>
+    <a href="#c3"><span class="n">03</span> The Penn tag set</a>
+    <a href="#c4"><span class="n">04</span> Ambiguity</a>
+    <div class="grp">The problem</div>
+    <a href="#c5"><span class="n">05</span> Sequence labeling</a>
+    <div class="grp">The HMM machinery</div>
+    <a href="#c6"><span class="n">06</span> Markov chains</a>
+    <a href="#c7"><span class="n">07</span> Hidden Markov Models</a>
+    <a href="#c8"><span class="n">08</span> Bayes' rule</a>
+    <a href="#c9"><span class="n">09</span> The two tables</a>
+    <div class="grp">Worked examples</div>
+    <a href="#c10"><span class="n">10</span> Tagging &ldquo;race&rdquo;</a>
+    <a href="#c11"><span class="n">11</span> Building the tables</a>
+    <a href="#c12"><span class="n">12</span> The ice-cream HMM</a>
+    <div class="grp">Decoding</div>
+    <a href="#c13"><span class="n">13</span> The Viterbi idea</a>
+    <a href="#c14"><span class="n">14</span> Viterbi in full</a>
+    <div class="grp">Beyond</div>
+    <a href="#c15"><span class="n">15</span> MEMM &amp; bidirectional</a>
+    <a href="#summary"><span class="n">16</span> Key takeaways</a>
+  </nav>
+</aside>
+
+<main>
+
+<section id="intro">
+ <div class="wrap">
+  <div class="kicker">Natural Language Processing &middot; Session 6</div>
+  <h1>Part-of-Speech<br>Tagging</h1>
+  <p class="lead">Every word in a sentence does a job. This lecture builds, from scratch, a machine that reads a sentence and labels each word with its job &mdash; noun, verb, and the rest. We go from the idea, to the Hidden Markov Model, to the <strong>Viterbi algorithm</strong>. Every slide example is worked out, with a live lab in every chapter.</p>
+  <div class="hero-net">
+    <canvas id="heroCanvas" width="900" height="240" style="width:100%;height:auto"></canvas>
+    <div class="legend">
+      <span><i style="background:var(--cyan2)"></i> hidden tags</span>
+      <span><i style="background:var(--amber)"></i> transition: tag &rarr; tag</span>
+      <span><i style="background:var(--green)"></i> emission: tag &rarr; word</span>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h4>What you'll learn</h4><p class="muted" style="font-size:14px">How a tagger turns words into tags, why context is the whole game, and how an HMM plus Viterbi finds the best tag sequence.</p></div>
+    <div class="card"><h4>How to use it</h4><p class="muted" style="font-size:14px">Read top to bottom, or jump via the sidebar. Every &#9889; panel is live: drag a slider, press step, watch the idea move. Try the <strong>&#9654; Guided tour</strong>.</p></div>
+    <div class="card"><h4>The rhythm</h4><p class="muted" style="font-size:14px">Each chapter follows one shape. A hook, an analogy, the math step by step, a worked example, an ML link, a pitfall, and a lab.</p></div>
+  </div>
+  <div class="note" style="margin-top:24px"><b>Companion PDF.</b> This page has a printable twin: a typeset study companion that works every example in full. Same lecture, same depth &mdash; one to touch, one to print.</div>
+ </div>
+</section>
+
+<section id="c1">
+ <div class="wrap">
+  <div class="kicker">01 &middot; The task</div>
+  <h2>What POS tagging is</h2>
+  <p class="lead">Every word plays a role. &ldquo;Dog&rdquo; names a thing; &ldquo;run&rdquo; names an action; &ldquo;the&rdquo; points at a thing. A part-of-speech tag is the name of that role. Tagging gives each word in a sentence its one correct tag.</p>
+  <div class="note"><b>Analogy first.</b> Think of a busy kitchen. The same person can be a chef, a waiter, or a cashier, depending on the moment. To run the place you first label who does what right now. Tagging does this for words.</div>
+  <h3>The shape of the task</h3>
+  <p>The input is a list of words \(w_1, w_2, \dots, w_n\), where \(n\) is the sentence length. The output is a matching list of tags \(t_1, t_2, \dots, t_n\), one per word. The small numbers are positions, so \(w_3\) is the third word.</p>
+  <div class="eqbox">$$ \underbrace{w_1\; w_2\; \dots\; w_n}_{\text{words in}} \;\longrightarrow\; \underbrace{t_1\; t_2\; \dots\; t_n}_{\text{one tag each}} $$</div>
+  <div class="key"><b>Worked example.</b> Tag &ldquo;the lead paint is unsafe&rdquo;.<br>
+  the &rarr; points at a thing &rarr; <b>Det</b>. lead &rarr; the metal, a thing &rarr; <b>N</b>. paint &rarr; a thing &rarr; <b>N</b>. is &rarr; the verb &rarr; <b>V</b>. unsafe &rarr; describes the paint &rarr; <b>Adj</b>.<br>
+  Result: <b>the/Det lead/N paint/N is/V unsafe/Adj</b>.</div>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Click each word to reveal its tag</h4>
+    <p class="muted" style="font-size:14px">Click any word to see the job it does here. Press &ldquo;reveal all&rdquo; to tag the whole sentence. Each word gets exactly one tag.</p>
+    <canvas id="c1canvas" width="760" height="190" style="width:100%;height:auto"></canvas>
+    <div class="chips" style="margin-top:8px"><button class="btn" id="c1all">reveal all</button><button class="btn" id="c1reset">&#8634; reset</button></div>
+    <div class="readout" id="c1out"></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>Tagging is the simplest <strong>sequence labeling</strong> task: one label per item in a list. Named entity recognition and chunking share this shape. It also feeds parsers, search, and translation as an early step.</p>
+  <div class="key"><b>Pitfall &mdash; a word has no fixed tag.</b> &ldquo;Lead&rdquo; is a noun in &ldquo;lead paint&rdquo; but a verb in &ldquo;lead the way&rdquo;. The tag belongs to the word in this sentence, not to the dictionary word.</div>
+  <p class="muted"><b>Bridge &rarr;</b> Before we tag, we need the menu of tags. Where do the labels come from? Meet the word classes.</p>
+ </div>
+</section>
+
+<section id="c2">
+ <div class="wrap">
+  <div class="kicker">02 &middot; The labels</div>
+  <h2>Word classes: open and closed</h2>
+  <p class="lead">There are about eight traditional parts of speech: noun, verb, adjective, adverb, preposition, pronoun, article, and conjunction. They fall into two groups, and that split matters more than the exact count.</p>
+  <div class="note"><b>Analogy first.</b> Picture a board game. The rule words on the box never change: &ldquo;roll&rdquo;, &ldquo;pass&rdquo;, &ldquo;skip&rdquo;. That is the closed set. The sticky notes players add for house rules keep growing. That is the open set.</div>
+  <h3>Two kinds of class</h3>
+  <p>A <strong>closed class</strong> has a small, fixed membership. New prepositions almost never appear. An <strong>open class</strong> grows all the time, as people coin new words. English has four open classes: nouns, verbs, adjectives, and adverbs.</p>
+  <div class="key"><b>Worked example.</b> &ldquo;of&rdquo; &rarr; preposition &rarr; closed. &ldquo;the&rdquo; &rarr; article &rarr; closed. &ldquo;she&rdquo; &rarr; pronoun &rarr; closed. &ldquo;can&rdquo; &rarr; auxiliary &rarr; closed. &ldquo;laptop&rdquo; &rarr; noun &rarr; open. &ldquo;stream&rdquo; &rarr; verb &rarr; open. &ldquo;happy&rdquo; &rarr; adjective &rarr; open.</div>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Sort the words: open or closed?</h4>
+    <p class="muted" style="font-size:14px">Click a word to flip your guess between open and closed. Then press check. The glue words are the small closed set; the content words grow forever.</p>
+    <div id="c2chips" class="chips"></div>
+    <div class="chips"><button class="btn" id="c2check">check</button><button class="btn" id="c2reset">&#8634; reset</button></div>
+    <div class="readout" id="c2out"></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>Closed-class words are most of the <strong>stop words</strong> search engines drop, since &ldquo;the&rdquo; carries little topic signal. Word vectors show the split too: closed words sit in tight clusters; open words spread across meaning.</p>
+  <div class="key"><b>Key insight.</b> Closed classes are a small fixed set of glue words. Open classes are the growing content words. A new word almost always joins an open class.</div>
+  <p class="muted"><b>Bridge &rarr;</b> Four broad classes are too coarse for real work. We need a finer, standard menu. Meet the Penn Treebank tag set.</p>
+ </div>
+</section>
+
+<section id="c3">
+ <div class="wrap">
+  <div class="kicker">03 &middot; The tag set</div>
+  <h2>The Penn Treebank tag set</h2>
+  <p class="lead">To tag by machine we must fix one standard list of tags. A coarse list uses just N, V, Adj, Adv. The common choice is the Penn Treebank set, with 45 tags that split the coarse classes into finer ones.</p>
+  <div class="note"><b>Analogy first.</b> A shop can label a rack &ldquo;tops&rdquo;, or split it into t-shirts, shirts, and sweaters. Finer labels help you find things, but you need more examples of each to learn them. A tag set is the same trade.</div>
+  <h3>From coarse to fine</h3>
+  <p>The Penn set has no single &ldquo;noun&rdquo; tag. It uses <strong>NN</strong> for a singular noun, <strong>NNS</strong> for a plural, and <strong>NNP</strong> for a proper noun. Verbs split too: <strong>VB</strong>, <strong>VBD</strong> (past), <strong>VBG</strong> (-ing form), <strong>VBZ</strong> (third person).</p>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Turn the detail knob</h4>
+    <p class="muted" style="font-size:14px">Slide from coarse to fine and watch each broad class split into its Penn tags. More detail means more tags, and more training data needed per tag.</p>
+    <div id="c3sliders"></div>
+    <div class="grid2" style="align-items:start"><div><canvas id="c3canvas" width="440" height="300" style="width:100%;height:auto"></canvas></div><div class="readout" id="c3out"></div></div>
+  </div>
+  <div class="key"><b>Worked example.</b> Tag &ldquo;The grand jury commented on a number of other topics .&rdquo;:<br>
+  The/<b>DT</b> grand/<b>JJ</b> jury/<b>NN</b> commented/<b>VBD</b> on/<b>IN</b> a/<b>DT</b> number/<b>NN</b> of/<b>IN</b> other/<b>JJ</b> topics/<b>NNS</b> ./<b>.</b></div>
+  <h4>Where this shows up in ML</h4>
+  <p>The tag set is the model's <strong>label space</strong>: the fixed list of answers it may give. A finer set helps later tools but needs more data. Many systems now use the smaller Universal Dependencies set across languages.</p>
+  <div class="key"><b>Pitfall &mdash; IN is broad, TO is special.</b> One IN tag covers prepositions and subordinating conjunctions, so &ldquo;although&rdquo; is IN. The word &ldquo;to&rdquo; gets its own tag, TO, not IN.</div>
+  <p class="muted"><b>Bridge &rarr;</b> Now the real trouble. Many words can take several of these tags. Which one wins?</p>
+ </div>
+</section>
+
+<section id="c4">
+ <div class="wrap">
+  <div class="kicker">04 &middot; The challenge</div>
+  <h2>Ambiguity: one word, many tags</h2>
+  <p class="lead">Here is the heart of the problem. Many words can take more than one tag. The word &ldquo;back&rdquo; is the classic case, and only the context tells us which tag it has this time.</p>
+  <div class="note"><b>Analogy first.</b> The word &ldquo;charge&rdquo; depends on who says it. A soldier hears &ldquo;attack&rdquo;. A shopper hears &ldquo;pay&rdquo;. A nurse hears &ldquo;person in my care&rdquo;. Same letters, different jobs, and the setting decides.</div>
+  <h3>The same word, four tags</h3>
+  <p>Tagging is not a lookup. It is a <strong>choice</strong>. Picking the right meaning has a name: <strong>disambiguation</strong>, which means removing the doubt. The neighbours of a word are the clues we use to choose.</p>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Change the context, watch the tag</h4>
+    <p class="muted" style="font-size:14px">Pick a sentence for the word &ldquo;back&rdquo; and watch its tag change. Nothing about the word changes; only the words around it do.</p>
+    <div id="c4chips" class="chips"></div>
+    <canvas id="c4canvas" width="760" height="160" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="c4out"></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>This is why context models matter. A method that gives each word one fixed tag fails on &ldquo;back&rdquo;. Context vectors like those inside BERT exist for this reason: the same word gets a different vector in a different sentence.</p>
+  <div class="key"><b>Key insight.</b> Many words carry several possible tags. So tagging is disambiguation: use the neighbours to choose the right tag for this use.</div>
+  <p class="muted"><b>Bridge &rarr;</b> If neighbours decide the tag, we cannot tag words one at a time. We must score the whole sequence.</p>
+ </div>
+</section>
+
+<section id="c5">
+ <div class="wrap">
+  <div class="kicker">05 &middot; The framing</div>
+  <h2>Tagging as a sequence problem</h2>
+  <p class="lead">We now see the sentence as a sequence: an ordered list of words. We must pick the best matching list of tags. The two lists have the same length and line up one to one.</p>
+  <div class="note"><b>Analogy first.</b> A crossword is the same shape. You rarely fill one square from its clue alone. Each letter must agree with the words crossing it. You solve the whole grid at once.</div>
+  <h3>Why not tag each word alone?</h3>
+  <p>Because tags lean on neighbours. After a determiner, a noun beats a verb. A second problem is size. With \(n\) words and \(T\) tags, the number of possible tag lists is \(T^n\), since each word could take any tag.</p>
+  <div class="eqbox">$$ \#\text{tag lists} \;=\; T^{\,n} \qquad (T \text{ tags},\; n \text{ words}) $$</div>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Watch brute force explode</h4>
+    <p class="muted" style="font-size:14px">Slide the number of words and tags. The bar shows how many whole tag lists exist, on a log scale. Compare it to the smart cost, \(n\,T^2\), which Viterbi pays.</p>
+    <div id="c5sliders"></div>
+    <div class="grid2" style="align-items:start"><div><canvas id="c5canvas" width="440" height="280" style="width:100%;height:auto"></canvas></div><div class="readout" id="c5out"></div></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>Sequence labeling is a core NLP pattern. Named entity recognition, chunking, and slot filling all give one label per word. Modern systems read the whole sentence with a Transformer, then label each word.</p>
+  <div class="key"><b>Key insight.</b> Tagging is sequence labeling: choose the best whole tag list. The count of lists is far too large to test one by one, so we need a model and a smart search.</div>
+  <p class="muted"><b>Bridge &rarr;</b> To model a sequence cheaply, we need one tool first: the Markov chain.</p>
+ </div>
+</section>
+
+<section id="c6">
+ <div class="wrap">
+  <div class="kicker">06 &middot; The tool</div>
+  <h2>Markov chains: today depends on yesterday</h2>
+  <p class="lead">A Markov chain models a process that moves between states over time. Its one rule: the next state depends only on the current state, not on the older past.</p>
+  <div class="note"><b>Analogy first.</b> Snakes and Ladders works this way. Your next square depends only on the square you stand on now and the dice. How you got to this square does not matter at all.</div>
+  <h3>The pieces</h3>
+  <p>The states are \(q_1,\dots,q_N\). A transition probability \(a_{ij}\) is the chance of moving from state \(i\) to state \(j\). A start vector \(\pi\) (the Greek letter pi) gives the chance of beginning in each state. A path's chance is the start times one transition per step.</p>
+  <div class="eqbox">$$ P(\text{warm},\text{warm},\text{warm},\text{warm}) = \pi_3 \, a_{33}^{\,3} = 0.2 \times 0.6^3 = 0.0432 $$</div>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Roll the weather forward</h4>
+    <p class="muted" style="font-size:14px">Set the stay-warm chance, then add warm days. The running product is the chance of that warm streak. Watch a long streak get unlikely fast: each day multiplies in another fraction.</p>
+    <div id="c6sliders"></div>
+    <div class="grid2" style="align-items:start"><div>
+      <div class="chips"><button class="btn" id="c6add">+ add warm day</button><button class="btn" id="c6reset">&#8634; reset</button></div>
+      <canvas id="c6canvas" width="440" height="210" style="width:100%;height:auto"></canvas></div>
+      <div class="readout" id="c6out"></div></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>Markov chains run under many models. A bigram language model is a Markov chain over words. PageRank is a Markov chain over web pages. Reinforcement learning adds actions and rewards to this same skeleton.</p>
+  <div class="key"><b>Pitfall &mdash; short memory.</b> The Markov rule forgets older history. That keeps the math cheap, but it cannot catch a clue from many words back. We accept the trade for speed.</div>
+  <p class="muted"><b>Bridge &rarr;</b> In tagging we cannot see the states. The tags are hidden. That is the Hidden Markov Model.</p>
+ </div>
+</section>
+
+<section id="c7">
+ <div class="wrap">
+  <div class="kicker">07 &middot; The model</div>
+  <h2>Hidden Markov Models</h2>
+  <p class="lead">In tagging we see the words, but the tags are hidden. A Hidden Markov Model is a Markov chain whose states are hidden, plus a rule for how each hidden state produces a visible word.</p>
+  <div class="note"><b>Analogy first.</b> You are in a windowless office. You cannot see the sky, but you see coats. Heavy coats mean cold; none means warm. The weather is hidden; the coats are visible.</div>
+  <h3>Two tables, one product</h3>
+  <p>An HMM uses two kinds of number. A <strong>transition</strong> \(P(t_i \mid t_{i-1})\) links a tag to the next tag. An <strong>emission</strong> \(P(w_i \mid t_i)\) links a tag to its word. The bar means &ldquo;given&rdquo;. The joint score multiplies one of each per position.</p>
+  <div class="eqbox">$$ P(w_{1:n}, t_{1:n}) = \prod_{i=1}^{n} \underbrace{P(t_i \mid t_{i-1})}_{\text{transition}}\; \underbrace{P(w_i \mid t_i)}_{\text{emission}} $$</div>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Build the joint score for &ldquo;the dog barks&rdquo;</h4>
+    <p class="muted" style="font-size:14px">Drag the transition and emission knobs. Each arrow thickens with its chance, and the readout multiplies them into the joint score. Two big tables, one product.</p>
+    <div id="c7sliders"></div>
+    <div class="grid2" style="align-items:start"><div><canvas id="c7canvas" width="440" height="250" style="width:100%;height:auto"></canvas></div><div class="readout" id="c7out"></div></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>HMMs were the workhorse of early speech recognition, where hidden states are sounds and the output is audio. They also find genes in DNA. Any visible stream with hidden labels behind it fits the HMM mold.</p>
+  <div class="key"><b>Pitfall &mdash; two simplifying claims.</b> A tag depends only on the one tag before it. A word depends only on its own tag. Real language bends both, yet the model still works well.</div>
+  <p class="muted"><b>Bridge &rarr;</b> We can score a tagging. But we want the most likely tagging given the words. Flip the question with Bayes.</p>
+ </div>
+</section>
+
+<section id="c8">
+ <div class="wrap">
+  <div class="kicker">08 &middot; The flip</div>
+  <h2>Bayes' rule: turning the problem around</h2>
+  <p class="lead">We want the most likely tag list given the words. That is hard to read off directly. Bayes' rule swaps it for two pieces we can count: a likelihood and a prior.</p>
+  <div class="note"><b>Analogy first.</b> A doctor wants the disease given your symptoms. That is hard directly. So the doctor asks two easier things: how well does each disease explain these symptoms, and how common is each disease?</div>
+  <h3>The rule, step by step</h3>
+  <p>We want \(\hat{t}\), the tag list with the largest \(P(t \mid w)\). The hat marks our best guess; <strong>argmax</strong> means &ldquo;the input that gives the largest value&rdquo;. Bayes' rule rewrites it, and the bottom term \(P(w)\) is the same for every tag list, so it drops out.</p>
+  <div class="eqbox">$$ \hat{t} = \operatorname*{argmax}_{t}\; \underbrace{P(w \mid t)}_{\text{likelihood}}\; \underbrace{P(t)}_{\text{prior}} $$</div>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Likelihood &times; prior picks the winner</h4>
+    <p class="muted" style="font-size:14px">Two candidate taggings, A and B. Set each one's likelihood and prior. The product bar decides the winner. Toggle &ldquo;divide by P(w)&rdquo; and watch the winner stay the same: the constant cancels.</p>
+    <div id="c8sliders"></div>
+    <div class="chips"><button class="btn" id="c8norm">divide by P(w)</button></div>
+    <div class="grid2" style="align-items:start"><div><canvas id="c8canvas" width="440" height="240" style="width:100%;height:auto"></canvas></div><div class="readout" id="c8out"></div></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>This is the generative recipe behind naive Bayes and many classifiers. Model the likelihood and the prior, then use Bayes' rule to score each label. Picking the top scorer this way is called MAP estimation.</p>
+  <div class="key"><b>Key insight.</b> The likelihood is how well the tags explain the words; it becomes the emission table. The prior is how common the tag list is; it becomes the transition table.</div>
+  <p class="muted"><b>Bridge &rarr;</b> Both tables are just numbers. Where do they come from? We count them in a corpus.</p>
+ </div>
+</section>
+
+<section id="c9">
+ <div class="wrap">
+  <div class="kicker">09 &middot; The data</div>
+  <h2>The two tables, filled by counting</h2>
+  <p class="lead">The likelihood and prior become two tables of numbers. We get both by counting in a corpus &mdash; a large body of text already tagged by hand &mdash; then dividing.</p>
+  <div class="note"><b>Analogy first.</b> A shop owner learns habits by tallying. Of 100 people who bought bread, 60 also bought milk. So &ldquo;milk after bread&rdquo; is 0.6. The tables are the same kind of tally.</div>
+  <h3>Count, then divide</h3>
+  <p>The transition table holds \(P(t_i \mid t_{i-1})\); the emission table holds \(P(w_i \mid t_i)\). To get the chance a noun follows a determiner, count the pair and divide by the count of the determiner.</p>
+  <div class="eqbox">$$ P(\text{NN}\mid\text{DT}) = \frac{C(\text{DT},\text{NN})}{C(\text{DT})} $$</div>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Tally the pairs, watch the fraction</h4>
+    <p class="muted" style="font-size:14px">Each button adds one tag-pair sighting after a determiner. The bars are the running chances; the readout shows count over total. Probability is just a tally turned into a fraction.</p>
+    <div class="chips"><button class="btn" id="c9nn">+ DT&rarr;NN</button><button class="btn" id="c9vb">+ DT&rarr;VB</button><button class="btn" id="c9jj">+ DT&rarr;JJ</button><button class="btn" id="c9reset">&#8634; reset</button></div>
+    <div class="grid2" style="align-items:start"><div><canvas id="c9canvas" width="440" height="230" style="width:100%;height:auto"></canvas></div><div class="readout" id="c9out"></div></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>Counting then dividing is maximum likelihood estimation, the most basic way to fit a model. The zero-count trap and its smoothing fix appear all over NLP, from n-gram models to text classifiers.</p>
+  <div class="key"><b>Pitfall &mdash; zero counts.</b> If a pair never appears, its chance is zero, and one zero makes the whole product zero. Real taggers use smoothing to move a little chance onto unseen pairs.</div>
+  <p class="muted"><b>Bridge &rarr;</b> Time to use the tables. First, settle a famously tricky word: &ldquo;race&rdquo;.</p>
+ </div>
+</section>
+
+<section id="c10">
+ <div class="wrap">
+  <div class="kicker">10 &middot; Worked example</div>
+  <h2>Tagging &ldquo;race&rdquo;</h2>
+  <p class="lead">In &ldquo;Secretariat is expected to race tomorrow&rdquo;, is &ldquo;race&rdquo; a verb or a noun? We decide with the neighbours: the &ldquo;to&rdquo; before it, and the adverbial noun &ldquo;tomorrow&rdquo; (tagged NR) after it.</p>
+  <div class="note"><b>The plan.</b> Score the verb story and the noun story. Each score multiplies three chances: the tag after &ldquo;to&rdquo;, the NR after that tag, and the word &ldquo;race&rdquo; given that tag. The bigger score wins.</div>
+  <h3>The two products</h3>
+  <p>We use these trained numbers: \(P(\text{VB}\mid\text{TO})=0.83\), \(P(\text{NN}\mid\text{TO})=0.00047\), \(P(\text{NR}\mid\text{VB})=0.0027\), \(P(\text{NR}\mid\text{NN})=0.0012\), \(P(\text{race}\mid\text{VB})=0.00012\), and \(P(\text{race}\mid\text{NN})=0.00057\).</p>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Step through the two paths</h4>
+    <p class="muted" style="font-size:14px">Press next to reveal each multiplication, for the verb path and the noun path. Then slide \(P(\text{VB}\mid\text{TO})\) and find where the winner flips. The verb wins because a verb almost always follows &ldquo;to&rdquo;.</p>
+    <div id="c10sliders"></div>
+    <div class="chips"><button class="btn" id="c10step">&#9654; next step</button><button class="btn" id="c10reset">&#8634; reset</button></div>
+    <div class="grid2" style="align-items:start"><div><canvas id="c10canvas" width="440" height="240" style="width:100%;height:auto"></canvas></div><div class="readout" id="c10out"></div></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>This local scoring is what every tagger and language model does in spirit: read the neighbours, weigh each option, keep the best. Modern models use richer context, but the move is the same.</p>
+  <div class="key"><b>Key insight.</b> To tag an ambiguous word, score each candidate against its neighbours and keep the highest product. Here &ldquo;to&rdquo; makes the verb tag win by about 850 times.</div>
+  <p class="muted"><b>Bridge &rarr;</b> Those numbers came from somewhere. Let us build a full table from a tiny corpus by hand.</p>
+ </div>
+</section>
+
+<section id="c11">
+ <div class="wrap">
+  <div class="kicker">11 &middot; Worked example</div>
+  <h2>Building the tables from a corpus</h2>
+  <p class="lead">Let us build a transition table by hand from three short tagged sentences. Every sentence starts with a marker, &ldquo;*&rdquo;, and ends with STOP.</p>
+  <div class="card"><p class="muted" style="font-size:13.5px;font-family:var(--mono)">the/DT employees/NNS pass/VB an/DT exam/NN .<br>the/DT employees/NNS wait/VB for/IN the/DT pass/VB .<br>employers/NNS fire/VB employees/NNS .</p></div>
+  <h3>Count every tag pair</h3>
+  <p>We walk the tags in order and tally each pair. The start marker is followed by DT twice and NNS once, across three sentences. So \(P(\text{DT}\mid *)=2/3\) and \(P(\text{NNS}\mid *)=1/3\). Every cell is one such fraction.</p>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Walk the bigrams, fill the table</h4>
+    <p class="muted" style="font-size:14px">Press next to step through each tag pair in order. The current pair lights up, and its cell in the transition grid counts up. The table is built entirely from these counts.</p>
+    <div class="chips"><button class="btn" id="c11step">&#9654; next pair</button><button class="btn" id="c11auto">&#9654;&#9654; run</button><button class="btn" id="c11reset">&#8634; reset</button></div>
+    <div class="grid2" style="align-items:start"><div><canvas id="c11canvas" width="440" height="300" style="width:100%;height:auto"></canvas></div><div class="readout" id="c11out"></div></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>This by-hand count is what a training script does at scale, over millions of tagged words. Here the table is tiny and full of zeros; a real corpus fills it in, and smoothing covers the gaps.</p>
+  <div class="key"><b>Key insight.</b> The tables are built by tallying tag pairs and tag-word pairs, then dividing each count by its row total. Counting is the whole training step.</div>
+  <p class="muted"><b>Bridge &rarr;</b> A friendlier example makes the HMM click: ice cream and the weather.</p>
+ </div>
+</section>
+
+<section id="c12">
+ <div class="wrap">
+  <div class="kicker">12 &middot; Worked example</div>
+  <h2>The ice-cream HMM</h2>
+  <p class="lead">Jason Eisner's puzzle: you are a future scientist with no weather records for one summer. You find a diary of how many ice creams someone ate each day. Guess how hot each day was.</p>
+  <div class="note"><b>Analogy first.</b> You guess a friend's mood from how much they text. Chatty often means happy; quiet often means tired. The mood is hidden; the texts are visible. Same shape as tags and words.</div>
+  <h3>One sequence, many paths</h3>
+  <p>The hidden states are HOT and COLD; the visible output is the count 1, 2, or 3. For the sequence &ldquo;1 3 1&rdquo; there are \(2^3 = 8\) possible weather paths. We score each by multiplying its start, transitions, and emissions.</p>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Score all eight weather paths</h4>
+    <p class="muted" style="font-size:14px">Reveal the score of each H/C path for the counts &ldquo;1 3 1&rdquo;. The slide example C&rarr;H&rarr;C scores 0.0024, but it is not the best. Watch which path actually wins.</p>
+    <div class="chips"><button class="btn" id="c12step">&#9654; reveal next path</button><button class="btn" id="c12all">reveal all</button><button class="btn" id="c12reset">&#8634; reset</button></div>
+    <div class="grid2" style="align-items:start"><div><canvas id="c12canvas" width="440" height="300" style="width:100%;height:auto"></canvas></div><div class="readout" id="c12out"></div></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>The ice-cream task is the standard teaching model for HMM decoding. The same code that guesses weather from ice creams guesses tags from words, or sounds from audio. Only the tables change.</p>
+  <div class="key"><b>Pitfall &mdash; paths explode.</b> Eight paths is easy. But the count is \(2^n\), so a month of data has billions of paths. Scoring all of them is hopeless. We need a smarter search.</div>
+  <p class="muted"><b>Bridge &rarr;</b> That smarter search is the Viterbi algorithm. First, the idea.</p>
+ </div>
+</section>
+
+<section id="c13">
+ <div class="wrap">
+  <div class="kicker">13 &middot; The algorithm</div>
+  <h2>The Viterbi idea</h2>
+  <p class="lead">Scoring every tag list is too slow: there are \(T^n\) of them. The Viterbi algorithm finds the single best list without testing them all, using dynamic programming.</p>
+  <div class="note"><b>Analogy first.</b> Plan a cheap road trip across several cities. To reach a city you keep only the cheapest way into it, not every way. You build the best route city by city.</div>
+  <h3>Keep one best path per cell</h3>
+  <p>Let \(V[s,t]\) be the score of the best path that ends in tag \(s\) at position \(t\). We build each column from the last one: take the best previous tag, times its transition, times the current emission.</p>
+  <div class="eqbox">$$ V[s,t] = \max_{s'} \; V[s',\,t-1]\;\cdot\; P(s \mid s')\;\cdot\; P(w_t \mid s) $$</div>
+  <p>We also store which \(s'\) won, a <strong>backpointer</strong>, so we can rebuild the path at the end. Many paths flow into a cell, but only the best can ever be part of the answer.</p>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Watch the pruning</h4>
+    <p class="muted" style="font-size:14px">Several paths reach each cell. Press prune to keep only the best one per cell and drop the rest. The readout compares brute-force paths against Viterbi's cost.</p>
+    <div class="chips"><button class="btn" id="c13step">&#9654; prune step</button><button class="btn" id="c13reset">&#8634; reset</button></div>
+    <div class="grid2" style="align-items:start"><div><canvas id="c13canvas" width="440" height="260" style="width:100%;height:auto"></canvas></div><div class="readout" id="c13out"></div></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>Viterbi decoding is everywhere in sequence models. Conditional random fields use it to find the best label list. Speech systems use it for the best word path. The same trick powers CTC decoding today.</p>
+  <div class="key"><b>Key insight.</b> Keep only the best path into each tag at each position, plus a backpointer. The cost drops from \(T^n\) to about \(n\,T^2\).</div>
+  <p class="muted"><b>Bridge &rarr;</b> Now run it in full on a real sentence: &ldquo;the doctor is in&rdquo;.</p>
+ </div>
+</section>
+
+<section id="c14">
+ <div class="wrap">
+  <div class="kicker">14 &middot; The centerpiece</div>
+  <h2>Viterbi in full: &ldquo;the doctor is in&rdquo;</h2>
+  <p class="lead">We decode &ldquo;the doctor is in&rdquo; from start to finish. Five tags, four words, one trellis. We fill it left to right, then backtrace the best path.</p>
+  <div class="note"><b>What to watch.</b> Each cell keeps one number: the best score for that tag at that word. Tags that emit a word with chance zero stay at zero. The gold path appears only at the end, by backtracing.</div>
+  <h3>The numbers</h3>
+  <p>From the tables: \(P(\text{Det}\mid\langle s\rangle)=0.3\), \(P(\text{the}\mid\text{Det})=0.7\); then \(P(\text{Noun}\mid\text{Det})=0.9\), \(P(\text{doctor}\mid\text{Noun})=0.4\); then \(P(\text{Verb}\mid\text{Noun})=0.4\), \(P(\text{is}\mid\text{Verb})=0.9\); then \(P(\text{Prep}\mid\text{Verb})=0.2\), \(P(\text{in}\mid\text{Prep})=1.0\).</p>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Fill the trellis, then backtrace</h4>
+    <p class="muted" style="font-size:14px">Press next to fill the next cell, with its full arithmetic in the readout. After the last column, the gold path lights up by following the backpointers. The answer is the/Det doctor/Noun is/Verb in/Prep.</p>
+    <div class="chips"><button class="btn" id="c14step">&#9654; next cell</button><button class="btn" id="c14all">fill all</button><button class="btn" id="c14reset">&#8634; reset</button></div>
+    <canvas id="c14canvas" width="820" height="350" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="c14out"></div>
+  </div>
+  <h4>Where this shows up in ML</h4>
+  <p>This exact table-filling runs inside taggers, chunkers, and named-entity systems built on HMMs or conditional random fields. The numbers come from a trained model, but the sweep and backtrace are the same.</p>
+  <div class="key"><b>Pitfall &mdash; read the path, not the cells.</b> Viterbi gives the best whole list, not each word's own top tag. A weak-looking tag can win if it makes the rest of the path much stronger.</div>
+  <p class="muted"><b>Bridge &rarr;</b> The HMM has limits. A stronger, feature-rich cousin is the MEMM.</p>
+ </div>
+</section>
+
+<section id="c15">
+ <div class="wrap">
+  <div class="kicker">15 &middot; Beyond</div>
+  <h2>MEMM, features, and bidirectionality</h2>
+  <p class="lead">The HMM is a fine first tagger, but it has limits: unknown words, sparse counts, and only one tag of context. A stronger model is the Maximum Entropy Markov Model, or MEMM.</p>
+  <div class="note"><b>The shift.</b> The HMM is generative: it models how words come from tags. The MEMM is discriminative: it models the tag directly from the word and the previous tag. It is logistic regression run along the sentence.</div>
+  <h3>Features and a softmax</h3>
+  <p>The MEMM's strength is <strong>features</strong>: any clue you choose, turned into a yes/no test. For &ldquo;back&rdquo; it might check the previous tag, the word ending, or the case. Each feature has a learned weight, and a softmax turns the total scores into probabilities.</p>
+  <div class="eqbox">$$ P(t \mid \text{context}) = \frac{e^{\,\text{score}(t)}}{\sum_{t'} e^{\,\text{score}(t')}} $$</div>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Toggle features, sharpen the tag</h4>
+    <p class="muted" style="font-size:14px">Turn features on and off. Each one pushes the score toward VB or NN, and the softmax bars react. Rich features make the right tag stand out &mdash; the HMM could not use most of these.</p>
+    <div id="c15feats" class="chips"></div>
+    <div class="grid2" style="align-items:start"><div><canvas id="c15canvas" width="440" height="240" style="width:100%;height:auto"></canvas></div><div class="readout" id="c15out"></div></div>
+  </div>
+  <h4>Decoding and bidirectionality</h4>
+  <p>We still want the best whole list, so we decode the MEMM with Viterbi too. We can also run two passes, left to right and right to left, and keep the higher-scoring one. Modern taggers usually run both ways.</p>
+  <div class="key"><b>Pitfall &mdash; greedy decoding.</b> Tagging one word at a time and locking it is fast but cannot undo an early mistake. Use Viterbi over the whole sentence. The MEMM's label-bias flaw is later fixed by the CRF.</div>
+  <p class="muted"><b>Bridge &rarr;</b> Step back and see the whole ladder, from counts to neural nets, in the takeaways.</p>
+ </div>
+</section>
+
+<section id="summary">
+ <div class="wrap">
+  <div class="kicker">16 &middot; Tying it together</div>
+  <h2>Key Takeaways</h2>
+  <p class="lead">One thread runs through the whole lecture: a tag depends on its neighbours, so we score whole sequences, not single words. Everything else is how to do that well and fast.</p>
+  <div class="grid3">
+    <div class="card"><h4>1 &middot; Tagging is choosing</h4><p class="muted" style="font-size:14px">A word like &ldquo;back&rdquo; has many tags. The job is to pick the right one for this sentence, using the words nearby.</p></div>
+    <div class="card"><h4>2 &middot; The HMM</h4><p class="muted" style="font-size:14px">Hidden tags emit visible words. Score a tagging by multiplying one transition per tag and one emission per word.</p></div>
+    <div class="card"><h4>3 &middot; Viterbi decodes</h4><p class="muted" style="font-size:14px">Keep only the best path into each cell, sweep left to right, then backtrace. The best sequence, without brute force.</p></div>
+  </div>
+  <div class="card">
+   <h4>&#9889; The through-line: how much context does a method use?</h4>
+   <p class="muted" style="font-size:14px">Slide from the simplest method to the richest. Each step uses more context and fixes the errors below it. Watch which method lights up and what it can see.</p>
+   <div id="ladderSliders"></div>
+   <div class="grid2" style="align-items:start;margin-top:8px">
+     <div><canvas id="ladderCanvas" width="440" height="300" style="width:100%;height:auto"></canvas></div>
+     <div class="readout" id="ladderOut"></div>
+   </div>
+  </div>
+  <div class="note" style="margin-top:22px"><b>Where to go next.</b> The HMM and Viterbi here are the floor under modern taggers. Swap the count-based tables for a neural network that reads the whole sentence, keep the same decode step, and you have a state-of-the-art tagger.</div>
+  <div class="chips" style="margin-top:18px">
+    <span class="tag">analogy before algebra</span>
+    <span class="tag">every symbol named</span>
+    <span class="tag">real-number examples</span>
+    <span class="tag">bespoke canvas labs</span>
+    <span class="tag">self-contained &middot; file safe</span>
+  </div>
+ </div>
+</section>
+
+<div class="foot">
+  Part-of-Speech Tagging &middot; an interactive companion to Session 6.
+  Math rendered with MathJax. Every visual is hand-drawn on a 2D canvas; the page is one self-contained file.
+</div>
+</main>
+</div>
+
+<script>
+/* ---------- shared helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=(x,d=3)=>{ if(Math.abs(x)<1e-12)x=0; return x.toFixed(d); };
+const esc=s=>String(s);
+function makeSlider(host,opt,onInput){
+  const row=document.createElement('div');row.className='ctrl';
+  const lab=document.createElement('label');lab.innerHTML=opt.label;
+  const inp=document.createElement('input');
+  inp.type='range';inp.id=opt.id;
+  inp.min=opt.min;inp.max=opt.max;inp.step=opt.step;inp.value=opt.value;
+  const val=document.createElement('span');val.className='val';
+  const dec=(opt.step+'').includes('.')?(opt.step+'').split('.')[1].length:0;
+  const show=()=>{val.textContent=parseFloat(inp.value).toFixed(dec);};
+  inp.addEventListener('input',()=>{show();if(onInput)onInput(parseFloat(inp.value));});
+  row.appendChild(lab);row.appendChild(inp);row.appendChild(val);host.appendChild(row);
+  show();
+  return ()=>parseFloat(inp.value);
+}
+function setupCanvas(canvas,drawFn){
+  const ctx=canvas.getContext('2d');
+  function resize(){
+    const dpr=Math.max(1,Math.min(window.devicePixelRatio||1,2));
+    const rect=canvas.getBoundingClientRect();
+    const cssW=rect.width||canvas.width;
+    const cssH=cssW*(canvas.height/canvas.width);
+    canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawFn(ctx,cssW,cssH);
+  }
+  let raf=null;
+  window.addEventListener('resize',()=>{if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(resize);});
+  resize();
+  return {redraw:()=>{const dpr=Math.max(1,Math.min(window.devicePixelRatio||1,2));
+    drawFn(ctx,canvas.width/dpr,canvas.height/dpr);}};
+}
+/* tiny canvas draw helpers */
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function nodeBox(ctx,cx,cy,w,h,txt,fill,stroke,tcol,fs){rrect(ctx,cx-w/2,cy-h/2,w,h,7);ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=tcol;ctx.font='bold '+(fs||13)+'px '+getComputedStyle(document.body).getPropertyValue('--mono');ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(txt,cx,cy);ctx.textAlign='left';}
+function arrowLine(ctx,x1,y1,x2,y2,col,lw){ctx.strokeStyle=col;ctx.lineWidth=lw||2;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();const a=Math.atan2(y2-y1,x2-x1),s=6;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-s*Math.cos(a-0.4),y2-s*Math.sin(a-0.4));ctx.lineTo(x2-s*Math.cos(a+0.4),y2-s*Math.sin(a+0.4));ctx.closePath();ctx.fill();}
+const softmax=arr=>{const m=Math.max(...arr),e=arr.map(v=>Math.exp(v-m)),s=e.reduce((a,v)=>a+v,0);return e.map(v=>v/s);};
+
+/* scroll progress + active nav */
+const tocLinks=$$('#toc a');
+const sections=tocLinks.map(a=>$(a.getAttribute('href')));
+function onScroll(){
+  const st=window.scrollY, h=document.body.scrollHeight-window.innerHeight;
+  $('#progbar').style.width=(100*st/(h||1))+'%';
+  let idx=0;
+  sections.forEach((sec,i)=>{ if(sec && sec.offsetTop-120<=st) idx=i; });
+  tocLinks.forEach((a,i)=>a.classList.toggle('active',i===idx));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+
+window.__demos=[];
+function runDemos(){ window.__demos.forEach(f=>{try{f();}catch(e){console.error(e);}}); }
+
+function initTheme(){
+  const btn=$('#themeBtn'); if(!btn)return;
+  const sync=()=>{const light=document.documentElement.getAttribute('data-theme')==='light';btn.innerHTML=light?'☾ Dark':'☀ Light';};
+  sync();
+  btn.addEventListener('click',()=>{
+    const root=document.documentElement, light=root.getAttribute('data-theme')==='light';
+    if(light){root.removeAttribute('data-theme');try{localStorage.setItem('postheme','dark');}catch(e){}}
+    else{root.setAttribute('data-theme','light');try{localStorage.setItem('postheme','light');}catch(e){}}
+    sync();runDemos();
+  });
+}
+function initReveal(){
+  if(!('IntersectionObserver' in window))return;
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),
+    {threshold:0.04,rootMargin:'0px 0px -4% 0px'});
+  $$('section .wrap > *').forEach(el=>{
+    if(el.classList.contains('lab')||el.querySelector('canvas')) return;
+    el.classList.add('reveal'); io.observe(el);
+  });
+}
+
+/* guided story */
+const STORY=[
+ {id:'intro',t:'Welcome',x:'We build a part-of-speech tagger from the ground up. Intuition first, then the exact math, with a live lab each chapter. Use the arrow keys; space pauses.'},
+ {id:'c1',t:'What tagging is',x:'Each word gets one tag for this sentence. Click the words in the lab and watch each one light up with its job.'},
+ {id:'c2',t:'Word classes',x:'Glue words form a small fixed set; content words keep growing. Sort the chips and see which is which.'},
+ {id:'c3',t:'The Penn tag set',x:'One coarse tag splits into many fine ones. Slide the detail knob and watch noun split into NN, NNS, NNP.'},
+ {id:'c4',t:'Ambiguity',x:'The same word wears different tags. Switch the context for the word back and watch its tag change.'},
+ {id:'c5',t:'Sequence labeling',x:'Tagging each word alone breaks. And the number of whole tag lists explodes. Slide n and T to see it.'},
+ {id:'c6',t:'Markov chains',x:'Only today matters. Set the stay-warm chance and add days to watch a long run get unlikely fast.'},
+ {id:'c7',t:'Hidden Markov Models',x:'Hidden tags emit visible words. Drag the transition and emission knobs and watch the joint score build.'},
+ {id:'c8',t:"Bayes' rule",x:'Posterior is likelihood times prior. The bottom term cancels across candidates. Toggle it and see.'},
+ {id:'c9',t:'The two tables',x:'Probability is just count over total. Add tally marks and watch the fraction settle.'},
+ {id:'c10',t:'Tagging race',x:'Score the verb story and the noun story. Step through the numbers and see the verb win.'},
+ {id:'c11',t:'Building the tables',x:'Walk the corpus bigram by bigram and watch the transition table fill in, cell by cell.'},
+ {id:'c12',t:'The ice-cream HMM',x:'Eight weather paths for one ice-cream sequence. Score them all and find the best.'},
+ {id:'c13',t:'The Viterbi idea',x:'Many paths flow into a cell; keep only the best. Watch the pruning that stops the blow-up.'},
+ {id:'c14',t:'Viterbi in full',x:'Fill the real trellis for the doctor is in, column by column, then backtrace the gold path.'},
+ {id:'c15',t:'MEMM and friends',x:'A discriminative tagger uses any feature you like. Toggle features and watch the tag probabilities sharpen.'},
+ {id:'summary',t:'Key takeaways',x:'One thread: context decides the tag, so score whole sequences. Slide the context ladder to see the whole story.'}
+];
+let storyI=0,storyPlaying=false,storyTimer=null,storyActive=false;
+function storySec(){return $('#'+STORY[storyI].id);}
+function positionSpot(){
+  const sec=storySec(); if(!sec)return; const el=sec.querySelector('h1,h2')||sec;
+  const r=el.getBoundingClientRect(), sp=$('#storyspot');
+  sp.style.display='block';
+  sp.style.left=(r.left-12)+'px'; sp.style.top=(r.top-10)+'px';
+  sp.style.width=(r.width+24)+'px'; sp.style.height=(r.height+20)+'px';
+}
+function showStory(){
+  const s=STORY[storyI];
+  $('#storyStep').textContent='Step '+(storyI+1)+' / '+STORY.length;
+  $('#storyTitle').textContent=s.t; $('#storyText').innerHTML=s.x;
+  $$('#storyDots i').forEach((d,i)=>d.classList.toggle('on',i===storyI));
+  const sec=storySec();
+  if(sec){const y=sec.getBoundingClientRect().top+window.scrollY-86;window.scrollTo({top:y,behavior:'smooth'});}
+  setTimeout(positionSpot,520);
+}
+function resetTimer(){clearInterval(storyTimer);if(storyPlaying)storyTimer=setInterval(()=>{if(storyI===STORY.length-1){togglePlay();}else nextStory();},9000);}
+function nextStory(){storyI=(storyI+1)%STORY.length;showStory();resetTimer();}
+function prevStory(){storyI=(storyI-1+STORY.length)%STORY.length;showStory();resetTimer();}
+function togglePlay(){storyPlaying=!storyPlaying;$('#storyPlay').innerHTML=storyPlaying?'⏸ pause':'▶ play';resetTimer();}
+function spotFollow(){if(storyActive)positionSpot();}
+function startStory(){
+  storyActive=true;storyI=0;storyPlaying=true;
+  $('#storycard').style.display='block';$('#storyPlay').innerHTML='⏸ pause';
+  $('#storyDots').innerHTML=STORY.map((_,i)=>'<i data-i="'+i+'"></i>').join('');
+  $$('#storyDots i').forEach(d=>d.addEventListener('click',()=>{storyI=+d.dataset.i;showStory();resetTimer();}));
+  showStory();resetTimer();
+  window.addEventListener('scroll',spotFollow,{passive:true});
+  window.addEventListener('resize',positionSpot);
+}
+function endStory(){
+  storyActive=false;storyPlaying=false;clearInterval(storyTimer);
+  $('#storycard').style.display='none';$('#storyspot').style.display='none';
+  window.removeEventListener('scroll',spotFollow);window.removeEventListener('resize',positionSpot);
+}
+function initStory(){
+  if(!$('#tourBtn'))return;
+  $('#tourBtn').addEventListener('click',startStory);
+  $('#storyExit').addEventListener('click',endStory);
+  $('#storyNext').addEventListener('click',nextStory);
+  $('#storyPrev').addEventListener('click',prevStory);
+  $('#storyPlay').addEventListener('click',togglePlay);
+  document.addEventListener('keydown',e=>{if(!storyActive)return;
+    if(e.key==='Escape')endStory();else if(e.key==='ArrowRight')nextStory();
+    else if(e.key==='ArrowLeft')prevStory();else if(e.key===' '){e.preventDefault();togglePlay();}});
+}
+
+/* ===================== DEMOS ===================== */
+
+/* hero: animated tag -> word network */
+window.__demos.push(function(){
+  const c=$('#heroCanvas'); if(!c)return; const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  const tags=['DT','NN','VB'], words=['the','dog','barks'];
+  let t=0;
+  function frame(){
+    ctx.clearRect(0,0,W,H);
+    const xs=[W*0.24,W*0.5,W*0.76], yT=H*0.32, yW=H*0.78;
+    for(let i=0;i<xs.length-1;i++){
+      const a=0.4+0.35*Math.sin(t+i);
+      ctx.strokeStyle='rgba(255,203,107,'+a.toFixed(3)+')';ctx.lineWidth=2.4;
+      ctx.beginPath();ctx.moveTo(xs[i]+34,yT);ctx.lineTo(xs[i+1]-34,yT);ctx.stroke();
+    }
+    for(let i=0;i<xs.length;i++){
+      const a=0.4+0.4*Math.sin(t*1.3+i*1.4);
+      ctx.strokeStyle='rgba(98,232,138,'+a.toFixed(3)+')';ctx.lineWidth=2.2;
+      ctx.beginPath();ctx.moveTo(xs[i],yT+20);ctx.lineTo(xs[i],yW-20);ctx.stroke();
+    }
+    for(let i=0;i<xs.length;i++){
+      const r=20+1.5*Math.sin(t*1.4+i);
+      ctx.fillStyle='#11203c';ctx.strokeStyle='#19c4ff';ctx.lineWidth=2.4;ctx.shadowColor='#19c4ff';ctx.shadowBlur=12;
+      ctx.beginPath();ctx.arc(xs[i],yT,r,0,7);ctx.fill();ctx.stroke();ctx.shadowBlur=0;
+      ctx.fillStyle='#cfe6ff';ctx.font='bold 13px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(tags[i],xs[i],yT);
+      rrect(ctx,xs[i]-30,yW-17,60,34,8);ctx.fillStyle='#0e1729';ctx.fill();ctx.strokeStyle='#33405e';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.fillStyle='#e7edf9';ctx.fillText(words[i],xs[i],yW);
+    }
+    ctx.textAlign='left';t+=0.02;requestAnimationFrame(frame);
+  }
+  frame();
+});
+
+/* summary: context ladder */
+window.__demos.push(function(){
+  const c=$('#ladderCanvas'); if(!c)return;
+  const host=$('#ladderSliders'); host.innerHTML='';
+  const methods=[
+    {n:'Most-frequent tag',ctx:'no context',acc:90,col:'#ff6b81'},
+    {n:'HMM (1 previous tag)',ctx:'one tag back',acc:95,col:'#ffcb6b'},
+    {n:'MEMM (rich features)',ctx:'features + 1 tag',acc:96.5,col:'#9b8cff'},
+    {n:'Neural (whole sentence)',ctx:'both directions',acc:97.8,col:'#62e88a'}
+  ];
+  const get=makeSlider(host,{id:'ladI',label:'context',min:'0',max:'3',step:'1',value:'1'},()=>render());
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const sel=Math.round(get());const n=methods.length;const rh=(H-30)/n;
+    for(let i=0;i<n;i++){
+      const m=methods[i];const y=15+i*rh;const on=i<=sel;
+      rrect(ctx,16,y+6,W-32,rh-12,9);
+      ctx.fillStyle=on?'rgba(98,232,138,0.10)':'rgba(120,140,180,0.05)';ctx.fill();
+      ctx.strokeStyle=i===sel?m.col:'#26344f';ctx.lineWidth=i===sel?2.4:1;ctx.stroke();
+      ctx.fillStyle=on?'#e7edf9':'#5b6a87';ctx.font='bold 13px sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';
+      ctx.fillText(m.n,28,y+rh/2-7);
+      ctx.fillStyle='#7e8eb0';ctx.font='11px monospace';ctx.fillText('sees: '+m.ctx,28,y+rh/2+10);
+      const bw=(W-180)* (m.acc-88)/(98-88);
+      ctx.fillStyle=on?m.col:'#2a3a5c';rrect(ctx,W-150,y+rh/2-8,Math.max(6,bw),16,4);ctx.fill();
+      ctx.fillStyle=on?'#e7edf9':'#5b6a87';ctx.font='bold 12px monospace';ctx.textAlign='right';
+      ctx.fillText(m.acc.toFixed(1)+'%',W-26,y+rh/2);
+    }
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();const m=methods[Math.round(get())];
+    $('#ladderOut').innerHTML='method: <span class="g">'+m.n+'</span>\ncontext used: <span class="hl">'+m.ctx+'</span>\ntypical accuracy: <span class="g">'+m.acc.toFixed(1)+'%</span>\n\nMore context climbs the ladder.\nEach rung fixes errors the rung below\ncannot see.';}
+  render();
+});
+
+/* 01 click words -> tags */
+window.__demos.push(function(){
+  const c=$('#c1canvas'); if(!c)return;
+  const words=['the','lead','paint','is','unsafe'];
+  const tags=['Det','N','N','V','Adj'];
+  const cols=['#19c4ff','#62e88a','#62e88a','#ffcb6b','#9b8cff'];
+  let shown=words.map(()=>false), boxes=[];
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const n=words.length, gap=10, bw=(W-(n+1)*gap)/n, y=24, h=44;
+    boxes=[];
+    for(let i=0;i<n;i++){
+      const x=gap+i*(bw+gap);
+      boxes.push({x,w:bw});
+      rrect(ctx,x,y,bw,h,8);
+      ctx.fillStyle='#0e1729';ctx.fill();ctx.strokeStyle=shown[i]?cols[i]:'#33405e';ctx.lineWidth=2;ctx.stroke();
+      ctx.fillStyle='#e7edf9';ctx.font='15px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(words[i],x+bw/2,y+h/2);
+      if(shown[i]){
+        arrowLine(ctx,x+bw/2,y+h+3,x+bw/2,y+h+26,cols[i],2);
+        rrect(ctx,x+bw*0.12,y+h+30,bw*0.76,28,7);ctx.fillStyle=cols[i];ctx.fill();
+        ctx.fillStyle='#06121f';ctx.font='bold 13px monospace';ctx.fillText(tags[i],x+bw/2,y+h+44);
+      }
+    }
+    ctx.textAlign='left';
+  });
+  function readout(){
+    const tagged=words.map((w,i)=>shown[i]?w+'/'+tags[i]:w+'/?').join(' ');
+    const k=shown.filter(Boolean).length;
+    $('#c1out').innerHTML='tagged ('+k+'/'+words.length+'):\n'+tagged+(k===words.length?'\n\n<span class="g">every word has exactly one tag &check;</span>':'\n\nclick a word to reveal its tag');
+  }
+  c.addEventListener('click',e=>{
+    const r=c.getBoundingClientRect(); const x=e.clientX-r.left;
+    boxes.forEach((b,i)=>{ if(x>=b.x&&x<=b.x+b.w) shown[i]=!shown[i]; });
+    cv.redraw(); readout();
+  });
+  $('#c1all').addEventListener('click',()=>{shown=words.map(()=>true);cv.redraw();readout();});
+  $('#c1reset').addEventListener('click',()=>{shown=words.map(()=>false);cv.redraw();readout();});
+  readout();
+});
+
+/* 02 open vs closed sort */
+window.__demos.push(function(){
+  const host=$('#c2chips'); if(!host)return;
+  const data=[['the',0],['of',0],['can',0],['she',0],['and',0],['to',0],
+              ['laptop',1],['happy',1],['quickly',1],['stream',1],['email',1],['run',1]];
+  let guess=data.map(()=>1);
+  function render(){
+    host.innerHTML='';
+    data.forEach((d,i)=>{
+      const b=document.createElement('button');b.className='wbtn sel';
+      b.textContent=d[0]+'  ['+(guess[i]?'open':'closed')+']';
+      b.onclick=()=>{guess[i]=guess[i]?0:1;render();};
+      host.appendChild(b);
+    });
+  }
+  render();
+  $('#c2check').addEventListener('click',()=>{
+    let right=0;
+    $$('#c2chips .wbtn').forEach((b,i)=>{b.classList.remove('ok','bad','sel');const ok=guess[i]===data[i][1];b.classList.add(ok?'ok':'bad');if(ok)right++;});
+    const closedWords=data.filter(d=>d[1]===0).map(d=>d[0]).join(', ');
+    $('#c2out').innerHTML='score: <span class="g">'+right+' / '+data.length+'</span>\n\nclosed (glue, fixed set):\n  <span class="hl">'+closedWords+'</span>\n\nopen classes keep growing:\nnew words like "laptop" and "email" join them.';
+  });
+  $('#c2reset').addEventListener('click',()=>{guess=data.map(()=>1);render();$('#c2out').innerHTML='';});
+});
+
+/* 03 granularity tree */
+window.__demos.push(function(){
+  const c=$('#c3canvas'); if(!c)return;
+  const host=$('#c3sliders'); host.innerHTML='';
+  const rows=[
+    ['Noun','#62e88a',['NN','NNS','NNP'],['NNPS']],
+    ['Verb','#ffcb6b',['VB','VBD','VBG'],['VBZ','VBN']],
+    ['Adj','#9b8cff',['JJ'],['JJR','JJS']],
+    ['Adv','#19c4ff',['RB'],['RBR','RBS']]
+  ];
+  const get=makeSlider(host,{id:'c3g',label:'detail',min:'1',max:'3',step:'1',value:'1'},()=>render());
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const lvl=Math.round(get());const rh=H/rows.length;
+    rows.forEach((r,ri)=>{
+      const cy=ri*rh+rh/2;
+      nodeBox(ctx,64,cy,86,34,r[0],'#0e1729',r[1],'#e7edf9',13);
+      if(lvl>=2){
+        let fine=r[2].slice(); if(lvl>=3) fine=fine.concat(r[3]);
+        const x0=150, cw=(W-x0-12)/Math.max(4,fine.length), bw=Math.min(58,cw-6);
+        fine.forEach((f,fi)=>{
+          const fx=x0+fi*cw+cw/2;
+          ctx.strokeStyle=r[1]+'88';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(107,cy);ctx.lineTo(fx-bw/2,cy);ctx.stroke();
+          nodeBox(ctx,fx,cy,bw,26,f,'#11203c',r[1],'#cfe0ff',11);
+        });
+      }
+    });
+    ctx.textAlign='left';
+  });
+  function count(lvl){return lvl===1?4:rows.reduce((a,r)=>a+r[2].length+(lvl>=3?r[3].length:0),0);}
+  function render(){cv.redraw();const lvl=Math.round(get());
+    $('#c3out').innerHTML='detail level: <span class="hl">'+lvl+'</span>\ntags shown: <span class="g">'+count(lvl)+'</span>\n\nlevel 1: 4 coarse classes\nlevel 2: split noun and verb\nlevel 3: finer still\n\nthe real Penn set: <span class="hl">45 tags</span>\nmore tags = more detail,\nbut more data needed per tag.';}
+  render();
+});
+
+/* 04 ambiguity: context decides the tag */
+window.__demos.push(function(){
+  const c=$('#c4canvas'); if(!c)return;
+  const host=$('#c4chips'); host.innerHTML='';
+  const ctxs=[
+    [['the','back','door'],1,'JJ','adjective','#9b8cff'],
+    [['on','my','back'],2,'NN','noun','#62e88a'],
+    [['win','the','voters','back'],3,'RB','adverb','#ffcb6b'],
+    [['promised','to','back','the','bill'],2,'VB','verb','#ff6ec7']
+  ];
+  let sel=0;
+  ctxs.forEach((d,i)=>{
+    const b=document.createElement('button');b.className='wbtn';b.textContent=d[0].join(' ');
+    b.onclick=()=>{sel=i;mark();cv.redraw();readout();};
+    host.appendChild(b);
+  });
+  function mark(){$$('#c4chips .wbtn').forEach((b,i)=>b.classList.toggle('sel',i===sel));}
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const d=ctxs[sel], ws=d[0], bi=d[1], col=d[4];
+    ctx.font='17px sans-serif';ctx.textBaseline='middle';
+    const widths=ws.map(w=>ctx.measureText(w).width+26);
+    const total=widths.reduce((a,v)=>a+v,0)+(ws.length-1)*8;
+    let x=(W-total)/2, y=H*0.40;
+    ws.forEach((w,i)=>{
+      const bw=widths[i];
+      if(i===bi){rrect(ctx,x,y-20,bw,40,9);ctx.fillStyle=col;ctx.fill();ctx.fillStyle='#06121f';ctx.font='bold 17px sans-serif';}
+      else{ctx.fillStyle='#cdd8ee';ctx.font='17px sans-serif';}
+      ctx.textAlign='center';ctx.fillText(w,x+bw/2,y);
+      if(i===bi){
+        arrowLine(ctx,x+bw/2,y+22,x+bw/2,y+50,col,2);
+        rrect(ctx,x+bw/2-26,y+52,52,26,7);ctx.fillStyle=col;ctx.fill();
+        ctx.fillStyle='#06121f';ctx.font='bold 13px monospace';ctx.fillText(d[2],x+bw/2,y+65);
+      }
+      x+=bw+8;
+    });
+    ctx.textAlign='left';
+  });
+  function readout(){const d=ctxs[sel];
+    $('#c4out').innerHTML='context: "'+d[0].join(' ')+'"\nthe word "back" here is a <span class="hl">'+d[3]+'</span>\ntag = <span class="g">'+d[2]+'</span>\n\nsame word, different job: only the\nneighbours changed.';}
+  mark(); readout();
+});
+
+/* 05 brute force explosion */
+window.__demos.push(function(){
+  const c=$('#c5canvas'); if(!c)return;
+  const host=$('#c5sliders'); host.innerHTML='';
+  const getN=makeSlider(host,{id:'c5n',label:'words n',min:'1',max:'12',step:'1',value:'5'},()=>render());
+  const getT=makeSlider(host,{id:'c5t',label:'tags T',min:'2',max:'45',step:'1',value:'45'},()=>render());
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const n=Math.round(getN()),T=Math.round(getT());
+    const logB=n*Math.log10(T), logS=Math.log10(n*T*T);
+    const maxlog=Math.max(logB,3), baseY=H-40, top=26;
+    function bar(cx,val,logv,col,lab){
+      const h=Math.max(2,(logv/maxlog)*(baseY-top));
+      ctx.fillStyle=col;rrect(ctx,cx-48,baseY-h,96,h,5);ctx.fill();
+      ctx.fillStyle='#cdd8ee';ctx.font='12px monospace';ctx.textAlign='center';ctx.fillText(lab,cx,baseY+16);
+      ctx.fillStyle='#fff';ctx.font='bold 11px monospace';ctx.fillText(val,cx,baseY-h-8);
+    }
+    bar(W*0.30, '10^'+logB.toFixed(1), logB,'#ff6b81','brute  T^n');
+    bar(W*0.70, (n*T*T).toLocaleString(), logS,'#62e88a','Viterbi n·T²');
+    ctx.fillStyle='#64759c';ctx.font='10px monospace';ctx.textAlign='left';ctx.fillText('log scale',8,16);
+  });
+  function render(){cv.redraw();const n=Math.round(getN()),T=Math.round(getT());
+    const brute=Math.pow(T,n), smart=n*T*T;
+    $('#c5out').innerHTML='n = '+n+' words,  T = '+T+' tags\n\nbrute force  T^n = <span style="color:var(--red)">'+brute.toExponential(2)+'</span>\nViterbi    n·T² = <span class="g">'+smart.toLocaleString()+'</span>\n\nbrute force is hopeless;\nViterbi stays tiny.';}
+  render();
+});
+
+/* 06 Markov weather streak */
+window.__demos.push(function(){
+  const c=$('#c6canvas'); if(!c)return;
+  const host=$('#c6sliders'); host.innerHTML='';
+  const getA=makeSlider(host,{id:'c6a',label:'a₃₃ stay-warm',min:'0.1',max:'0.9',step:'0.05',value:'0.6'},()=>render());
+  let days=1;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const n=days, cw=Math.min(38,(W-16)/Math.max(1,n));
+    for(let i=0;i<n;i++){const x=8+i*cw;rrect(ctx,x,8,cw-5,26,6);ctx.fillStyle='#ffcb6b';ctx.fill();ctx.fillStyle='#06121f';ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('W',x+(cw-5)/2,21);}
+    const a=getA(),pad=40,baseY=H-22,top=52,maxd=12;
+    ctx.strokeStyle='rgba(120,150,210,.2)';ctx.beginPath();ctx.moveTo(pad,baseY);ctx.lineTo(W-pad,baseY);ctx.stroke();
+    ctx.strokeStyle='#38f0d8';ctx.lineWidth=2;ctx.beginPath();
+    for(let k=1;k<=maxd;k++){const f=Math.pow(a,k-1);const x=pad+(k-1)/(maxd-1)*(W-2*pad);const y=baseY-f*(baseY-top);if(k===1)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    ctx.stroke();
+    const f=Math.pow(a,days-1);const x=pad+(days-1)/(maxd-1)*(W-2*pad);const y=baseY-f*(baseY-top);
+    ctx.fillStyle='#ffcb6b';ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill();
+    ctx.fillStyle='#64759c';ctx.font='10px monospace';ctx.textAlign='left';ctx.fillText('P(streak)',pad-4,top-6);ctx.fillText('days →',W-pad-32,baseY+14);
+  });
+  function render(){cv.redraw();const a=getA();const p=0.2*Math.pow(a,days-1);
+    $('#c6out').innerHTML='warm days in a row: <span class="hl">'+days+'</span>\nstart π₃ = 0.2,  a₃₃ = '+fmt(a,2)+'\n\nP(streak) = 0.2 × '+fmt(a,2)+'^'+(days-1)+'\n        = <span class="g">'+p.toExponential(3)+'</span>\n\neach extra warm day multiplies in\nanother '+fmt(a,2)+': streaks get rare fast.';}
+  $('#c6add').addEventListener('click',()=>{days=Math.min(12,days+1);render();});
+  $('#c6reset').addEventListener('click',()=>{days=1;render();});
+  render();
+});
+
+/* 07 HMM joint score */
+window.__demos.push(function(){
+  const c=$('#c7canvas'); if(!c)return;
+  const host=$('#c7sliders'); host.innerHTML='';
+  const t1=makeSlider(host,{id:'c7t1',label:'T DT|⟨s⟩',min:'0.05',max:'0.95',step:'0.05',value:'0.3'},()=>render());
+  const t2=makeSlider(host,{id:'c7t2',label:'T NN|DT',min:'0.05',max:'0.95',step:'0.05',value:'0.5'},()=>render());
+  const t3=makeSlider(host,{id:'c7t3',label:'T VB|NN',min:'0.05',max:'0.95',step:'0.05',value:'0.4'},()=>render());
+  const e1=makeSlider(host,{id:'c7e1',label:'E the|DT',min:'0.05',max:'0.95',step:'0.05',value:'0.4'},()=>render());
+  const e2=makeSlider(host,{id:'c7e2',label:'E dog|NN',min:'0.01',max:'0.5',step:'0.01',value:'0.02'},()=>render());
+  const e3=makeSlider(host,{id:'c7e3',label:'E barks|VB',min:'0.01',max:'0.5',step:'0.01',value:'0.03'},()=>render());
+  const tags=['DT','NN','VB'], words=['the','dog','barks'];
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const xs=[W*0.22,W*0.5,W*0.78], yT=54, yW=H-40, tv=[t2(),t3()], ev=[e1(),e2(),e3()];
+    for(let i=0;i<2;i++){const t=tv[i];arrowLine(ctx,xs[i]+26,yT,xs[i+1]-26,yT,'rgba(255,203,107,'+(0.3+0.6*t)+')',1+5*t);ctx.fillStyle='#caa86a';ctx.font='10px monospace';ctx.textAlign='center';ctx.fillText(fmt(t,2),(xs[i]+xs[i+1])/2,yT-10);}
+    for(let i=0;i<3;i++){const e=ev[i];arrowLine(ctx,xs[i],yT+22,xs[i],yW-22,'rgba(98,232,138,'+(0.3+0.6*Math.min(1,e*2))+')',1+8*e);ctx.fillStyle='#7fd49a';ctx.font='10px monospace';ctx.textAlign='left';ctx.fillText(fmt(e,2),xs[i]+8,(yT+yW)/2);}
+    for(let i=0;i<3;i++){nodeBox(ctx,xs[i],yT,52,30,tags[i],'#11203c','#19c4ff','#cfe6ff',13);nodeBox(ctx,xs[i],yW,66,30,words[i],'#0e1729','#33405e','#e7edf9',12);}
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();
+    const tp=t1()*t2()*t3(), ep=e1()*e2()*e3(), j=tp*ep;
+    $('#c7out').innerHTML='transitions:\n '+fmt(t1(),2)+' × '+fmt(t2(),2)+' × '+fmt(t3(),2)+' = <span class="hl">'+fmt(tp,4)+'</span>\nemissions:\n '+fmt(e1(),2)+' × '+fmt(e2(),2)+' × '+fmt(e3(),2)+' = <span class="hl">'+ep.toExponential(2)+'</span>\n\njoint P(words, DT NN VB)\n = <span class="g">'+j.toExponential(3)+'</span>';}
+  render();
+});
+
+/* 08 Bayes: likelihood x prior */
+window.__demos.push(function(){
+  const c=$('#c8canvas'); if(!c)return;
+  const host=$('#c8sliders'); host.innerHTML='';
+  const lA=makeSlider(host,{id:'c8la',label:'A likelihood',min:'0.02',max:'1',step:'0.02',value:'0.6'},()=>render());
+  const pA=makeSlider(host,{id:'c8pa',label:'A prior',min:'0.02',max:'1',step:'0.02',value:'0.3'},()=>render());
+  const lB=makeSlider(host,{id:'c8lb',label:'B likelihood',min:'0.02',max:'1',step:'0.02',value:'0.3'},()=>render());
+  const pB=makeSlider(host,{id:'c8pb',label:'B prior',min:'0.02',max:'1',step:'0.02',value:'0.5'},()=>render());
+  let norm=false;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const a=lA()*pA(), b=lB()*pB(), Z=a+b;
+    const baseY=H-28,top=24;const mxProd=norm?1:Math.max(a,b,0.02);
+    function grp(x0,name,lik,pri,prod){
+      const items=[['L',lik,'#19c4ff',1],['prior',pri,'#9b8cff',1],['L·pr',prod,'#62e88a',mxProd]];
+      items.forEach((it,i)=>{const h=Math.max(2,(it[1]/it[3])*(baseY-top));const x=x0+i*46;
+        ctx.fillStyle=it[2];rrect(ctx,x,baseY-h,36,h,4);ctx.fill();
+        ctx.fillStyle='#9fb0d0';ctx.font='10px monospace';ctx.textAlign='center';ctx.fillText(it[0],x+18,baseY+13);
+        ctx.fillStyle='#cfe0ff';ctx.font='10px monospace';ctx.fillText(fmt(it[1],2),x+18,baseY-h-6);});
+      ctx.fillStyle='#cdd8ee';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText('tagging '+name,x0+70,top-6);
+    }
+    grp(W*0.06,'A',lA(),pA(),norm?a/Z:a);
+    grp(W*0.54,'B',lB(),pB(),norm?b/Z:b);
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();const a=lA()*pA(),b=lB()*pB(),Z=a+b;const win=a>=b?'A':'B';
+    $('#c8out').innerHTML='A: L×prior = '+fmt(lA(),2)+'×'+fmt(pA(),2)+' = <span class="hl">'+fmt(a,3)+'</span>\nB: L×prior = '+fmt(lB(),2)+'×'+fmt(pB(),2)+' = <span class="hl">'+fmt(b,3)+'</span>\n\nwinner: <span class="g">tagging '+win+'</span>'+(norm?'\n\n÷ P(w)='+fmt(Z,3)+':  A='+fmt(a/Z,3)+'  B='+fmt(b/Z,3)+'\nsame winner — the constant cancels.':'\n\ntoggle "divide by P(w)" — winner holds.');}
+  $('#c8norm').addEventListener('click',function(){norm=!norm;this.classList.toggle('active',norm);render();});
+  render();
+});
+
+/* 09 tally the tables */
+window.__demos.push(function(){
+  const c=$('#c9canvas'); if(!c)return;
+  let counts={NN:0,VB:0,JJ:0};
+  const cols={NN:'#62e88a',VB:'#ffcb6b',JJ:'#9b8cff'};
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const total=counts.NN+counts.VB+counts.JJ;
+    const keys=['NN','VB','JJ'],baseY=H-34,top=30,bw=64;
+    keys.forEach((k,i)=>{const p=total?counts[k]/total:0;const x=W*0.16+i*W*0.27;const h=p*(baseY-top);
+      ctx.fillStyle=cols[k];rrect(ctx,x,baseY-h,bw,h,5);ctx.fill();
+      ctx.fillStyle='#cdd8ee';ctx.font='12px monospace';ctx.textAlign='center';ctx.fillText('DT→'+k,x+bw/2,baseY+16);
+      ctx.fillStyle='#fff';ctx.font='bold 12px monospace';ctx.fillText(total?(p*100).toFixed(0)+'%':'—',x+bw/2,baseY-h-8);
+      ctx.fillStyle='#7e8eb0';ctx.font='10px monospace';ctx.fillText(counts[k]+'/'+total,x+bw/2,baseY-h-22);});
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();const total=counts.NN+counts.VB+counts.JJ;
+    $('#c9out').innerHTML='counts after DT:\n NN '+counts.NN+'   VB '+counts.VB+'   JJ '+counts.JJ+'\ntotal C(DT) = <span class="hl">'+total+'</span>\n\nP(NN|DT) = '+counts.NN+'/'+total+' = <span class="g">'+(total?fmt(counts.NN/total,2):'—')+'</span>\n\nprobability is a tally over the total.';}
+  $('#c9nn').addEventListener('click',()=>{counts.NN++;render();});
+  $('#c9vb').addEventListener('click',()=>{counts.VB++;render();});
+  $('#c9jj').addEventListener('click',()=>{counts.JJ++;render();});
+  $('#c9reset').addEventListener('click',()=>{counts={NN:0,VB:0,JJ:0};render();});
+  render();
+});
+
+/* 10 race stepper */
+window.__demos.push(function(){
+  const c=$('#c10canvas'); if(!c)return;
+  const host=$('#c10sliders'); host.innerHTML='';
+  const gVBTO=makeSlider(host,{id:'c10s',label:'P(VB|TO)',min:'0.0002',max:'0.9',step:'0.0002',value:'0.83'},()=>render());
+  const pNNTO=0.00047,pNRVB=0.0027,pNRNN=0.0012,praceVB=0.00012,praceNN=0.00057;
+  let step=0;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const vb=gVBTO()*pNRVB*praceVB, nn=pNNTO*pNRNN*praceNN;
+    const logv=v=>Math.max(0,Math.log10(v)+12);
+    const mx=Math.max(logv(vb),logv(nn),1),baseY=H-40,top=30;
+    [['VB',vb,'#62e88a',W*0.30],['NN',nn,'#ff6b81',W*0.70]].forEach(b=>{
+      const h=Math.max(2,(logv(b[1])/mx)*(baseY-top));
+      ctx.fillStyle=b[2];rrect(ctx,b[3]-46,baseY-h,92,h,5);ctx.fill();
+      ctx.fillStyle='#cdd8ee';ctx.font='12px monospace';ctx.textAlign='center';ctx.fillText('race/'+b[0],b[3],baseY+16);
+      ctx.fillStyle='#fff';ctx.font='bold 11px monospace';ctx.fillText(b[1].toExponential(1),b[3],baseY-h-8);});
+    const win=vb>=nn?'VB':'NN';
+    ctx.fillStyle=win==='VB'?'#62e88a':'#ff6b81';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText('winner: race/'+win+'  (log scale)',W/2,16);
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();
+    const vb=gVBTO()*pNRVB*praceVB, nn=pNNTO*pNRNN*praceNN;
+    const lines=[
+     'P(VB|TO) = '+gVBTO().toFixed(4)+'    P(NN|TO) = 0.00047',
+     'VB path = '+gVBTO().toFixed(4)+' × 0.0027 × 0.00012\n      = <span class="g">'+vb.toExponential(2)+'</span>',
+     'NN path = 0.00047 × 0.0012 × 0.00057\n      = <span style="color:var(--red)">'+nn.toExponential(2)+'</span>',
+     (vb>=nn?'VB wins by <span class="hl">'+(vb/nn).toFixed(0)+'×</span> — a verb follows "to".':'NN now wins — you dropped P(VB|TO) very low.')
+    ];
+    $('#c10out').innerHTML=lines.slice(0,step+1).join('\n\n');}
+  $('#c10step').addEventListener('click',()=>{step=Math.min(3,step+1);render();});
+  $('#c10reset').addEventListener('click',()=>{step=0;render();});
+  render();
+});
+
+/* 11 build transition table from bigrams */
+window.__demos.push(function(){
+  const c=$('#c11canvas'); if(!c)return;
+  const T=['*','DT','NNS','VB','NN','IN','STOP'];
+  const idx={};T.forEach((t,i)=>idx[t]=i);
+  const sents=[['*','DT','NNS','VB','DT','NN','STOP'],
+               ['*','DT','NNS','VB','IN','DT','VB','STOP'],
+               ['*','NNS','VB','NNS','STOP']];
+  const bigrams=[];sents.forEach(s=>{for(let i=0;i<s.length-1;i++)bigrams.push([s[i],s[i+1]]);});
+  let k=0, grid=T.map(()=>T.map(()=>0)), timer=null;
+  function applyTo(n){grid=T.map(()=>T.map(()=>0));for(let i=0;i<n;i++){const b=bigrams[i];grid[idx[b[0]]][idx[b[1]]]++;}}
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const x0=44,y0=24,cw=(W-x0-4)/T.length,ch=(H-y0-6)/T.length;
+    ctx.textBaseline='middle';ctx.font='9px monospace';
+    for(let j=0;j<T.length;j++){ctx.fillStyle='#7e8eb0';ctx.textAlign='center';ctx.fillText(T[j],x0+j*cw+cw/2,y0-11);}
+    const cur=k>0?bigrams[k-1]:null;
+    for(let i=0;i<T.length;i++){
+      ctx.fillStyle='#7e8eb0';ctx.textAlign='right';ctx.font='9px monospace';ctx.fillText(T[i],x0-3,y0+i*ch+ch/2);
+      for(let j=0;j<T.length;j++){
+        const x=x0+j*cw,y=y0+i*ch,v=grid[i][j];
+        const isCur=cur&&idx[cur[0]]===i&&idx[cur[1]]===j;
+        ctx.fillStyle=isCur?'rgba(56,240,216,.35)':(v>0?'rgba(98,232,138,'+Math.min(.55,.15+v*.16)+')':'rgba(120,140,180,.05)');
+        rrect(ctx,x+1,y+1,cw-2,ch-2,3);ctx.fill();
+        if(isCur){ctx.strokeStyle='#38f0d8';ctx.lineWidth=2;ctx.stroke();}
+        if(v>0){ctx.fillStyle='#e7edf9';ctx.textAlign='center';ctx.font='bold 11px monospace';ctx.fillText(v,x+cw/2,y+ch/2);}
+      }
+    }
+    ctx.textAlign='left';
+  });
+  function render(){applyTo(k);cv.redraw();const cur=k>0?bigrams[k-1]:null;
+    $('#c11out').innerHTML='bigram <span class="hl">'+k+' / '+bigrams.length+'</span>\n'+(cur?'counted: <span class="g">'+cur[0]+' → '+cur[1]+'</span>':'press next to start')+'\n\nrows = first tag\ncols = second tag\neach cell = count of that pair\n\ndivide a row by its total to get\nP(second | first).';}
+  function stop(){if(timer){clearInterval(timer);timer=null;}}
+  $('#c11step').addEventListener('click',()=>{stop();k=Math.min(bigrams.length,k+1);render();});
+  $('#c11auto').addEventListener('click',()=>{stop();timer=setInterval(()=>{if(k>=bigrams.length){stop();return;}k++;render();},430);});
+  $('#c11reset').addEventListener('click',()=>{stop();k=0;render();});
+  render();
+});
+
+/* 12 ice-cream: score all 8 paths */
+window.__demos.push(function(){
+  const c=$('#c12canvas'); if(!c)return;
+  const start={C:0.2,H:0.8}, tr={C:{C:0.6,H:0.4},H:{C:0.3,H:0.7}}, em={C:{1:0.5,3:0.1},H:{1:0.2,3:0.4}};
+  const seq=[1,3,1], states=['C','H'], paths=[];
+  states.forEach(a=>states.forEach(b=>states.forEach(d=>paths.push([a,b,d]))));
+  const scored=paths.map(p=>{let s=start[p[0]]*em[p[0]][seq[0]];s*=tr[p[0]][p[1]]*em[p[1]][seq[1]];s*=tr[p[1]][p[2]]*em[p[2]][seq[2]];return{p:p.join(''),s:s};});
+  const maxS=Math.max.apply(null,scored.map(o=>o.s));
+  let shown=0;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const n=scored.length,rh=(H-16)/n;
+    scored.forEach((o,i)=>{const y=8+i*rh,on=i<shown,isMax=o.s===maxS;
+      ctx.fillStyle='#9fb0d0';ctx.font='bold 12px monospace';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(o.p,8,y+rh/2);
+      const bw=on?(o.s/maxS)*(W-150):0;
+      ctx.fillStyle=isMax?'#62e88a':'#3a6ea5';rrect(ctx,68,y+3,Math.max(on?3:0,bw),rh-6,3);ctx.fill();
+      if(on){ctx.fillStyle=isMax?'#bfeccb':'#9fb0d0';ctx.font='11px monospace';ctx.fillText(o.s.toFixed(5),Math.min(W-60,74+bw),y+rh/2);}});
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();
+    const chc=scored.find(o=>o.p==='CHC').s, best=scored.find(o=>o.s===maxS);
+    $('#c12out').innerHTML='ice-cream counts: 1 3 1\npaths revealed: <span class="hl">'+shown+' / 8</span>\n\nslide example C H C = <span class="hl">'+chc.toFixed(4)+'</span>\n'+(shown>=8?'best path = <span class="g">'+best.p+'  ('+best.s.toFixed(5)+')</span>\none path is not enough — the best\nneeds all 2³ = 8 scored.':'reveal all to find the true best.');}
+  $('#c12step').addEventListener('click',()=>{shown=Math.min(8,shown+1);render();});
+  $('#c12all').addEventListener('click',()=>{shown=8;render();});
+  $('#c12reset').addEventListener('click',()=>{shown=0;render();});
+  render();
+});
+
+/* 13 viterbi pruning idea */
+window.__demos.push(function(){
+  const c=$('#c13canvas'); if(!c)return;
+  const cols=3, rows=3, best=[[0,2,1],[2,0,1]];
+  let pruned=0;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const xs=[W*0.18,W*0.5,W*0.82], ys=[H*0.26,H*0.5,H*0.74];
+    for(let col=1;col<cols;col++){
+      const isP=col<=pruned;
+      for(let tr=0;tr<rows;tr++)for(let sr=0;sr<rows;sr++){
+        const keep=best[col-1][tr]===sr;
+        if(isP&&!keep)continue;
+        ctx.strokeStyle=isP?'rgba(56,240,216,.9)':'rgba(120,140,180,.22)';
+        ctx.lineWidth=isP?2.2:1;
+        ctx.beginPath();ctx.moveTo(xs[col-1]+15,ys[sr]);ctx.lineTo(xs[col]-15,ys[tr]);ctx.stroke();
+      }
+    }
+    for(let col=0;col<cols;col++)for(let r=0;r<rows;r++){
+      ctx.beginPath();ctx.arc(xs[col],ys[r],15,0,7);ctx.fillStyle='#11203c';ctx.fill();ctx.strokeStyle='#19c4ff';ctx.lineWidth=2;ctx.stroke();
+      ctx.fillStyle='#cfe6ff';ctx.font='11px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('s'+(r+1),xs[col],ys[r]);
+    }
+    ctx.fillStyle='#7e8eb0';ctx.font='10px monospace';['w₁','w₂','w₃'].forEach((w,i)=>ctx.fillText(w,xs[i],H-6));
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();
+    $('#c13out').innerHTML='states T = 3,  words n = 3\ncolumns pruned: <span class="hl">'+pruned+' / 2</span>\n\nbrute force paths = T^n = <span style="color:var(--red)">27</span>\nViterbi work ≈ n·T² = <span class="g">27 steps</span>\n\n'+(pruned>=2?'each cell now holds one best path.\nthat is the whole trick.':'press prune to keep the best edge\ninto each cell, dropping the rest.');}
+  $('#c13step').addEventListener('click',()=>{pruned=Math.min(2,pruned+1);render();});
+  $('#c13reset').addEventListener('click',()=>{pruned=0;render();});
+  render();
+});
+
+/* 14 viterbi full: "the doctor is in" */
+window.__demos.push(function(){
+  const c=$('#c14canvas'); if(!c)return;
+  const states=['Noun','Verb','Det','Prep','Adv'], words=['the','doctor','is','in'];
+  const val={'2_0':0.21,'0_1':0.0756,'1_1':0.00021,'1_2':0.027216,'0_2':0.001512,'3_3':0.005443,'4_3':0.000272};
+  const path={'2_0':1,'0_1':1,'1_2':1,'3_3':1};
+  const texts=[
+   'Word 1 "the": only Det can emit "the".\nV(Det) = P(Det|⟨s⟩)·P(the|Det)\n      = 0.3 · 0.7 = <span class="g">0.21</span>\nevery other tag emits "the" with 0.',
+   'Word 2 "doctor":\nNoun: 0.21 · P(Noun|Det) · P(doctor|Noun)\n    = 0.21 · 0.9 · 0.4 = <span class="g">0.0756</span>\nVerb: 0.21 · 0.01 · 0.1 = <span class="hl">0.00021</span>',
+   'Word 3 "is":\nVerb: best comes from Noun\n   0.0756 · 0.4 · 0.9 = <span class="g">0.027216</span>\nNoun: 0.0756 · 0.2 · 0.1 = <span class="hl">0.001512</span>',
+   'Word 4 "in":\nPrep: best comes from Verb\n   0.027216 · 0.2 · 1.0 = <span class="g">0.005443</span>\nAdv: 0.027216 · 0.1 · 0.1 = <span class="hl">0.000272</span>',
+   'Backtrace from the largest last cell,\n0.005443 at Prep:\n  Prep ← Verb ← Noun ← Det\n\nanswer: <span class="g">the/Det doctor/Noun is/Verb in/Prep</span>'
+  ];
+  let step=0;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const x0=66,y0=38,cw=(W-x0-10)/4,ch=(H-y0-18)/5;
+    ctx.textBaseline='middle';
+    for(let j=0;j<4;j++){ctx.fillStyle='#cdd8ee';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(words[j],x0+j*cw+cw/2,y0-16);}
+    const cols=Math.min(step,4), bt=step>=5;
+    if(bt){const order=['2_0','0_1','1_2','3_3'];ctx.strokeStyle='#ffcb6b';ctx.lineWidth=3;ctx.beginPath();
+      order.forEach((key,i)=>{const r=+key.split('_')[0],cc=+key.split('_')[1];const cx=x0+cc*cw+cw/2,cy=y0+r*ch+ch/2;if(i===0)ctx.moveTo(cx,cy);else ctx.lineTo(cx,cy);});ctx.stroke();}
+    for(let i=0;i<5;i++){
+      ctx.fillStyle='#7e8eb0';ctx.font='11px monospace';ctx.textAlign='right';ctx.fillText(states[i],x0-6,y0+i*ch+ch/2);
+      for(let j=0;j<4;j++){
+        const key=i+'_'+j, x=x0+j*cw, y=y0+i*ch, has=val[key]!==undefined;
+        const shown=j<cols, onPath=bt&&path[key];
+        ctx.fillStyle=onPath?'#2e7d52':(shown?(has?'rgba(98,232,138,.16)':'rgba(120,140,180,.05)'):'rgba(120,140,180,.03)');
+        rrect(ctx,x+3,y+3,cw-6,ch-6,5);ctx.fill();
+        ctx.strokeStyle=onPath?'#62e88a':(shown&&has?'#3f6e57':'#26344f');ctx.lineWidth=onPath?2:1;ctx.stroke();
+        if(shown){ctx.fillStyle=onPath?'#eaffef':(has?'#e7edf9':'#5b6a87');ctx.font=(has?'bold ':'')+'11px monospace';ctx.textAlign='center';ctx.fillText(has?(+val[key].toPrecision(3)):'0',x+cw/2,y+ch/2);}
+      }
+    }
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();
+    $('#c14out').innerHTML=(step===0?'press "next cell" to fill the first column.':texts[Math.min(step,5)-1]);}
+  $('#c14step').addEventListener('click',()=>{step=Math.min(5,step+1);render();});
+  $('#c14all').addEventListener('click',()=>{step=5;render();});
+  $('#c14reset').addEventListener('click',()=>{step=0;render();});
+  render();
+});
+
+/* 15 MEMM features -> softmax */
+window.__demos.push(function(){
+  const c=$('#c15canvas'); if(!c)return;
+  const host=$('#c15feats'); host.innerHTML='';
+  const feats=[
+    {n:'prev tag = MD ("will __")',vb:1.8,nn:0,on:true},
+    {n:'next word = "the"',vb:1.5,nn:0,on:false},
+    {n:'word is "back"',vb:0.6,nn:0.2,on:true},
+    {n:'Capitalized mid-sentence',vb:0,nn:1.6,on:false}
+  ];
+  feats.forEach((f)=>{const b=document.createElement('button');b.className='wbtn'+(f.on?' sel':'');b.textContent=f.n;
+    b.onclick=()=>{f.on=!f.on;b.classList.toggle('sel',f.on);render();};host.appendChild(b);});
+  function probs(){let sV=0.3,sN=0.3;feats.forEach(f=>{if(f.on){sV+=f.vb;sN+=f.nn;}});const p=softmax([sV,sN]);return{sV,sN,pV:p[0],pN:p[1]};}
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const pr=probs();const baseY=H-34,top=30;
+    [['VB',pr.pV,'#62e88a',W*0.30],['NN',pr.pN,'#ff6b81',W*0.70]].forEach(b=>{
+      const h=Math.max(2,b[1]*(baseY-top));
+      ctx.fillStyle=b[2];rrect(ctx,b[3]-46,baseY-h,92,h,5);ctx.fill();
+      ctx.fillStyle='#cdd8ee';ctx.font='12px monospace';ctx.textAlign='center';ctx.fillText('back/'+b[0],b[3],baseY+16);
+      ctx.fillStyle='#fff';ctx.font='bold 13px monospace';ctx.fillText((b[1]*100).toFixed(0)+'%',b[3],baseY-h-8);});
+    ctx.fillStyle='#64759c';ctx.font='10px monospace';ctx.textAlign='center';ctx.fillText('softmax over tag scores',W/2,16);
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();const pr=probs();
+    $('#c15out').innerHTML='score(VB) = '+fmt(pr.sV,2)+'    score(NN) = '+fmt(pr.sN,2)+'\n\nP(VB) = e^score / Σ e^score\n     = <span class="g">'+fmt(pr.pV,3)+'</span>\nP(NN) = <span class="hl">'+fmt(pr.pN,3)+'</span>\n\nfeatures the HMM could not use\nsharpen the choice.';}
+  render();
+});
+
+/* boot */
+window.addEventListener('load',()=>{
+  runDemos(); initTheme(); initReveal(); initStory(); onScroll();
+  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();
+});
+</script>
+</body>
+</html>

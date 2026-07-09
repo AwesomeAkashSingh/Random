@@ -1,0 +1,2227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Language Modelling — Interactive Lecture (NLP Session 4)</title>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-svg.min.js"></script>
+
+<style>
+:root{
+  --bg:#070b16;
+  --bg2:#0b1120;
+  --panel:#0e1729;
+  --panel2:#121d36;
+  --line:#1f2d4d;
+  --ink:#e7edf9;
+  --muted:#93a4c8;
+  --dim:#64759c;
+  --cyan:#38f0d8;
+  --cyan2:#19c4ff;
+  --violet:#9b8cff;
+  --pink:#ff6ec7;
+  --amber:#ffcb6b;
+  --green:#62e88a;
+  --red:#ff6b81;
+  --glow: 0 0 18px rgba(56,240,216,.45);
+  --r:16px;
+  --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+    radial-gradient(1200px 600px at 80% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 10%, rgba(155,140,255,.10), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:16px;
+  overflow-x:hidden;
+}
+a{color:var(--cyan2);text-decoration:none}
+p{overflow-wrap:anywhere}
+
+/* layout */
+.shell{display:grid;grid-template-columns:288px 1fr;max-width:1500px;margin:0 auto}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+  border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),transparent)}
+.brand{font-weight:800;letter-spacing:.3px;font-size:15px;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow)}
+.brand small{display:block;color:var(--dim);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.toc{margin-top:18px;display:flex;flex-direction:column;gap:1px}
+.toc a{color:var(--muted);font-size:13.5px;padding:7px 12px;border-radius:9px;display:flex;gap:9px;align-items:center;border:1px solid transparent;transition:.15s}
+.toc a .n{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:20px}
+.toc a:hover{background:var(--panel);color:var(--ink)}
+.toc a.active{background:linear-gradient(90deg,rgba(56,240,216,.16),rgba(56,240,216,.02));color:#fff;border-color:rgba(56,240,216,.35)}
+.toc a.active .n{color:var(--cyan)}
+.toc .grp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:14px 12px 5px;font-weight:700}
+
+main{padding:0 0 120px;min-width:0}
+.progress{position:fixed;top:0;left:288px;right:0;height:3px;background:transparent;z-index:50}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:var(--glow)}
+
+section{padding:64px 56px;border-bottom:1px solid var(--line);scroll-margin-top:10px}
+section:nth-child(even){background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+.wrap{max-width:920px;margin:0 auto;min-width:0}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:26px;height:2px;background:var(--cyan);display:inline-block;border-radius:2px}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin:.35em 0 .2em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,34px);margin:.25em 0 .5em;font-weight:800;letter-spacing:-.01em;color:#fff}
+h3{font-size:19px;margin:1.6em 0 .5em;color:#fff;font-weight:700}
+h4{font-size:15px;margin:1.2em 0 .4em;color:var(--cyan);font-weight:700;letter-spacing:.02em}
+p{color:var(--ink)}
+.lead{font-size:18.5px;color:var(--muted)}
+.muted{color:var(--muted)}
+strong{color:#fff}
+code{font-family:var(--mono);background:var(--panel2);padding:.12em .42em;border-radius:6px;font-size:.88em;color:var(--cyan);overflow-wrap:anywhere}
+ul.muted li{margin:4px 0}
+ul,ol{padding-left:1.3em}
+li{overflow-wrap:anywhere}
+
+/* cards & callouts */
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:22px 0;min-width:0}
+.lab{background:linear-gradient(180deg,#0c1830,#0a1322);border:1px solid rgba(56,240,216,.28);border-radius:var(--r);padding:22px 24px;margin:26px 0;position:relative;overflow:hidden}
+.lab::before{content:"\26A1 INTERACTIVE";position:absolute;top:0;right:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:#06241f;background:var(--cyan);padding:4px 12px;border-bottom-left-radius:10px;font-weight:800}
+.note{border-left:3px solid var(--violet);background:rgba(155,140,255,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0;color:var(--muted)}
+.note b,.note strong{color:#cdc4ff}
+.key{border-left:3px solid var(--amber);background:rgba(255,203,107,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0}
+.key b{color:var(--amber)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:880px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* controls */
+.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:14px;flex-wrap:wrap}
+.ctrl label{min-width:62px;font-family:var(--mono);color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;background:var(--line);flex:1;min-width:120px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow);cursor:pointer;border:2px solid #06241f}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--cyan);cursor:pointer;border:2px solid #06241f}
+input[type=range]:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.val{font-family:var(--mono);color:var(--cyan);min-width:54px;text-align:right;font-size:13.5px}
+button.btn{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13px;transition:.15s;min-height:40px}
+button.btn:hover{border-color:var(--cyan);color:#fff}
+button.btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+button.btn.active{background:var(--cyan);color:#06241f;border-color:var(--cyan);font-weight:700}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+
+/* tables */
+.tablewrap{overflow-x:auto;margin:8px 0}
+table.tt{border-collapse:collapse;font-family:var(--mono);font-size:14px;margin:8px 0;word-break:break-word}
+table.tt th,table.tt td{border:1px solid var(--line);padding:8px 16px;text-align:center}
+table.tt th{background:var(--panel2);color:var(--muted)}
+table.tt td.one{color:var(--green);font-weight:700}
+table.tt td.zero{color:var(--dim)}
+.readout{font-family:var(--mono);font-size:14px;background:#06101f;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;white-space:pre-wrap;color:var(--cyan);overflow-x:auto;word-break:break-word}
+.readout .hl{color:var(--amber)}
+.readout .g{color:var(--green)}
+.readout .r{color:var(--red)}
+canvas{display:block;max-width:100%}
+.eqbox{background:#06101f;border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:16px 0;overflow-x:auto;color:#e7edf9}
+mjx-container[display="true"]{overflow-x:auto;max-width:100%}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted);margin:2px 4px 2px 0}
+.foot{max-width:920px;margin:40px auto 0;color:var(--dim);font-size:13px;padding:0 56px}
+.pill{font-family:var(--mono);font-size:11px;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 10px;color:var(--muted)}
+.hero-net{margin:34px 0 6px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);font-family:var(--mono);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+/* clickable word switches (bespoke DOM interactive) */
+.wordsw{display:inline-flex;flex-wrap:wrap;gap:7px;margin:8px 0}
+.wordsw button{font-family:var(--mono);font-size:13px;padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);cursor:pointer;min-height:38px}
+.wordsw button.on{background:var(--cyan);color:#06241f;border-color:var(--cyan);font-weight:700}
+.quiz-a{margin-top:10px;padding:12px 16px;border-radius:10px;background:rgba(98,232,138,.08);border:1px solid rgba(98,232,138,.3);display:none}
+.quiz-a.show{display:block}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ===== scroll-reveal ===== */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .65s ease, transform .65s cubic-bezier(.2,.8,.3,1)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1 !important;transform:none !important;transition:none}}
+body{transition:background .35s ease,color .35s ease}
+
+/* ===== top controls ===== */
+.topctl{position:fixed;top:14px;right:18px;z-index:60;display:flex;gap:9px}
+.topbtn{font-family:var(--mono);font-size:12.5px;background:rgba(18,29,54,.82);border:1px solid var(--line);color:var(--ink);
+  padding:9px 14px;border-radius:30px;cursor:pointer;display:flex;align-items:center;gap:7px;backdrop-filter:blur(8px);transition:.18s;min-height:40px}
+.topbtn:hover{border-color:var(--cyan);color:#fff}
+.topbtn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.topbtn.primary{background:linear-gradient(90deg,var(--violet),var(--cyan));color:#06241f;border:none;font-weight:700}
+.topbtn.primary:hover{color:#06241f;filter:brightness(1.08)}
+[data-theme="light"] .topbtn{background:rgba(255,255,255,.9);border-color:#dde4f0;color:#16223d}
+[data-theme="light"] .topbtn:hover{color:#0a4a57}
+
+/* ===== guided story mode ===== */
+.spot{position:fixed;z-index:71;border:2px solid var(--cyan);border-radius:16px;
+  box-shadow:0 0 0 9999px rgba(2,5,12,.66), 0 0 28px rgba(56,240,216,.55);
+  transition:all .5s cubic-bezier(.3,.9,.3,1);pointer-events:none}
+.storycard{position:fixed;z-index:73;left:50%;bottom:28px;transform:translateX(-50%);width:min(640px,92vw);
+  background:linear-gradient(180deg,#0f1b33,#0a1322);border:1px solid rgba(56,240,216,.42);border-radius:18px;padding:20px 24px;
+  box-shadow:0 22px 64px rgba(0,0,0,.55);color:#e7edf9;animation:popcard .35s cubic-bezier(.2,.9,.3,1)}
+@keyframes popcard{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+.storycard .stp{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan)}
+.storycard h3{margin:6px 0 6px;color:#fff;font-size:21px}
+.storycard p{color:#aebbd6;font-size:14.5px;margin:0;line-height:1.6}
+.storynav{display:flex;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap}
+.storynav .sp{flex:1}
+.storynav .btn{padding:7px 12px}
+.storydots{display:flex;gap:5px;flex-wrap:wrap;max-width:260px}
+.storydots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.2s;cursor:pointer}
+.storydots i.on{background:var(--cyan);transform:scale(1.35)}
+
+/* ===== mobile ===== */
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)}
+  .progress{left:0}
+  section{padding:48px 22px}
+}
+
+/* ===== LIGHT THEME (page chrome only — interactive consoles stay dark) ===== */
+[data-theme="light"] body{
+  background:
+    radial-gradient(1200px 600px at 82% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 8%, rgba(155,140,255,.13), transparent 55%),
+    #eef2f8;
+  color:#16223d;
+}
+[data-theme="light"] h1,[data-theme="light"] h2{color:#0d1730}
+[data-theme="light"] h3{color:#16223d}
+[data-theme="light"] h4{color:#0a8198}
+[data-theme="light"] p{color:#28364f}
+[data-theme="light"] .lead{color:#46566f}
+[data-theme="light"] .muted{color:#586a8a}
+[data-theme="light"] strong{color:#0a1326}
+[data-theme="light"] .kicker{color:#0a8198}
+[data-theme="light"] .kicker::before{background:#0a8198}
+[data-theme="light"] a{color:#0a72b8}
+[data-theme="light"] section{border-bottom-color:#dde4f0}
+[data-theme="light"] section:nth-child(even){background:linear-gradient(180deg,rgba(13,23,48,.025),transparent)}
+[data-theme="light"] .card{background:linear-gradient(180deg,#ffffff,#f5f8fe);border-color:#dde4f0;box-shadow:0 1px 3px rgba(20,40,80,.05)}
+[data-theme="light"] .card h4{color:#0a8198}
+[data-theme="light"] .card .muted,[data-theme="light"] .card p{color:#43516e}
+[data-theme="light"] .note{background:rgba(124,108,255,.09);color:#3a3357}
+[data-theme="light"] .note b,[data-theme="light"] .note strong{color:#4b3bb0}
+[data-theme="light"] .key{background:rgba(214,158,46,.11)}
+[data-theme="light"] .key b{color:#946708}
+[data-theme="light"] .sidebar{background:linear-gradient(180deg,#ffffff,transparent);border-right-color:#dde4f0}
+[data-theme="light"] .brand{color:#0d1730}
+[data-theme="light"] .toc a{color:#46566f}
+[data-theme="light"] .toc a:hover{background:#eef2fb;color:#0d1730}
+[data-theme="light"] .toc a.active{background:linear-gradient(90deg,rgba(10,129,152,.14),transparent);color:#0a4a57;border-color:rgba(10,129,152,.4)}
+[data-theme="light"] .toc a.active .n{color:#0a8198}
+[data-theme="light"] .toc .grp{color:#8693b0}
+[data-theme="light"] table.tt th{background:#eef2f9;color:#46566f}
+[data-theme="light"] table.tt td{color:#16223d;border-color:#d8e0ee}
+[data-theme="light"] .foot{color:#7a89a8}
+[data-theme="light"] .tag{color:#43516e;border-color:#d2dcec}
+[data-theme="light"] .pill{color:#43516e;background:#eef2f9;border-color:#d8e0ee}
+[data-theme="light"] .legend{color:#586a8a}
+[data-theme="light"] .wordsw button{background:#eef2f9;color:#16223d;border-color:#d8e0ee}
+/* keep console text light inside dark interactive panels */
+[data-theme="light"] .lab h4{color:#38f0d8}
+[data-theme="light"] .lab p,[data-theme="light"] .lab .muted{color:#93a4c8}
+[data-theme="light"] .lab strong,[data-theme="light"] .lab b{color:#fff}
+</style>
+</head>
+<body>
+<script>(function(){try{var t=localStorage.getItem('lectheme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<div class="progress"><i id="progbar"></i></div>
+
+<div class="topctl">
+  <button class="topbtn primary" id="tourBtn">&#9654; Guided tour</button>
+  <button class="topbtn" id="themeBtn">&#9728; Light</button>
+</div>
+
+<div class="spot" id="storyspot" style="display:none"></div>
+<div class="storycard" id="storycard" style="display:none">
+  <div class="stp" id="storyStep"></div>
+  <h3 id="storyTitle"></h3>
+  <p id="storyText"></p>
+  <div class="storynav">
+    <div class="storydots" id="storyDots"></div>
+    <div class="sp"></div>
+    <button class="btn" id="storyPrev">&#9664; prev</button>
+    <button class="btn" id="storyPlay">&#9208; pause</button>
+    <button class="btn" id="storyNext">next &#9654;</button>
+    <button class="btn" id="storyExit">&#10005; exit</button>
+  </div>
+</div>
+
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span><div>Language Modelling<small>NLP &middot; Session 4</small></div></div>
+  <nav class="toc" id="toc">
+    <div class="grp">Foundations</div>
+    <a href="#intro"><span class="n">00</span> Overview &amp; map</a>
+    <a href="#whatis"><span class="n">01</span> What a language model is</a>
+    <a href="#why"><span class="n">02</span> Why LMs matter</a>
+    <div class="grp">Building P(W)</div>
+    <a href="#chain"><span class="n">03</span> Chain rule</a>
+    <a href="#markov"><span class="n">04</span> Markov assumption</a>
+    <a href="#ngram"><span class="n">05</span> Unigram / bigram / n-gram</a>
+    <div class="grp">Counting from a corpus</div>
+    <a href="#mle"><span class="n">06</span> Estimating by counting (MLE)</a>
+    <a href="#mini"><span class="n">07</span> A tiny corpus, counted</a>
+    <a href="#berkeley"><span class="n">08</span> Berkeley Restaurant</a>
+    <a href="#logspace"><span class="n">09</span> Working in log space</a>
+    <a href="#google"><span class="n">10</span> Web-scale counts</a>
+    <div class="grp">When counting breaks</div>
+    <a href="#zeros"><span class="n">11</span> Overfitting &amp; zeros</a>
+    <a href="#laplace"><span class="n">12</span> Add-1 smoothing</a>
+    <a href="#backoff"><span class="n">13</span> Backoff &amp; interpolation</a>
+    <a href="#heldout"><span class="n">14</span> Setting the weights</a>
+    <a href="#unk"><span class="n">15</span> Unknown words</a>
+    <a href="#stupid"><span class="n">16</span> Pruning &amp; stupid backoff</a>
+    <div class="grp">Measuring quality</div>
+    <a href="#eval"><span class="n">17</span> Extrinsic vs intrinsic</a>
+    <a href="#shannon"><span class="n">18</span> The Shannon game</a>
+    <a href="#perplexity"><span class="n">19</span> Perplexity</a>
+    <a href="#corpora"><span class="n">20</span> Corpora &amp; wrap-up</a>
+  </nav>
+</aside>
+
+<main>
+
+<section id="intro">
+ <div class="wrap">
+  <div class="kicker">Interactive Edition &middot; NLP Session 4</div>
+  <h1>Language Modelling,<br>built up one idea at a time</h1>
+  <p class="lead">A <strong>language model</strong> scores word sequences. It answers two linked questions. How likely is this whole sentence? And what word comes next? This lecture builds that tool from scratch. <strong>Analogy first, then the math.</strong> Every symbol is named. Every slide example is worked with real numbers. Each idea is something you can drag and watch move.</p>
+  <div class="hero-net">
+    <canvas id="heroCanvas" width="900" height="220" style="width:100%;height:auto"></canvas>
+    <div class="legend">
+      <span><i style="background:var(--cyan2)"></i> a word seen so far</span>
+      <span><i style="background:var(--violet)"></i> the model scoring</span>
+      <span><i style="background:var(--pink)"></i> the next word it picks</span>
+    </div>
+  </div>
+
+  <h3>The whole lecture as one map</h3>
+  <p class="muted">Click any box to jump to that chapter. We go left to right. First, what a model is. Then how to turn a sentence into a probability. Then how to read those numbers off real text. Then how to fix what breaks. Last, how to score the result.</p>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; The big picture</h4>
+    <p class="muted" style="font-size:14px">Each node is a chapter. Hover to highlight, click to jump. Watch the path: build the score, count it, fix it, measure it.</p>
+    <canvas id="mapCanvas" width="900" height="240" style="width:100%;height:auto"></canvas>
+  </div>
+
+  <div class="grid3">
+    <div class="card"><h4>What you'll learn</h4><p class="muted" style="font-size:14px">How to give a sentence a probability, how n-grams shortcut the math, how smoothing removes zeros, and how perplexity scores a model.</p></div>
+    <div class="card"><h4>How to use it</h4><p class="muted" style="font-size:14px">Read top-to-bottom or jump via the sidebar. Every &#9889; panel is live. Try the <strong>&#9654; Guided tour</strong> (top-right), or <strong>&#9728; / &#127769;</strong> to switch light/dark.</p></div>
+    <div class="card"><h4>The rhythm</h4><p class="muted" style="font-size:14px">Every chapter has the same shape. A hook, an analogy, the math step by step, a worked example, an ML link, a pitfall, and a lab.</p></div>
+  </div>
+ </div>
+</section>
+
+<section id="whatis">
+ <div class="wrap">
+  <div class="kicker">01 &middot; The goal</div>
+  <h2>What a language model is</h2>
+  <p class="lead">A <strong>language model</strong> (LM for short) learns to predict the probability of a sequence of words. "Probability" here is a score between 0 and 1. High means "this sounds like real language". Low means "this looks odd".</p>
+
+  <div class="note"><b>Analogy first.</b> Think of your phone keyboard. You type "See you", and it offers "tomorrow", "soon", and "later". It is ranking next words by how likely each is after "See you". That ranking is a language model at work.</div>
+
+  <h3>The two questions, one coin</h3>
+  <p>The first question is about a <strong>whole sentence</strong>. We write the probability of a sentence \(W\) as \(P(W)\). Here \(W\) is the full string of words, like "the cat sat".</p>
+  <div class="eqbox">$$ W \;=\; w_1,\, w_2,\, \ldots,\, w_n $$</div>
+  <p>So \(w_1\) is the first word, \(w_2\) the second, and \(w_n\) the last. The second question is about the <strong>next word</strong>. The bar "\(\mid\)" means "given". We write the next-word probability like this:</p>
+  <div class="eqbox">$$ P(w_n \mid w_1, w_2, \ldots, w_{n-1}) $$</div>
+  <p>Read that as "the probability of word number \(n\), given all the words before it". The two questions share the same underlying probabilities, as the next chapters show.</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; reading the notation</h4>
+    <p class="muted" style="font-size:14px">Take the sentence "the cat sat". The next-word probability for "sat" is:</p>
+    <div class="eqbox">$$ P(\text{sat} \mid \text{the cat}) $$</div>
+    <p style="font-size:14px">In words: how likely is "sat" right after "the cat"? A good model gives this a fair-sized number, because cats do sit. The whole-sentence score \(P(\text{the cat sat})\) is built from three such next-word steps, one per word.</p>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Rank the next word</h4>
+    <p class="muted" style="font-size:14px">Pick a context on the left. The model ranks the words that could come next, tallest bar first. <strong>What to look for:</strong> the context changes the ranking &mdash; "See you" wants "tomorrow", but "a piece of" wants "cake".</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div class="wordsw" id="ctxSw"></div>
+        <div class="readout" id="ctxOut"></div>
+      </div>
+      <div><canvas id="ctxCanvas" width="440" height="300" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Every large language model behind a modern chat assistant is this exact idea, scaled up. The model is trained to predict the next word from the words before it. Generating text is just doing that over and over: predict a word, add it, predict again.</p>
+
+  <div class="key"><b>Pitfall &mdash; probability is not truth.</b> \(P(W)\) is "does this sound like our training language", not "is this true". A false but fluent sentence can still score high. The model judges style, not facts.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Scoring sentences sounds abstract. So why do real systems need it? Three concrete reasons.</p>
+ </div>
+</section>
+
+<section id="why">
+ <div class="wrap">
+  <div class="kicker">02 &middot; The payoff</div>
+  <h2>Why language models matter</h2>
+  <p class="lead">Many language tasks must choose between options that sound almost the same. A good language model picks the natural one. Here are the three examples from the slides.</p>
+
+  <div class="note"><b>Analogy first.</b> A spelling helper sees "about fifteen minuets". It knows "minutes" is far more common right there. So it quietly fixes the word. That "more common, so more likely" judgement is the language model.</div>
+
+  <h3>Three real choices</h3>
+  <p><strong>Machine translation</strong> (turning text from one language into another) prefers the fluent phrasing:</p>
+  <div class="eqbox">$$ P(\text{high winds tonight}) \;>\; P(\text{large winds tonight}) $$</div>
+  <p><strong>Spelling correction</strong> uses the same trick &mdash; the right word in context wins:</p>
+  <div class="eqbox">$$ P(\text{about fifteen minutes from}) \;>\; P(\text{about fifteen minuets from}) $$</div>
+  <p><strong>Speech recognition</strong> (turning sound into text) must pick which words were spoken. The symbol "\(\gg\)" means "much greater than":</p>
+  <div class="eqbox">$$ P(\text{I saw a van}) \;\gg\; P(\text{eyes awe of an}) $$</div>
+  <p>The two phrases can sound alike out loud. But only one reads like English, and the model knows the difference.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Be the judge</h4>
+    <p class="muted" style="font-size:14px">Switch between the three tasks. Each shows a good candidate and a bad one. <strong>What to look for:</strong> the green (fluent) bar always beats the red (odd) bar. That gap is the value of a language model.</p>
+    <div class="chips" id="judgeChips"></div>
+    <canvas id="judgeCanvas" width="860" height="240" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="judgeOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Translation, speech, and spelling systems once used a language model as a <strong>re-ranker</strong>. The main system proposes options; the language model scores them, and the best one wins. Modern end-to-end models fold this scoring inside themselves, but the principle is unchanged.</p>
+
+  <div class="key"><b>Pitfall &mdash; "likely" is not "correct".</b> The model only ranks by fluency. It must be paired with a system that proposes sensible options in the first place.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> So we need \(P(W)\). But a whole sentence is hard to score at once. The chain rule breaks it into easy steps.</p>
+ </div>
+</section>
+
+<section id="chain">
+ <div class="wrap">
+  <div class="kicker">03 &middot; The math of a sentence</div>
+  <h2>The chain rule</h2>
+  <p class="lead">A whole sentence is hard to score at once. So we score it one word at a time. Each word is judged by the words already said. Multiply those judgements and you get the sentence score. That is the <strong>chain rule</strong>.</p>
+
+  <div class="note"><b>Analogy first.</b> Think of telling a story to a friend. Each new word depends on what you just said. "Once upon a ___" almost forces "time". The sentence grows one believable step at a time. The chain rule is the math of that.</div>
+
+  <h3>Step 1 &mdash; conditional probability</h3>
+  <p><strong>Conditional probability</strong> is the chance of one event given that another happened. We write "the probability of \(B\) given \(A\)" as \(P(B \mid A)\). Its definition divides the chance of both by the chance of \(A\):</p>
+  <div class="eqbox">$$ P(B \mid A) \;=\; \frac{P(A, B)}{P(A)} $$</div>
+  <p>Here \(P(A,B)\) is the chance that \(A\) and \(B\) both happen. Rearranging gives a product form:</p>
+  <div class="eqbox">$$ P(A, B) \;=\; P(A)\,P(B \mid A) $$</div>
+
+  <h3>Step 2 &mdash; chain it over many words</h3>
+  <p>Apply that rule again and again. For a sequence \(x_1, x_2, \ldots, x_n\), the <strong>chain rule</strong> is. The big symbol \(\prod\) (capital pi) means "multiply all of these":</p>
+  <div class="eqbox">$$ P(x_1, x_2, \ldots, x_n) \;=\; \prod_{i=1}^{n} P(x_i \mid x_1, \ldots, x_{i-1}) $$</div>
+  <p>So a sentence's probability is a product. Each factor is one word given every word before it.</p>
+
+  <h3>Step 3 &mdash; on a real sentence</h3>
+  <p>Take "its water is so transparent". The chain rule writes five factors:</p>
+  <div class="eqbox">$$ \begin{aligned} P(\text{its water is so transparent}) =\;& P(\text{its}) \\ \times\;& P(\text{water} \mid \text{its}) \\ \times\;& P(\text{is} \mid \text{its water}) \\ \times\;& P(\text{so} \mid \text{its water is}) \\ \times\;& P(\text{transparent} \mid \text{its water is so}) \end{aligned} $$</div>
+  <p>Each factor is read off real text as a ratio of counts. Here "\(\#\)" means "the number of times this appears":</p>
+  <div class="eqbox">$$ P(\text{water} \mid \text{its}) \;=\; \frac{\#(\text{its water})}{\#(\text{its})} $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Build the sentence probability, step by step</h4>
+    <p class="muted" style="font-size:14px">Press <strong>Next word</strong> to add one factor at a time. Each factor is a probability below 1, so the running product shrinks. <strong>What to look for:</strong> the score drops with every word. Long sentences are always rare. That is why we move to log space later.</p>
+    <div class="chips">
+      <button class="btn" id="chainNext">&#9656; Next word</button>
+      <button class="btn" id="chainReset">&#8634; reset</button>
+    </div>
+    <canvas id="chainCanvas" width="860" height="220" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="chainOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>The chain rule is exactly how a modern language model generates text. It outputs \(P(\text{next word} \mid \text{everything so far})\), samples one word, appends it, and repeats. The product of those steps is the probability of the text it wrote.</p>
+
+  <div class="key"><b>Pitfall &mdash; order matters.</b> \(P(B \mid A)\) is not \(P(A \mid B)\). "dog bites man" and "man bites dog" use the same words but mean very different things.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> The last factor needs the whole history. That is too hard to count. The Markov shortcut fixes it.</p>
+ </div>
+</section>
+
+<section id="markov">
+ <div class="wrap">
+  <div class="kicker">04 &middot; The key shortcut</div>
+  <h2>The Markov assumption</h2>
+  <p class="lead">The chain rule is exact but heavy. Its last factor needs every earlier word. Real text rarely repeats a long exact phrase, so those counts are zero or shaky. The fix is named after the mathematician <strong>Andrei Markov</strong>.</p>
+
+  <div class="note"><b>Analogy first.</b> When you merge onto a busy road, you mostly watch the car right next to you, not every car a mile back. The nearby car carries almost all the information you need now. The Markov shortcut keeps only that nearby context.</div>
+
+  <h3>Drop the distant past</h3>
+  <p>The exact factor uses all of \(w_1\) through \(w_{i-1}\):</p>
+  <div class="eqbox">$$ P(w_i \mid w_1, \ldots, w_{i-1}) $$</div>
+  <p>The Markov assumption replaces it with a short window of the last \(k\) words. The symbol "\(\approx\)" means "is about equal to":</p>
+  <div class="eqbox">$$ P(w_i \mid w_1, \ldots, w_{i-1}) \;\approx\; P(w_i \mid w_{i-k}, \ldots, w_{i-1}) $$</div>
+  <p>Here \(k\) is the window size, a small whole number we choose. If \(k=1\) we keep just the last word. If \(k=2\) we keep the last two. Bigger \(k\) means more context, but those longer phrases get harder to find.</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; from 4 words of history to 1</h4>
+    <p class="muted" style="font-size:14px">For "so transparent that ___", the exact factor needs the whole left side. With \(k=1\) we keep only "that":</p>
+    <div class="eqbox">$$ P(? \mid \text{...so transparent that}) \;\approx\; P(? \mid \text{that}) $$</div>
+    <p style="font-size:14px">"that" is a common word, so \(P(? \mid \text{that})\) is easy to count. The long exact history "so transparent that" is rare, so its count would be unreliable. We trade a little accuracy for a number we can actually measure.</p>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Slide the memory window</h4>
+    <p class="muted" style="font-size:14px">Slide \(k\), the number of past words kept. The kept words light up; the dropped words fade. <strong>What to look for:</strong> at \(k=1\) almost the whole sentence goes grey &mdash; a bigram remembers almost nothing, which is its weakness and its speed.</p>
+    <div class="ctrl"><label>k (history)</label><input type="range" id="mkK" min="0" max="6" step="1" value="1"><span class="val" id="mkKv">1</span></div>
+    <canvas id="markovCanvas" width="860" height="160" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="markovOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Classic n-gram models are pure Markov models: a fixed short window. Modern neural models break this limit, reading long context with attention. So the Markov assumption is the simple baseline that later models were built to beat.</p>
+
+  <div class="key"><b>Pitfall &mdash; it is only an approximation.</b> Some real sentences depend on far-back words. We accept a small error in exchange for counts we can estimate.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Now we name the models by how wide their window is: unigram, bigram, trigram.</p>
+ </div>
+</section>
+
+<section id="ngram">
+ <div class="wrap">
+  <div class="kicker">05 &middot; Naming the models</div>
+  <h2>Unigram, bigram, and n-gram</h2>
+  <p class="lead">We name a model by its window size. An <strong>n-gram</strong> keeps \(n\) words, counting the word we predict. So \(n=1\) keeps no history, \(n=2\) keeps one previous word, and so on.</p>
+
+  <div class="note"><b>Analogy first.</b> Picture blinders of different widths. The unigram wears full blinders and sees nothing before. The bigram peeks at the one word just behind. The trigram peeks at two. Wider view, better guess, but rarer sights.</div>
+
+  <h3>Unigram (n = 1): no history</h3>
+  <p>Each word stands alone, so the sentence is just a product of single-word probabilities:</p>
+  <div class="eqbox">$$ P(w_1, \ldots, w_n) \;\approx\; \prod_{i=1}^{n} P(w_i) $$</div>
+  <p>This treats a sentence as a bag of words with no order. Weak, but a useful floor.</p>
+
+  <h3>Bigram (n = 2): one previous word</h3>
+  <p>Each factor uses only the word before it:</p>
+  <div class="eqbox">$$ P(w_i \mid w_1, \ldots, w_{i-1}) \;\approx\; P(w_i \mid w_{i-1}) $$</div>
+  <p>We mark the start with a token \(\langle s \rangle\) and the end with \(\langle /s \rangle\). These let the model learn which words start and end sentences. For "I want to eat healthy food":</p>
+  <div class="eqbox">$$ \begin{aligned} P(\ldots) \approx\;& P(\text{I} \mid \langle s \rangle)\,P(\text{want} \mid \text{I})\,P(\text{to} \mid \text{want}) \\ \times\;& P(\text{eat} \mid \text{to})\,P(\text{healthy} \mid \text{eat})\,P(\text{food} \mid \text{healthy}) \\ \times\;& P(\langle /s \rangle \mid \text{food}) \end{aligned} $$</div>
+
+  <h3>Trigram and beyond &mdash; and a limit</h3>
+  <p>A <strong>trigram</strong> keeps two previous words, a <strong>4-gram</strong> three, a <strong>5-gram</strong> four. More context helps, up to a point. But even big n-grams miss <strong>long-distance dependencies</strong> &mdash; links between far-apart words:</p>
+  <div class="note">Read this example. "The computer<strong>s</strong> ... on the fifth floor <strong>are</strong> crashing." The choice of "are" depends on "computers". That word is ten places back. No small window can see that far.</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Switch the model order</h4>
+    <p class="muted" style="font-size:14px">Pick unigram, bigram, or trigram. The factorization of "I want to eat" rewrites itself, and each arrow shows how far each word looks back. <strong>What to look for:</strong> more order means longer arrows (more context) but rarer phrases to count.</p>
+    <div class="chips" id="ngramChips"></div>
+    <canvas id="ngramCanvas" width="860" height="220" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="ngramOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>The jump from bigram to trigram to higher orders mirrors the history of language modelling. Each step bought a little more context. The long-distance problem above is exactly what recurrent networks and then transformers were invented to solve.</p>
+
+  <div class="key"><b>Pitfall &mdash; bigger n is not always better.</b> As \(n\) grows, exact phrases get rare, so most counts fall to zero. The sweet spot for classic models is usually trigram to 5-gram.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> We have the models. Now, where do the actual numbers come from? We count them.</p>
+ </div>
+</section>
+
+<section id="mle">
+ <div class="wrap">
+  <div class="kicker">06 &middot; Reading numbers off text</div>
+  <h2>Estimating by counting (MLE)</h2>
+  <p class="lead">Where do the probabilities come from? We read them off a <strong>corpus</strong> &mdash; a large body of text we treat as training data. The rule for turning counts into probabilities is the <strong>maximum likelihood estimate</strong>, or <strong>MLE</strong>.</p>
+
+  <div class="note"><b>Analogy first.</b> Want the chance of rain after a cloudy morning? Look back over many days. Of all cloudy mornings, what fraction were followed by rain? That fraction is your estimate. The MLE does the same with word pairs.</div>
+
+  <h3>Count and divide</h3>
+  <p>The MLE of a bigram probability is the count of the pair, divided by the count of the first word:</p>
+  <div class="eqbox">$$ P(w_i \mid w_{i-1}) \;=\; \frac{\operatorname{count}(w_{i-1}, w_i)}{\operatorname{count}(w_{i-1})} $$</div>
+  <p>Here \(\operatorname{count}(w_{i-1}, w_i)\) is how many times the pair "\(w_{i-1}\ w_i\)" appears. And \(\operatorname{count}(w_{i-1})\) is how many times the first word appears. "Maximum likelihood" means this choice makes the training text as likely as possible. For now, read it as "count and divide".</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; one ratio</h4>
+    <p class="muted" style="font-size:14px">Suppose "the dog" appears 50 times and "the" appears 1000 times. Then:</p>
+    <div class="eqbox">$$ P(\text{dog} \mid \text{the}) = \frac{50}{1000} = 0.05 $$</div>
+    <p style="font-size:14px">So 5 percent of the time, "the" is followed by "dog". That single number came straight from two counts.</p>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Count-and-divide calculator</h4>
+    <p class="muted" style="font-size:14px">Slide the pair count and the first-word count. The bar and the printed fraction update live. <strong>What to look for:</strong> the probability is just one count over another. Raise the pair count and it climbs; raise the first-word count and it falls.</p>
+    <div class="ctrl"><label>count(A,B)</label><input type="range" id="mleAB" min="0" max="900" step="1" value="50"><span class="val" id="mleABv">50</span></div>
+    <div class="ctrl"><label>count(A)</label><input type="range" id="mleA" min="1" max="3000" step="1" value="1000"><span class="val" id="mleAv">1000</span></div>
+    <canvas id="mleCanvas" width="860" height="150" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="mleOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>"Count and divide" is the simplest way to fit a model to data. Neural models replace counting with gradient descent, but the goal is the same: choose probabilities that make the training data most likely. That is the maximum-likelihood principle.</p>
+
+  <div class="key"><b>Pitfall &mdash; the MLE gives unseen pairs a zero.</b> Any pair it never saw gets probability exactly 0. That seems fair but is dangerous, as the zeros chapter shows.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Let us count for real, by hand, on a tiny three-sentence corpus.</p>
+ </div>
+</section>
+
+<section id="mini">
+ <div class="wrap">
+  <div class="kicker">07 &middot; Counting by hand</div>
+  <h2>A tiny corpus, fully counted</h2>
+  <p class="lead">Let us make the MLE concrete on the slide's three-sentence corpus. The angle-bracket tokens mark the start and end of each sentence.</p>
+
+  <div class="card" style="font-family:var(--mono);font-size:14px">
+    &langle;s&rangle; I am Sam &langle;/s&rangle;<br>
+    &langle;s&rangle; Sam I am &langle;/s&rangle;<br>
+    &langle;s&rangle; I do not like green eggs and ham &langle;/s&rangle;
+  </div>
+
+  <div class="note"><b>Analogy first.</b> With only three short sentences we can count by hand, like tallying votes on paper. Scan the text, mark each pair, then divide. Slow, but completely honest.</div>
+
+  <h3>First, single-word counts</h3>
+  <p>"I" appears 3 times. "am" appears 2 times. "Sam" appears 2 times. The start token \(\langle s \rangle\) appears 3 times, once per sentence. Now the bigram MLEs are just count-and-divide.</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; six bigram MLEs (every step)</h4>
+    <div class="readout" id="miniWorked"></div>
+    <p class="muted" style="font-size:13px;margin-top:10px">Notice the two factors after "I": \(P(\text{am}\mid\text{I})=2/3\) and \(P(\text{do}\mid\text{I})=1/3\). They add to 1, because "am" and "do" are the only words that ever follow "I" here.</p>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Click a first word, watch counts become probabilities</h4>
+    <p class="muted" style="font-size:14px">Pick the first word of a pair. The grid shows what follows it and how often, then turns those counts into probabilities that sum to 1. <strong>What to look for:</strong> pairs never seen sit at zero. For example, "do" is never followed by "Sam", so that probability is 0.</p>
+    <div class="wordsw" id="miniSw"></div>
+    <canvas id="miniCanvas" width="860" height="260" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="miniOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>This hand count is exactly what a training loop does, only on billions of words. The model builds a giant table of which word follows which, then normalises each row into probabilities. Same idea, bigger table.</p>
+
+  <div class="key"><b>Pitfall &mdash; unseen pairs are zero here too.</b> \(P(\text{Sam}\mid\text{do})\) is 0, since "do Sam" never appears. A real test sentence will hit such a zero, and that breaks things.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> The method does not change with size. Let us scale up to a real corpus of 9222 sentences.</p>
+ </div>
+</section>
+
+<section id="berkeley">
+ <div class="wrap">
+  <div class="kicker">08 &middot; A real corpus</div>
+  <h2>The Berkeley Restaurant Project</h2>
+  <p class="lead">The <strong>Berkeley Restaurant Project</strong> is 9222 sentences people spoke to a restaurant-information system. The slides give real bigram counts. Let us read several probabilities off them, then score a whole sentence.</p>
+
+  <div class="note"><b>Analogy first.</b> The method is the same as the tiny corpus: count and divide. We just have real, messy numbers now. Some pairs are common, some are rare, and some never appear at all.</div>
+
+  <h3>Raw bigram probabilities (every one worked)</h3>
+  <p>Each line below is count of the pair over count of the first word. Some pairs, like "i to", simply never appear, so they are 0.</p>
+  <div class="card"><div class="readout" id="berkRaw"></div></div>
+
+  <p>The big number is \(P(\text{to} \mid \text{want}) = 0.66\). Two out of three times, "want" is followed by "to". That is the model learning real grammar from counts. The slides also list more facts, two of which are zero:</p>
+  <div class="tablewrap">
+  <table class="tt">
+    <tr><th>pair</th><th>P</th><th>pair</th><th>P</th></tr>
+    <tr><td>english | want</td><td>0.0011</td><td>chinese | want</td><td>0.0065</td></tr>
+    <tr><td>to | want</td><td>0.66</td><td>eat | to</td><td>0.28</td></tr>
+    <tr><td>food | to</td><td class="zero">0</td><td>want | spend</td><td class="zero">0</td></tr>
+    <tr><td>i | &langle;s&rangle;</td><td>0.25</td><td></td><td></td></tr>
+  </table>
+  </div>
+
+  <h3>Scoring a whole sentence</h3>
+  <p>Now score "\(\langle s \rangle\) I want english food \(\langle /s \rangle\)" by multiplying its bigram factors. The slides report the answer as 0.000031. The lab replays every step.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Score the sentence, one factor at a time</h4>
+    <p class="muted" style="font-size:14px">Press <strong>Next factor</strong> to multiply in one bigram probability. <strong>What to look for:</strong> each factor is below 1, so the running product dives to a tiny <span style="color:var(--green)">0.000031</span>. That is the exact number from the slides.</p>
+    <div class="chips">
+      <button class="btn" id="berkNext">&#9656; Next factor</button>
+      <button class="btn" id="berkReset">&#8634; reset</button>
+    </div>
+    <canvas id="berkCanvas" width="860" height="220" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="berkOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>This is how an n-gram model scores or generates restaurant queries. Multiply the learned bigram probabilities along the sentence. A speech system computes this for several candidate sentences and keeps the highest.</p>
+
+  <div class="key"><b>Pitfall &mdash; the product gets tiny fast.</b> Five factors already give about 0.00003. A long sentence can underflow to zero on a computer, which is why we move to log space next.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Those tiny products are dangerous on a computer. Logarithms make them safe.</p>
+ </div>
+</section>
+
+<section id="logspace">
+ <div class="wrap">
+  <div class="kicker">09 &middot; A practical fix</div>
+  <h2>Working in log space</h2>
+  <p class="lead">Multiplying many small probabilities is risky. The product shrinks toward zero and can hit <strong>underflow</strong>, where the number is too small to store and becomes exactly 0. The fix is to work with <strong>logarithms</strong>.</p>
+
+  <div class="note"><b>Analogy first.</b> Fold a long strip of paper. Each fold halves the length; after a few folds it is too thin to measure. But counting the folds is easy: 1, 2, 3, 4. The log is like counting folds instead of measuring the sliver.</div>
+
+  <h3>Logs turn multiplying into adding</h3>
+  <p>The key fact: the log of a product is the sum of the logs.</p>
+  <div class="eqbox">$$ \log(p_1 \cdot p_2 \cdot p_3 \cdot p_4) \;=\; \log p_1 + \log p_2 + \log p_3 + \log p_4 $$</div>
+  <p>So we store and add log-probabilities. Each \(\log p_i\) is a moderate negative number, easy to handle. Two wins. We avoid underflow, because we never form the tiny product. And adding is faster than multiplying on most hardware.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Watch the product crash, then the log-sum stay safe</h4>
+    <p class="muted" style="font-size:14px">Add words one at a time. Toggle between the raw product and the log-sum. <strong>What to look for:</strong> the product (left) dives to a flat zero. The log-sum (right) steps down gently and never vanishes. Same calculation, safe numbers.</p>
+    <div class="chips">
+      <button class="btn" id="logAdd">&#9656; Add a word</button>
+      <button class="btn" id="logReset">&#8634; reset</button>
+      <button class="btn" id="logToggle">view: product</button>
+    </div>
+    <canvas id="logCanvas" width="860" height="240" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="logOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Almost every probabilistic model is trained and scored in log space. The standard training loss, <strong>cross-entropy</strong>, is an average of negative log-probabilities. So log space is not just a trick here; it is the everyday language of model training.</p>
+
+  <div class="key"><b>Pitfall &mdash; logs of probabilities are negative.</b> A "higher" log-probability means closer to zero, that is, less negative. Do not flip the sign in your head.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> More text means fewer zeros. How big can counts get? Web-scale big.</p>
+ </div>
+</section>
+
+<section id="google">
+ <div class="wrap">
+  <div class="kicker">10 &middot; Counts at scale</div>
+  <h2>Web-scale counts</h2>
+  <p class="lead">Google released n-gram counts from a huge sweep of the web. These show how often each short phrase appears across trillions of words. With enough text, even rare phrases get counted.</p>
+
+  <div class="note"><b>Analogy first.</b> Imagine a tally of every short phrase ever written on the public web. "serve as the" followed by "incoming", "following", "index", each with its own count. That tally is what Google shared.</div>
+
+  <h3>More text, steadier estimates</h3>
+  <p>The phrase "serve as the" is followed by many different words, each with a count, such as "serve as the incoming" and "serve as the following". The bigger the text, the more continuations we can count with confidence. This is the upside of scale: fewer zeros, steadier estimates.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Grow the corpus, watch zeros fill in</h4>
+    <p class="muted" style="font-size:14px">Slide the corpus size from a tiny sample up to web scale. Each cell is a possible continuation; grey means "never seen yet". <strong>What to look for:</strong> as the corpus grows, grey zero cells light up. But a few stubborn rare phrases stay grey, so zeros never fully vanish.</p>
+    <div class="ctrl"><label>corpus</label><input type="range" id="gScale" min="0" max="100" step="1" value="20"><span class="val" id="gScalev">20</span></div>
+    <canvas id="googleCanvas" width="860" height="220" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="googleOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Large public count releases and huge text crawls are the fuel of modern language models. The lesson holds at every scale: more text means better estimates of what word comes next.</p>
+
+  <div class="key"><b>Pitfall &mdash; even web scale runs out.</b> Most possible long phrases were still never written, so zeros never fully disappear. Scale reduces the problem but does not remove it.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Zeros are the deep flaw of plain n-grams. Time to face them head-on.</p>
+ </div>
+</section>
+
+<section id="zeros">
+ <div class="wrap">
+  <div class="kicker">11 &middot; The deep flaw</div>
+  <h2>Overfitting and zeros</h2>
+  <p class="lead">Plain n-grams only work when the test text looks like the training text. When a new word pair appears, the model breaks sharply: it says "probability zero", and one zero makes a whole sentence score zero.</p>
+
+  <div class="note"><b>Analogy first.</b> A chef who only cooks dishes from one cookbook. Ask for a reasonable dish not in the book, and the chef says "impossible". The dish is fine; the chef is just too rigid. A zero-probability pair is that "impossible".</div>
+
+  <h3>Overfitting, then zeros</h3>
+  <p><strong>Overfitting</strong> means fitting the training text too closely and failing on new text. N-grams overfit because they trust their exact counts. The sharpest form is <strong>zeros</strong>. Suppose training has "denied the allegations / reports / claims / request". The test says "denied the offer". We never saw that pair, so:</p>
+  <div class="eqbox">$$ P(\text{offer} \mid \text{denied the}) \;=\; \frac{0}{\#(\text{denied the})} \;=\; 0 $$</div>
+  <p>Because the sentence is a product, this single zero zeros the whole sentence:</p>
+  <div class="eqbox">$$ P(\text{test sentence}) \;=\; (\ldots) \times 0 \times (\ldots) \;=\; 0 $$</div>
+  <p>Worse, perplexity (our score, defined later) divides by a probability. A zero makes perplexity infinite, so we cannot even score the model. One unseen pair has broken everything.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; One zero nukes the sentence</h4>
+    <p class="muted" style="font-size:14px">Each bar is one bigram factor in a sentence. Click any bar to set that factor to zero (an unseen pair). <strong>What to look for:</strong> the moment any one factor hits zero, the whole sentence probability drops to <span style="color:var(--red)">0</span>, no matter how good the others are.</p>
+    <div class="chips" id="zeroChips"></div>
+    <canvas id="zeroCanvas" width="860" height="240" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="zeroOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Overfitting is a universal worry, not just for n-grams. The fixes share a flavour everywhere: do not trust the training data too much. Smoothing, next, is the n-gram version of that caution.</p>
+
+  <div class="key"><b>Pitfall &mdash; zero is not "very unlikely".</b> "Very unlikely" is a small positive number. A hard zero says "cannot happen", which is almost never true for a sensible phrase.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> The simplest fix: pretend we saw every pair one extra time.</p>
+ </div>
+</section>
+
+<section id="laplace">
+ <div class="wrap">
+  <div class="kicker">12 &middot; The first fix</div>
+  <h2>Add-1 (Laplace) smoothing</h2>
+  <p class="lead"><strong>Laplace smoothing</strong>, also called <strong>Add-1 smoothing</strong>, pretends we saw every word pair one extra time. It steals a little probability from the common pairs and hands it to the unseen ones, so no pair is zero.</p>
+
+  <div class="note"><b>Analogy first.</b> A teacher gives every student one free mark before grading. A student who scored zero now has one mark. The top students barely notice. That free mark is the "add one".</div>
+
+  <h3>The smoothed formula</h3>
+  <p>Recall the plain MLE for one word: "bagel" appears 400 times in a million words, so \(P(\text{bagel}) = 400/1{,}000{,}000 = 0.0004\). Add-1 changes the bigram rule. Add 1 to every pair count. To keep probabilities summing to 1, add the vocabulary size \(V\) (the number of different words) to the denominator:</p>
+  <div class="eqbox">$$ P^{*}(w_i \mid w_{i-1}) \;=\; \frac{\operatorname{count}(w_{i-1}, w_i) + 1}{\operatorname{count}(w_{i-1}) + V} $$</div>
+  <p>The star in \(P^{*}\) marks the smoothed version. Why add \(V\) below? Because we added 1 to each of the \(V\) possible next words, so the bottom grows by \(V\). That keeps every row a proper probability.</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; add-1 Berkeley bigrams (V = 1446)</h4>
+    <div class="readout" id="lapWorked"></div>
+    <p class="muted" style="font-size:13px;margin-top:10px">\(P(\text{want}\mid\text{i})\) fell from 0.33 to 0.21. And \(P(\text{to}\mid\text{i})\) rose from 0 to 0.00025. The zero is gone, but the big value shrank a lot.</p>
+  </div>
+
+  <h3>Reconstituted counts: how blunt is it?</h3>
+  <p>Turn the smoothed probability back into an effective count, the <strong>reconstituted count</strong> \(c^{*}\), and compare to the real count:</p>
+  <div class="eqbox">$$ c^{*}(w_{i-1}, w_i) \;=\; \frac{\big(\operatorname{count}(w_{i-1}, w_i) + 1\big)\,\operatorname{count}(w_{i-1})}{\operatorname{count}(w_{i-1}) + V} $$</div>
+  <p>For "i want" (real count 827, first-word count 2533, \(V=1446\)): \(c^{*} = (828 \times 2533)/3979 \approx 527\). A drop from 827 to 527 is huge. About 300 sightings of a common pair were given away. That is why add-1 is a <strong>blunt instrument</strong>.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Move the smoothing dial</h4>
+    <p class="muted" style="font-size:14px">Slide the add-\(k\) amount and the vocabulary size \(V\). Watch a common pair and an unseen pair. <strong>What to look for:</strong> as \(k\) or \(V\) grows, the green seen-pair bar shrinks and the red unseen-pair bar climbs. Probability mass flows from seen to unseen.</p>
+    <div class="ctrl"><label>add-k</label><input type="range" id="lapK" min="0" max="5" step="0.1" value="1"><span class="val" id="lapKv">1.0</span></div>
+    <div class="ctrl"><label>V (vocab)</label><input type="range" id="lapV" min="2" max="3000" step="1" value="1446"><span class="val" id="lapVv">1446</span></div>
+    <canvas id="lapCanvas" width="860" height="240" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="lapOut"></div>
+  </div>
+
+  <div class="key"><b>When add-1 is fine.</b> It hurts most when there are many zeros to feed. Where zeros are rare, the "+1" and "+V" barely move the numbers. An example is <strong>text classification</strong>, which means sorting documents into categories. So the slides say: do not use add-1 for n-grams. But do use it for classification. There it is the standard fix inside a <strong>naive Bayes</strong> classifier.</div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Adding a small constant to counts is a form of <strong>regularisation</strong>. That means a gentle pull from the raw data toward a safer guess. The same idea appears as "pseudo-counts" in Bayesian models. It also appears as label smoothing in neural networks.</p>
+
+  <div class="key"><b>Pitfall &mdash; the bigger V, the worse it gets.</b> With tens of thousands of words, the "+V" swamps the real counts. So add-1 is rarely used for n-grams in practice.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> A smarter idea: when a long phrase is unseen, lean on shorter ones you have seen.</p>
+ </div>
+</section>
+
+<section id="backoff">
+ <div class="wrap">
+  <div class="kicker">13 &middot; Use less context when unsure</div>
+  <h2>Backoff and interpolation</h2>
+  <p class="lead">A long context is precise but rare. A short context is rough but common. So when the long context has no evidence, lean on the short one. Two methods do this: <strong>backoff</strong> and <strong>interpolation</strong>.</p>
+
+  <div class="note"><b>Analogy first.</b> Ask a local for a restaurant on your exact street. If they know it, great (the trigram). If not, they suggest the neighbourhood (the bigram). If even that is blank, a city-wide favourite (the unigram). You widen until you get a real answer.</div>
+
+  <h3>Backoff: drop context only when needed</h3>
+  <p><strong>Backoff</strong> uses the longest context that has good evidence, and steps down only when it must. Use the trigram if seen enough; else back off to the bigram; else to the unigram. Each step drops one word of context.</p>
+
+  <h3>Interpolation: always blend all orders</h3>
+  <p><strong>Interpolation</strong> mixes all orders every time. Give each a weight and add them. <strong>Linear interpolation</strong> for a trigram is. The weights \(\lambda\) (lambda) say how much to trust each order:</p>
+  <div class="eqbox">$$ \hat{P}(w_n \mid w_{n-2}, w_{n-1}) \;=\; \lambda_1 P(w_n \mid w_{n-2}, w_{n-1}) + \lambda_2 P(w_n \mid w_{n-1}) + \lambda_3 P(w_n) $$</div>
+  <p>Here \(\hat{P}\) is the blended estimate. The weights must add to 1, so the blend stays a proper probability:</p>
+  <div class="eqbox">$$ \lambda_1 + \lambda_2 + \lambda_3 \;=\; 1 $$</div>
+  <p>The weights can also depend on context, so we trust the trigram more when we have seen that context often. The slides note interpolation usually beats backoff.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; The interpolation mixer</h4>
+    <p class="muted" style="font-size:14px">Set the trigram and bigram weights. The unigram weight fills the rest, so all three always sum to 1. <strong>What to look for:</strong> the blended probability (green) moves between the three orders' values. Pour weight onto the order you trust; the total stays 1.</p>
+    <div class="ctrl"><label>&lambda;&#8321; tri</label><input type="range" id="lam1" min="0" max="1" step="0.01" value="0.6"><span class="val" id="lam1v">0.60</span></div>
+    <div class="ctrl"><label>&lambda;&#8322; bi</label><input type="range" id="lam2" min="0" max="1" step="0.01" value="0.3"><span class="val" id="lam2v">0.30</span></div>
+    <canvas id="interpCanvas" width="860" height="240" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="interpOut"></div>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; The backoff ladder</h4>
+    <p class="muted" style="font-size:14px">Press <strong>try / back off</strong> to attempt the current order; if it has no evidence, step down. <strong>What to look for:</strong> you only drop to a shorter context when the longer one gives a zero. Backoff keeps the most context it can.</p>
+    <div class="chips">
+      <button class="btn" id="boTry">&#9656; try / back off</button>
+      <button class="btn" id="boReset">&#8634; reset</button>
+    </div>
+    <canvas id="backoffCanvas" width="860" height="200" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="backoffOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Blending several models with weights is called an <strong>ensemble</strong> (a team of models voting together). Interpolation is a small, classic ensemble. Modern systems blend many models too, often with learned weights, for the same reason: the team beats any single member.</p>
+
+  <div class="key"><b>Pitfall &mdash; the weights must sum to 1.</b> Otherwise the blend is no longer a probability. Backoff also needs a discount, so the probabilities still sum to 1 after stealing mass for lower orders.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Interpolation needs those weights. Where do they come from? A held-out set.</p>
+ </div>
+</section>
+
+<section id="heldout">
+ <div class="wrap">
+  <div class="kicker">14 &middot; Tuning honestly</div>
+  <h2>Setting the weights with a held-out set</h2>
+  <p class="lead">The weights \(\lambda\) do not come from the training set. And they never come from the test set. We use a third slice of data instead: the <strong>held-out set</strong>.</p>
+
+  <div class="note"><b>Analogy first.</b> Studying for an exam. You learn from your notes (training). You rehearse on a mock exam to fine-tune your strategy (held-out). Then you sit the real exam once, to measure how you did (test). Using the real exam to practise would be cheating.</div>
+
+  <h3>Three splits, three jobs</h3>
+  <p>The <strong>training set</strong> fixes the n-gram probabilities by counting. The <strong>held-out set</strong> chooses the weights \(\lambda\) that make that held-out text most likely. The <strong>test set</strong> is touched once, at the end, for a fair final score. The recipe: fix the probabilities on training, search weights to maximise the held-out probability, then freeze and report on test.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Tune lambda on held-out, judge on test</h4>
+    <p class="muted" style="font-size:14px">Slide \(\lambda\). The held-out curve peaks at the best weight; a marker shows where you are. Press <strong>lock in best</strong> to snap to the peak, then read the honest test score. <strong>What to look for:</strong> the best \(\lambda\) is the one that maximises the held-out probability &mdash; not the training one.</p>
+    <div class="ctrl"><label>&lambda; (tri)</label><input type="range" id="hoLam" min="0" max="1" step="0.01" value="0.3"><span class="val" id="hoLamv">0.30</span></div>
+    <div class="chips"><button class="btn" id="hoBest">&#9737; lock in best</button></div>
+    <canvas id="heldCanvas" width="860" height="240" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="heldOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Every machine-learning project uses this split. The held-out set is the <strong>validation set</strong> that tunes settings you cannot learn directly, called <strong>hyperparameters</strong>. The test set gives the honest final number. Mixing them up is one of the most common and serious mistakes in the field.</p>
+
+  <div class="key"><b>Pitfall &mdash; never tune on the test set.</b> If you peek at the test set while choosing weights, your final score is too optimistic and cannot be trusted.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> One more surprise: a word we have never seen at all.</p>
+ </div>
+</section>
+
+<section id="unk">
+ <div class="wrap">
+  <div class="kicker">15 &middot; The unknown word</div>
+  <h2>Unknown words and the UNK token</h2>
+  <p class="lead">Not a new pair, but a brand-new word. We need a plan for these <strong>out-of-vocabulary</strong> words, often shortened to <strong>OOV</strong>.</p>
+
+  <div class="note"><b>Analogy first.</b> A form with a final option labelled "Other". You cannot list every possible answer, so "Other" catches the rest. The unknown-word token is the "Other" box of a language model.</div>
+
+  <h3>The plan: one bucket for the unknown</h3>
+  <p>A <strong>closed vocabulary</strong> assumes every test word is already known. An <strong>open vocabulary</strong> allows new words at test time, which is realistic. To handle it, use a special token \(\langle\text{UNK}\rangle\), meaning "unknown word". The plan has three steps. First, fix a vocabulary, a lexicon \(L\) of size \(V\). Second, in training, map every word not in \(L\) to \(\langle\text{UNK}\rangle\), and learn its probability like any word. Third, at test time, replace any unseen word with \(\langle\text{UNK}\rangle\) and use that probability.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Send unseen words to UNK</h4>
+    <p class="muted" style="font-size:14px">Pick a test sentence. Words in the fixed vocabulary stay. Words outside it get mapped to \(\langle\text{UNK}\rangle\). <strong>What to look for:</strong> the model never sees a true "zero word". Every stranger lands in the one UNK bucket, which has a learned probability.</p>
+    <div class="wordsw" id="unkSw"></div>
+    <canvas id="unkCanvas" width="860" height="170" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="unkOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Modern models avoid pure unknown words with <strong>subword tokens</strong>. They split a strange word into known pieces. But the spirit is the same as \(\langle\text{UNK}\rangle\). Always have a way to score input you did not expect.</p>
+
+  <div class="key"><b>Pitfall &mdash; pick the vocabulary before training.</b> If you choose which words count by peeking at the test set, you are cheating again, in a subtle way.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> At web scale, even smoothing is too slow. Two fast tricks finish the toolkit.</p>
+ </div>
+</section>
+
+<section id="stupid">
+ <div class="wrap">
+  <div class="kicker">16 &middot; Fast at scale</div>
+  <h2>Pruning and stupid backoff</h2>
+  <p class="lead">At web scale, count tables get too big to store, and full smoothing gets too slow. Two tricks handle this: <strong>pruning</strong> and <strong>stupid backoff</strong>.</p>
+
+  <div class="note"><b>Analogy first.</b> Packing for a long trip with a small bag. You drop the items you used only once. And you stop fussing over neat folding, to save time. Pruning drops rare items; stupid backoff is the quick, good-enough fold.</div>
+
+  <h3>Pruning: drop the singletons</h3>
+  <p><strong>Pruning</strong> only stores n-grams whose count is above a threshold. In particular, drop the <strong>singletons</strong> of the higher orders &mdash; the long phrases seen exactly once. This keeps the table small with little loss.</p>
+
+  <h3>Stupid backoff: a fast score</h3>
+  <p><strong>Stupid backoff</strong> (Brants and colleagues, 2007) does no discounting. If the longer phrase was seen, use its plain relative frequency. If not, back off and multiply by a fixed weight, commonly 0.4. We call it \(S\), not \(P\), because it is not a true probability:</p>
+  <div class="eqbox">$$ S(w_i \mid w_{i-k+1}^{\,i-1}) = \begin{cases} \dfrac{\operatorname{count}(w_{i-k+1}^{\,i})}{\operatorname{count}(w_{i-k+1}^{\,i-1})}, & \text{if count} > 0 \\[1em] 0.4 \cdot S(w_i \mid w_{i-k+2}^{\,i-1}), & \text{otherwise} \end{cases} $$</div>
+  <p>The top case is count of the long phrase over count of its context. The bottom case drops one word and multiplies by 0.4. That 0.4 is fixed, not tuned. The score \(S\) is good for ranking, which is all a huge system needs.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Stupid backoff, step by step</h4>
+    <p class="muted" style="font-size:14px">Pick whether each order was seen. The score either uses the count ratio or multiplies a shorter score by 0.4. <strong>What to look for:</strong> every backoff step costs a fixed 0.4 penalty &mdash; cheap, no discounting math, good enough to rank.</p>
+    <div class="chips" id="sbChips"></div>
+    <canvas id="sbCanvas" width="860" height="200" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="sbOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Stupid backoff is a lesson in scale. At a billion words, a simple method that runs fast beats a careful method too slow to use. Engineers make this trade often: a rough tool that scales can win over a precise tool that does not.</p>
+
+  <div class="key"><b>Pitfall &mdash; S is not a real probability.</b> It does not sum to 1, so you cannot plug it into perplexity. It is for ranking only.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> We have built and fixed models. How do we tell which one is better?</p>
+ </div>
+</section>
+
+<section id="eval">
+ <div class="wrap">
+  <div class="kicker">17 &middot; Judging a model</div>
+  <h2>Extrinsic vs intrinsic evaluation</h2>
+  <p class="lead">We train on a training set and test on an <em>unseen</em> test set. Then we measure. There are two kinds of measurement: <strong>extrinsic</strong> (the real job) and <strong>intrinsic</strong> (a quick stand-in).</p>
+
+  <div class="note"><b>Analogy first.</b> To compare two car engines, the true test is a real race (extrinsic), but it takes days to set up. A quick test is a dynamometer reading in the garage (intrinsic): fast, a decent hint, but not the race itself.</div>
+
+  <h3>The two measures</h3>
+  <p>An <strong>extrinsic</strong> evaluation (also called <strong>in-vivo</strong>, "in the living task") puts models A and B inside a real application. That could be a spell checker, a speech recogniser, or a translator. It compares their accuracy. This is best, because it scores what we care about. The cost is time: days or weeks. An <strong>intrinsic</strong> evaluation scores the model directly, with no task. The standard one is <strong>perplexity</strong> (next chapter). It is fast. But it is only a good guide when the test text looks like the training text. So perplexity is best for quick pilot checks.</p>
+
+  <div class="tablewrap">
+  <table class="tt">
+    <tr><th></th><th>Extrinsic (in-vivo)</th><th>Intrinsic (perplexity)</th></tr>
+    <tr><td>what it measures</td><td>real task accuracy</td><td>model's surprise on text</td></tr>
+    <tr><td>speed</td><td class="zero">slow (days)</td><td class="one">fast</td></tr>
+    <tr><td>trust</td><td class="one">gold standard</td><td>good guide only</td></tr>
+    <tr><td>best for</td><td>final decisions</td><td>quick pilots</td></tr>
+  </table>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Fast filter, slow final test</h4>
+    <p class="muted" style="font-size:14px">Slide how many model ideas you have. See the time for the fast intrinsic check versus the slow extrinsic test. <strong>What to look for:</strong> the fast score lets you screen many ideas cheaply. Then you pay for the slow real test on the few survivors.</p>
+    <div class="ctrl"><label>ideas</label><input type="range" id="evN" min="1" max="40" step="1" value="12"><span class="val" id="evNv">12</span></div>
+    <canvas id="evalCanvas" width="860" height="200" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="evalOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Every field faces this split. A search engine has fast offline scores and slow real user tests. Teams use the fast score to filter ideas, then run the expensive real test on the few survivors. Perplexity plays the fast-score role for language models.</p>
+
+  <div class="key"><b>Pitfall &mdash; a better intrinsic score is not always a better task.</b> Perplexity can disagree with task accuracy. When stakes are high, trust the extrinsic test.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> What does perplexity actually measure? Surprise. Here is the intuition first.</p>
+ </div>
+</section>
+
+<section id="shannon">
+ <div class="wrap">
+  <div class="kicker">18 &middot; The intuition for perplexity</div>
+  <h2>The Shannon game</h2>
+  <p class="lead">A good model is not surprised by real text. It gives high probability to the word that actually comes next. This is the <strong>Shannon game</strong>, named after Claude Shannon.</p>
+
+  <div class="note"><b>Analogy first.</b> A friend who knows you well finishes your sentences correctly. A stranger guesses all over the place. The friend is the better "model" of you, because the true next word rarely surprises them.</div>
+
+  <h3>Cover the next word and bet</h3>
+  <p>Let the model bet on the hidden next word. A good model puts most of its bet on the true word. A bad model spreads the bet thinly. Try these slide examples (the blank is the next word):</p>
+  <ul class="muted">
+    <li>"I always order pizza with cheese and ___"</li>
+    <li>"The 33rd President of the US was ___"</li>
+    <li>"I saw a ___"</li>
+  </ul>
+  <p>A strong model gives a high probability to "mushrooms" or "Truman" or "cat". The slides note that <strong>unigram models are bad at this game</strong>. With no context, a unigram cannot tell that "cheese and" wants a topping next.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Play the guessing game</h4>
+    <p class="muted" style="font-size:14px">Pick a sentence and a model. The bars are the model's bet over candidate next words; the true word is outlined. <strong>What to look for:</strong> a context-aware model piles its bet onto the true word. The unigram spreads it flat. Flat bets mean a worse model.</p>
+    <div class="chips" id="shChips"></div>
+    <div class="chips" id="shModelChips"></div>
+    <canvas id="shCanvas" width="860" height="240" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="shOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>This "how surprised is the model?" idea is exactly the training signal for modern language models. They are trained to lower their surprise on real text, word by word. Surprise has a precise name, which the next chapter makes into a number.</p>
+
+  <div class="key"><b>Pitfall &mdash; low surprise on training text is easy.</b> We care about low surprise on <em>unseen</em> text. A model can memorise training data and still be useless on new sentences.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Now turn that surprise into one number: perplexity.</p>
+ </div>
+</section>
+
+<section id="perplexity">
+ <div class="wrap">
+  <div class="kicker">19 &middot; Surprise as a number</div>
+  <h2>Perplexity</h2>
+  <p class="lead"><strong>Perplexity</strong> measures how surprised a model is by a test set. Lower perplexity means less surprise, which means a better model.</p>
+
+  <div class="note"><b>Analogy first.</b> Being quizzed, at each question, how many options are you torn between? Always sure between two? Your "perplexity" is about two. Guessing among ten? About ten. Lower means more confident and more often right.</div>
+
+  <h3>The formula, built up</h3>
+  <p>Let the test set be \(w_1, \ldots, w_N\), with \(N\) words. Perplexity \(\mathrm{PP}(W)\) is the test-set probability raised to the power \(-1/N\):</p>
+  <div class="eqbox">$$ \mathrm{PP}(W) \;=\; P(w_1, w_2, \ldots, w_N)^{-\frac{1}{N}} $$</div>
+  <p>The minus sign turns "high probability" into "low perplexity". The \(1/N\) averages over length, so test sets of different sizes are comparable. By the chain rule, this is a product of per-word inverse probabilities:</p>
+  <div class="eqbox">$$ \mathrm{PP}(W) \;=\; \left( \prod_{i=1}^{N} \frac{1}{P(w_i \mid w_1, \ldots, w_{i-1})} \right)^{\frac{1}{N}} $$</div>
+  <p>For a bigram model, each factor uses only the previous word:</p>
+  <div class="eqbox">$$ \mathrm{PP}(W) \;=\; \left( \prod_{i=1}^{N} \frac{1}{P(w_i \mid w_{i-1})} \right)^{\frac{1}{N}} $$</div>
+  <p>The big idea: minimising perplexity is the same as maximising the probability of the test set. Lower is better.</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; the branching factor of random digits</h4>
+    <div class="readout" id="ppWorked"></div>
+    <p class="muted" style="font-size:13px;margin-top:10px">So perplexity reads as the effective number of choices per step. For ten equally likely digits, that number is exactly ten. It is called the <strong>branching factor</strong>.</p>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; The perplexity meter</h4>
+    <p class="muted" style="font-size:14px">Slide the model's confidence in the true word. The dial shows perplexity and the matching branching factor. <strong>What to look for:</strong> as confidence rises, perplexity falls toward 1 (no surprise). A flat, unsure model pushes perplexity up toward the vocabulary size.</p>
+    <div class="ctrl"><label>confidence</label><input type="range" id="ppConf" min="1" max="99" step="1" value="50"><span class="val" id="ppConfv">50</span></div>
+    <div class="ctrl"><label>vocab V</label><input type="range" id="ppV" min="2" max="50" step="1" value="10"><span class="val" id="ppVv">10</span></div>
+    <canvas id="ppCanvas" width="860" height="240" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="ppOut"></div>
+  </div>
+
+  <h3>Real models: WSJ perplexity</h3>
+  <p>On Wall Street Journal text (WSJ), trained on 38 million words and tested on 1.5 million, more context gives lower perplexity:</p>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; The value of context, as one number</h4>
+    <p class="muted" style="font-size:14px">The bars are the WSJ perplexities. Click a model to highlight it and read its meaning. <strong>What to look for:</strong> adding context cuts perplexity from 962 (unigram) to 170 (bigram) to 109 (trigram). That drop is what context buys.</p>
+    <div class="chips" id="wsjChips"></div>
+    <canvas id="wsjCanvas" width="860" height="240" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="wsjOut"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Perplexity is still the headline intrinsic score for modern language models. When a new model is announced, its perplexity on a standard test set is one of the first numbers reported. It is the direct descendant of this exact formula.</p>
+
+  <div class="key"><b>Pitfall &mdash; perplexity needs real probabilities.</b> A single zero makes it infinite, so you must smooth first. And only compare perplexities on the <em>same</em> test set and vocabulary.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> One last piece: where does all this text come from?</p>
+ </div>
+</section>
+
+<section id="corpora">
+ <div class="wrap">
+  <div class="kicker">20 &middot; The data, and the thread</div>
+  <h2>Corpora and wrap-up</h2>
+  <p class="lead">To train and test models, the field uses shared <strong>corpora</strong> &mdash; large public collections of text and speech. Sharing them lets different teams compare results fairly.</p>
+
+  <div class="note"><b>Analogy first.</b> Standard reading lists in a class: if everyone studies the same books, their test scores can be compared. Shared corpora are the standard reading lists of language modelling.</div>
+
+  <h3>The standard collections</h3>
+  <div class="tablewrap">
+  <table class="tt">
+    <tr><th>kind</th><th>examples</th></tr>
+    <tr><td>written text</td><td>Brown, WSJ, AP newswire</td></tr>
+    <tr><td>two-language</td><td>Hansards (parliament debates)</td></tr>
+    <tr><td>speech / dialogue</td><td>CallHome, ATIS, Switchboard, Broadcast News</td></tr>
+    <tr><td>more speech</td><td>TDT, Communicator, TRAINS, Radio News</td></tr>
+  </table>
+  </div>
+  <p>The Hansards exist in two languages, which makes them useful for translation. The speech corpora were gathered under DARPA and NIST research programs.</p>
+
+  <h3>The whole lecture in one slider</h3>
+  <p>Everything here turns on one axis: <strong>how much context a method uses</strong>. Slide it and watch the trade-off appear.</p>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; The through-line: context vs reliability</h4>
+    <p class="muted" style="font-size:14px">Slide from "no context" (unigram) to "long context" (high n-gram). The lit row is where you land, with its trade-off printed. <strong>What to look for:</strong> more context means better predictions but rarer phrases and more zeros. The whole lecture is managing that one tension.</p>
+    <div class="ctrl"><label>context</label><input type="range" id="synCtx" min="0" max="4" step="1" value="1"><span class="val" id="synCtxv">1</span></div>
+    <canvas id="synCanvas" width="860" height="260" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="synOut"></div>
+  </div>
+
+  <div class="card">
+    <h4>Check yourself</h4>
+    <p class="muted" style="font-size:14px">Why does one unseen bigram make a whole sentence's probability zero?</p>
+    <div class="chips"><button class="btn" id="cyBtn">Reveal answer</button></div>
+    <div class="quiz-a" id="cyA"><p style="margin:0;font-size:14px">The sentence probability is a <strong>product</strong> of bigram factors. Anything times 0 is 0. So one zero factor drags the whole product to 0 &mdash; which is why we smooth, to remove zeros.</p></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Shared benchmark datasets drive the whole field forward. Progress is measured by beating the last best score on a common dataset. These early corpora set that habit, which still powers machine-learning research today.</p>
+
+  <div class="key"><b>The thread.</b> Score a sentence with the chain rule. Shortcut it with Markov n-grams. Read the numbers by counting. Remove zeros with smoothing. Blend orders with interpolation. Judge it with perplexity. Six ideas, one tool.</div>
+
+  <div class="chips" style="margin-top:18px">
+    <span class="tag">analogy before algebra</span>
+    <span class="tag">every symbol named</span>
+    <span class="tag">every slide example worked</span>
+    <span class="tag">bespoke canvas labs</span>
+    <span class="tag">self-contained &middot; file safe</span>
+  </div>
+ </div>
+</section>
+
+<div class="foot">
+  Interactive companion to NLP Session 4, Language Modelling (by Dr. Chetana Gavankar). Every concept and slide example rebuilt with plain English, step-by-step math, and hand-drawn canvas labs. Math rendered with MathJax (the only external dependency). Open it from a file, no server needed.
+</div>
+</main>
+</div>
+
+<script>
+/* ===== shared utilities (defined once, before any demo uses them) ===== */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=(x,d=3)=>{ if(!isFinite(x))return '∞'; if(Math.abs(x)<1e-12)x=0; return x.toFixed(d); };
+const fmtSig=(x)=>{ if(!isFinite(x))return '∞'; if(x===0)return '0'; if(x>=0.01)return x.toFixed(4); return x.toExponential(2); };
+
+/* slider factory (from the template) */
+function makeSlider(host,opt,onInput){
+  const row=document.createElement('div');row.className='ctrl';
+  const lab=document.createElement('label');lab.innerHTML=opt.label;
+  const inp=document.createElement('input');
+  inp.type='range';inp.id=opt.id;
+  inp.min=opt.min;inp.max=opt.max;inp.step=opt.step;inp.value=opt.value;
+  const val=document.createElement('span');val.className='val';
+  const dec=(opt.step+'').includes('.')?(opt.step+'').split('.')[1].length:0;
+  const show=()=>{val.textContent=parseFloat(inp.value).toFixed(dec);};
+  inp.addEventListener('input',()=>{show();if(onInput)onInput(parseFloat(inp.value));});
+  row.appendChild(lab);row.appendChild(inp);row.appendChild(val);host.appendChild(row);
+  show();
+  return ()=>parseFloat(inp.value);
+}
+
+/* DPR-aware canvas (from the template) */
+function setupCanvas(canvas,drawFn){
+  const ctx=canvas.getContext('2d');
+  function resize(){
+    const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+    const rect=canvas.getBoundingClientRect();
+    const cssW=rect.width||canvas.width;
+    const cssH=cssW*(canvas.height/canvas.width);
+    canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawFn(ctx,cssW,cssH);
+  }
+  let raf=null;
+  window.addEventListener('resize',()=>{if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(resize);});
+  resize();
+  return {redraw:()=>{const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+    drawFn(ctx,canvas.width/dpr,canvas.height/dpr);}};
+}
+
+/* small shared drawing helpers */
+const COL={cyan:'#38f0d8',cyan2:'#19c4ff',violet:'#9b8cff',pink:'#ff6ec7',amber:'#ffcb6b',green:'#62e88a',red:'#ff6b81',muted:'#93a4c8',dim:'#64759c',line:'#1f2d4d'};
+function axisLine(ctx,x1,y1,x2,y2,col){ctx.strokeStyle=col||'rgba(120,150,210,.25)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+/* draw a row of value bars with labels; returns nothing. Used by many demos. */
+function barChart(ctx,W,H,items,opt){
+  opt=opt||{};
+  const pad=opt.pad||40, top=opt.top||24, bot=H-34;
+  const maxv=opt.max||Math.max(...items.map(d=>d.v),1e-9);
+  const n=items.length, slot=(W-2*pad)/n, bw=Math.min(slot*0.62,70);
+  ctx.clearRect(0,0,W,H);
+  // baseline
+  axisLine(ctx,pad-6,bot,W-pad+6,bot);
+  items.forEach((d,i)=>{
+    const cx=pad+slot*(i+0.5);
+    const h=Math.max(2,(d.v/maxv)*(bot-top));
+    ctx.fillStyle=d.col||COL.cyan;
+    ctx.fillRect(cx-bw/2,bot-h,bw,h);
+    if(d.outline){ctx.strokeStyle=COL.amber;ctx.lineWidth=2.5;ctx.strokeRect(cx-bw/2,bot-h,bw,h);}
+    ctx.fillStyle='#cfe0f5';ctx.font='11px monospace';ctx.textAlign='center';
+    ctx.fillText(d.top!==undefined?d.top:fmtSig(d.v),cx,bot-h-6);
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';
+    (d.label||'').split('\n').forEach((ln,k)=>ctx.fillText(ln,cx,bot+14+k*12));
+  });
+  ctx.textAlign='left';
+}
+
+/* scroll progress + active nav */
+const tocLinks=$$('#toc a');
+const sections=tocLinks.map(a=>$(a.getAttribute('href')));
+function onScroll(){
+  const st=window.scrollY, h=document.body.scrollHeight-window.innerHeight;
+  $('#progbar').style.width=(100*st/(h||1))+'%';
+  let idx=0;
+  sections.forEach((sec,i)=>{ if(sec && sec.offsetTop-130<=st) idx=i; });
+  tocLinks.forEach((a,i)=>a.classList.toggle('active',i===idx));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+
+/* registry */
+window.__demos=[];
+function runDemos(){ window.__demos.forEach(f=>{try{f();}catch(e){console.error(e);}}); }
+
+/* theme toggle */
+function initTheme(){
+  const btn=$('#themeBtn'); if(!btn)return;
+  const sync=()=>{const light=document.documentElement.getAttribute('data-theme')==='light';btn.innerHTML=light?'🌙 Dark':'☀ Light';};
+  sync();
+  btn.addEventListener('click',()=>{
+    const root=document.documentElement, light=root.getAttribute('data-theme')==='light';
+    if(light){root.removeAttribute('data-theme');try{localStorage.setItem('lectheme','dark');}catch(e){}}
+    else{root.setAttribute('data-theme','light');try{localStorage.setItem('lectheme','light');}catch(e){}}
+    sync();
+    setTimeout(()=>{try{runDemos();}catch(e){}},30);
+  });
+}
+
+/* scroll reveal (never on canvas-holding blocks) */
+function initReveal(){
+  if(!('IntersectionObserver' in window))return;
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),
+    {threshold:0.04,rootMargin:'0px 0px -4% 0px'});
+  $$('section .wrap > *').forEach(el=>{
+    if(el.classList.contains('lab')||el.querySelector('canvas')) return;
+    el.classList.add('reveal'); io.observe(el);
+  });
+}
+
+/* guided story mode — one line per chapter */
+const STORY=[
+ {id:'intro',t:'Welcome',x:'We build a language model from scratch: score a sentence, count it, fix it, measure it. Use prev / next or the arrow keys; space pauses.'},
+ {id:'whatis',t:'What a model is',x:'A model scores a sentence and ranks the next word. Pick a context in the lab and watch the ranking change.'},
+ {id:'why',t:'Why it matters',x:'Translation, spelling, and speech all pick the most fluent option. Flip tasks and watch the good sentence beat the odd one.'},
+ {id:'chain',t:'The chain rule',x:'A sentence score is a product of next-word scores. Press Next word and watch the running product shrink.'},
+ {id:'markov',t:'The Markov shortcut',x:'Keep only the last few words. Slide k and watch the distant history fade to grey.'},
+ {id:'ngram',t:'n-gram models',x:'Unigram keeps none, bigram one, trigram two. Switch the order and watch the look-back arrows grow.'},
+ {id:'mle',t:'Count and divide',x:'A bigram probability is one count over another. Slide the counts and watch the fraction move.'},
+ {id:'mini',t:'A tiny corpus',x:'Count three sentences by hand. Click a first word and watch its counts become probabilities that sum to 1.'},
+ {id:'berkeley',t:'A real corpus',x:'9222 restaurant sentences. Press Next factor and watch the sentence score dive to 0.000031.'},
+ {id:'logspace',t:'Log space',x:'Tiny products underflow to zero. Toggle to the log-sum and watch the same calculation stay safe.'},
+ {id:'google',t:'Web scale',x:'More text fills in zeros. Grow the corpus and watch grey cells light up, though a few stay grey.'},
+ {id:'zeros',t:'The zeros problem',x:'One unseen pair zeros the whole sentence. Click any bar to zero it and watch the product collapse.'},
+ {id:'laplace',t:'Add-1 smoothing',x:'Give every pair one free count. Slide add-k and V and watch mass flow from seen to unseen pairs.'},
+ {id:'backoff',t:'Backoff & interpolation',x:'Blend the orders or step down to shorter ones. Move the lambda sliders; they always sum to 1.'},
+ {id:'heldout',t:'Held-out tuning',x:'Tune the weights on held-out data, judge once on test. Slide lambda to its held-out peak.'},
+ {id:'unk',t:'Unknown words',x:'Strangers map to one UNK bucket. Pick a sentence and watch unseen words become UNK.'},
+ {id:'stupid',t:'Stupid backoff',x:'A fast 0.4 penalty per backoff, no discounting. Toggle which orders were seen and watch the score build.'},
+ {id:'eval',t:'How to judge',x:'A fast intrinsic check filters ideas; a slow real test decides. Slide the number of ideas to feel the trade.'},
+ {id:'shannon',t:'The Shannon game',x:'A good model bets on the true next word. Switch models and watch the unigram spread its bet flat.'},
+ {id:'perplexity',t:'Perplexity',x:'The effective number of choices per word. Slide confidence and watch perplexity fall toward 1.'},
+ {id:'corpora',t:'Wrap-up',x:'It all turns on one axis: how much context. Slide it to see the trade-off, then you have the whole lecture.'}
+];
+let storyI=0,storyPlaying=false,storyTimer=null,storyActive=false;
+function storySec(){return $('#'+STORY[storyI].id);}
+function positionSpot(){
+  const sec=storySec(); if(!sec)return; const el=sec.querySelector('h1,h2')||sec;
+  const r=el.getBoundingClientRect(), sp=$('#storyspot');
+  sp.style.display='block';
+  sp.style.left=(r.left-12)+'px'; sp.style.top=(r.top-10)+'px';
+  sp.style.width=(r.width+24)+'px'; sp.style.height=(r.height+20)+'px';
+}
+function showStory(){
+  const s=STORY[storyI];
+  $('#storyStep').textContent='Step '+(storyI+1)+' / '+STORY.length;
+  $('#storyTitle').textContent=s.t; $('#storyText').innerHTML=s.x;
+  $$('#storyDots i').forEach((d,i)=>d.classList.toggle('on',i===storyI));
+  const sec=storySec();
+  if(sec){const y=sec.getBoundingClientRect().top+window.scrollY-86;window.scrollTo({top:y,behavior:'smooth'});}
+  setTimeout(positionSpot,520);
+}
+function resetTimer(){clearInterval(storyTimer);if(storyPlaying)storyTimer=setInterval(()=>{if(storyI===STORY.length-1){togglePlay();}else nextStory();},9000);}
+function nextStory(){storyI=(storyI+1)%STORY.length;showStory();resetTimer();}
+function prevStory(){storyI=(storyI-1+STORY.length)%STORY.length;showStory();resetTimer();}
+function togglePlay(){storyPlaying=!storyPlaying;$('#storyPlay').innerHTML=storyPlaying?'⏸ pause':'▶ play';resetTimer();}
+function spotFollow(){if(storyActive)positionSpot();}
+function startStory(){
+  storyActive=true;storyI=0;storyPlaying=true;
+  $('#storycard').style.display='block';$('#storyPlay').innerHTML='⏸ pause';
+  $('#storyDots').innerHTML=STORY.map((_,i)=>'<i data-i="'+i+'"></i>').join('');
+  $$('#storyDots i').forEach(d=>d.addEventListener('click',()=>{storyI=+d.dataset.i;showStory();resetTimer();}));
+  showStory();resetTimer();
+  window.addEventListener('scroll',spotFollow,{passive:true});
+  window.addEventListener('resize',positionSpot);
+}
+function endStory(){
+  storyActive=false;storyPlaying=false;clearInterval(storyTimer);
+  $('#storycard').style.display='none';$('#storyspot').style.display='none';
+  window.removeEventListener('scroll',spotFollow);window.removeEventListener('resize',positionSpot);
+}
+function initStory(){
+  if(!$('#tourBtn'))return;
+  $('#tourBtn').addEventListener('click',startStory);
+  $('#storyExit').addEventListener('click',endStory);
+  $('#storyNext').addEventListener('click',nextStory);
+  $('#storyPrev').addEventListener('click',prevStory);
+  $('#storyPlay').addEventListener('click',togglePlay);
+  document.addEventListener('keydown',e=>{if(!storyActive)return;
+    if(e.key==='Escape')endStory();else if(e.key==='ArrowRight')nextStory();
+    else if(e.key==='ArrowLeft')prevStory();else if(e.key===' '){e.preventDefault();togglePlay();}});
+}
+
+/* helper: chip-row builder (toggle buttons) */
+function buildChips(host,labels,active,onPick){
+  host.innerHTML='';
+  labels.forEach((lab,i)=>{
+    const b=document.createElement('button');b.className='btn'+(i===active?' active':'');
+    b.innerHTML=lab;b.addEventListener('click',()=>{
+      $$('button',host).forEach(x=>x.classList.remove('active'));b.classList.add('active');onPick(i);
+    });host.appendChild(b);
+  });
+}
+
+/* ============================================================
+   DEMOS
+   ============================================================ */
+
+/* HERO: words flowing into a scoring node, next word lighting up */
+window.__demos.push(function(){
+  const c=$('#heroCanvas'); if(!c)return; const ctx=c.getContext('2d');
+  const W=c.width,H=c.height; let t=0;
+  const words=['the','cat','sat','on','the'];
+  function frame(){
+    ctx.clearRect(0,0,W,H);t+=0.02;
+    const baseY=H*0.5, x0=70, gap=(W*0.52-x0)/(words.length-1);
+    // context word nodes
+    words.forEach((w,i)=>{
+      const x=x0+i*gap, pulse=0.5+0.5*Math.sin(t*1.3+i*0.6);
+      ctx.strokeStyle='rgba(25,196,255,'+(0.3+0.4*pulse)+')';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(x+22,baseY);ctx.lineTo(W*0.6-20,baseY);ctx.stroke();
+      ctx.beginPath();ctx.arc(x,baseY,20,0,7);ctx.fillStyle='#0e2138';ctx.fill();
+      ctx.strokeStyle=COL.cyan2;ctx.lineWidth=2;ctx.stroke();
+      ctx.fillStyle='#cfe6ff';ctx.font='12px monospace';ctx.textAlign='center';ctx.fillText(w,x,baseY+4);
+    });
+    // scoring node
+    const sx=W*0.62;
+    ctx.beginPath();ctx.arc(sx,baseY,28,0,7);ctx.fillStyle='#15233f';ctx.fill();
+    ctx.strokeStyle=COL.violet;ctx.lineWidth=2.5;ctx.stroke();
+    ctx.fillStyle='#cdc4ff';ctx.font='15px monospace';ctx.textAlign='center';ctx.fillText('P(?)',sx,baseY+5);
+    // candidate next words
+    const cands=['mat','floor','rug'];
+    cands.forEach((w,i)=>{
+      const y=H*0.25+i*(H*0.5/2), x=W-90, on=(Math.floor(t*0.6)%3)===i;
+      ctx.strokeStyle=on?'rgba(255,110,199,.8)':'rgba(120,140,180,.3)';ctx.lineWidth=on?2.4:1.2;
+      ctx.beginPath();ctx.moveTo(sx+28,baseY);ctx.lineTo(x-26,y);ctx.stroke();
+      ctx.beginPath();ctx.arc(x,y,18,0,7);ctx.fillStyle=on?'#2a1430':'#101a2e';ctx.fill();
+      ctx.strokeStyle=on?COL.pink:'rgba(120,140,180,.4)';ctx.lineWidth=2;ctx.stroke();
+      ctx.fillStyle=on?'#ffd0ec':'#7f93b5';ctx.font='12px monospace';ctx.textAlign='center';ctx.fillText(w,x,y+4);
+    });
+    ctx.textAlign='left';
+    requestAnimationFrame(frame);
+  }
+  frame();
+});
+
+/* MAP: the whole lecture as clickable nodes */
+window.__demos.push(function(){
+  const c=$('#mapCanvas'); if(!c)return;
+  const nodes=[
+    {x:0.08,y:0.30,t:'What & why',h:'#whatis',col:COL.cyan2},
+    {x:0.30,y:0.22,t:'Chain rule',h:'#chain',col:COL.violet},
+    {x:0.30,y:0.74,t:'n-grams',h:'#ngram',col:COL.violet},
+    {x:0.52,y:0.30,t:'Counting',h:'#mle',col:COL.cyan},
+    {x:0.52,y:0.78,t:'Log space',h:'#logspace',col:COL.cyan},
+    {x:0.72,y:0.26,t:'Smoothing',h:'#laplace',col:COL.amber},
+    {x:0.72,y:0.74,t:'Backoff',h:'#backoff',col:COL.amber},
+    {x:0.92,y:0.50,t:'Perplexity',h:'#perplexity',col:COL.green}
+  ];
+  const edges=[[0,1],[0,2],[1,3],[2,3],[3,4],[3,5],[3,6],[5,7],[6,7],[4,7]];
+  let hover=-1;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    edges.forEach(([a,b])=>{
+      ctx.strokeStyle='rgba(120,150,210,.25)';ctx.lineWidth=1.4;
+      ctx.beginPath();ctx.moveTo(nodes[a].x*W,nodes[a].y*H);ctx.lineTo(nodes[b].x*W,nodes[b].y*H);ctx.stroke();
+    });
+    nodes.forEach((n,i)=>{
+      const x=n.x*W,y=n.y*H,r=i===hover?26:22;
+      ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=i===hover?'#16233f':'#0e1729';ctx.fill();
+      ctx.strokeStyle=n.col;ctx.lineWidth=i===hover?3:2;ctx.stroke();
+      ctx.fillStyle='#e7edf9';ctx.font=(i===hover?'bold ':'')+'11px monospace';ctx.textAlign='center';
+      ctx.fillText(n.t,x,y+4);
+    });
+    ctx.textAlign='left';
+  });
+  function pick(e){
+    const r=c.getBoundingClientRect(),mx=(e.clientX-r.left),my=(e.clientY-r.top);
+    const W=r.width,H=r.height;let h=-1;
+    nodes.forEach((n,i)=>{if(Math.hypot(mx-n.x*W,my-n.y*H)<26)h=i;});
+    return h;
+  }
+  c.addEventListener('mousemove',e=>{const h=pick(e);if(h!==hover){hover=h;cv.redraw();c.style.cursor=h>=0?'pointer':'default';}});
+  c.addEventListener('click',e=>{const h=pick(e);if(h>=0)location.hash=nodes[h].h;});
+});
+
+/* 01 next-word ranker */
+window.__demos.push(function(){
+  const c=$('#ctxCanvas'); if(!c)return;
+  const data={
+    'See you':[['tomorrow',0.40],['soon',0.34],['later',0.26]],
+    'a piece of':[['cake',0.45],['paper',0.30],['advice',0.25]],
+    'the cat':[['sat',0.38],['ran',0.34],['slept',0.28]],
+    'I would like':[['to',0.55],['a',0.30],['some',0.15]]
+  };
+  const ctxs=Object.keys(data); let cur=0;
+  buildChips($('#ctxSw'),ctxs.map(c=>'"'+c+' ___"'),0,i=>{cur=i;render();});
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const items=data[ctxs[cur]].map((d,i)=>({label:d[0],v:d[1],top:(d[1]*100).toFixed(0)+'%',
+      col:[COL.green,COL.cyan2,COL.violet][i],outline:i===0}));
+    barChart(ctx,W,H,items,{max:0.6});
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('P(next word | "'+ctxs[cur]+'")',12,16);
+  });
+  function render(){cv.redraw();
+    const d=data[ctxs[cur]];
+    $('#ctxOut').innerHTML='context = "'+ctxs[cur]+' ___"\n'+
+      'top guess = <span class="g">'+d[0][0]+'</span> at <span class="hl">'+(d[0][1]*100).toFixed(0)+'%</span>\n'+
+      'check Σ probs = <span class="g">'+d.reduce((a,v)=>a+v[1],0).toFixed(2)+'</span>';
+  }
+  render();
+});
+
+/* 02 be the judge */
+window.__demos.push(function(){
+  const c=$('#judgeCanvas'); if(!c)return;
+  const tasks=[
+    {name:'Machine translation',good:['high winds tonight',2.1e-5],bad:['large winds tonight',3e-6]},
+    {name:'Spelling correction',good:['fifteen minutes from',8.0e-5],bad:['fifteen minuets from',2e-7]},
+    {name:'Speech recognition',good:['I saw a van',5.0e-5],bad:['eyes awe of an',4e-9]}
+  ];
+  let cur=0;
+  buildChips($('#judgeChips'),tasks.map(t=>t.name),0,i=>{cur=i;render();});
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const t=tasks[cur];
+    const items=[{label:t.good[0],v:t.good[1],top:fmtSig(t.good[1]),col:COL.green,outline:true},
+                 {label:t.bad[0],v:t.bad[1],top:fmtSig(t.bad[1]),col:COL.red}];
+    barChart(ctx,W,H,items,{max:t.good[1]*1.25,pad:90});
+  });
+  function render(){cv.redraw();
+    const t=tasks[cur],ratio=t.good[1]/t.bad[1];
+    $('#judgeOut').innerHTML=t.name+':\n'+
+      'P(fluent) = <span class="g">'+fmtSig(t.good[1])+'</span>   P(odd) = <span class="r">'+fmtSig(t.bad[1])+'</span>\n'+
+      'the fluent phrase is <span class="hl">'+Math.round(ratio).toLocaleString()+'×</span> more likely → the model picks it';
+  }
+  render();
+});
+
+/* 03 chain-rule stepper */
+window.__demos.push(function(){
+  const c=$('#chainCanvas'); if(!c)return;
+  const factors=[
+    ['P(its)',0.016],['P(water|its)',0.30],['P(is|its water)',0.45],
+    ['P(so|...)',0.12],['P(transparent|...)',0.40]
+  ];
+  let shown=0;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const pad=40, bot=H-30, top=24;
+    // running product per step
+    let prod=1; const pts=[];
+    for(let i=0;i<factors.length;i++){prod*=factors[i][1];pts.push(prod);}
+    const maxLog=Math.log10(1), minLog=Math.log10(pts[pts.length-1])-0.5;
+    const X=i=>pad+ i*((W-2*pad)/(factors.length-1||1));
+    const Y=v=>{const l=Math.log10(Math.max(v,1e-9));return top+(maxLog-l)/(maxLog-minLog)*(bot-top);};
+    axisLine(ctx,pad,bot,W-pad,bot);
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('running product (log scale)',pad,16);
+    // line up to shown
+    ctx.strokeStyle=COL.cyan;ctx.lineWidth=2.4;ctx.beginPath();
+    for(let i=0;i<shown;i++){const x=X(i),y=Y(pts[i]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    ctx.stroke();
+    for(let i=0;i<shown;i++){
+      const x=X(i),y=Y(pts[i]);
+      ctx.fillStyle=i===shown-1?COL.amber:COL.cyan;ctx.beginPath();ctx.arc(x,y,i===shown-1?6:4,0,7);ctx.fill();
+      ctx.fillStyle=COL.muted;ctx.font='10px monospace';ctx.textAlign='center';
+      ctx.fillText('×'+factors[i][1],x,bot+14);
+    }
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();
+    let prod=1,lines='P(its water is so transparent) =\n';
+    for(let i=0;i<shown;i++){prod*=factors[i][1];}
+    lines+=factors.slice(0,shown).map(f=>f[0]+' = '+f[1]).join('  ×  ')||'(press Next word)';
+    lines+='\nrunning product = '+(shown?('<span class="'+(shown===factors.length?'g':'hl')+'">'+fmtSig(prod)+'</span>'):'1');
+    if(shown===factors.length)lines+='\n→ five factors, all below 1, so the score is tiny';
+    $('#chainOut').innerHTML=lines;
+  }
+  $('#chainNext').addEventListener('click',()=>{if(shown<factors.length){shown++;render();}});
+  $('#chainReset').addEventListener('click',()=>{shown=0;render();});
+  render();
+});
+
+/* 04 Markov window slider */
+window.__demos.push(function(){
+  const c=$('#markovCanvas'); if(!c)return;
+  const sent=['its','water','is','so','transparent','that','melts'];
+  const focus=sent.length-1;
+  // the slider already exists in the markup; wire it directly
+  const slider=$('#mkK'), kv=$('#mkKv');
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const k=parseInt(slider.value);
+    ctx.clearRect(0,0,W,H);
+    const n=sent.length, slot=(W-40)/n, y=H*0.5, bw=Math.min(slot*0.82,110), bh=44;
+    sent.forEach((w,i)=>{
+      const cx=20+slot*(i+0.5);
+      const kept=(i===focus)|| (i>=focus-k && i<focus);
+      const isFocus=i===focus;
+      ctx.fillStyle=isFocus?'rgba(98,232,138,.18)':(kept?'rgba(56,240,216,.12)':'rgba(120,140,180,.05)');
+      ctx.strokeStyle=isFocus?COL.green:(kept?COL.cyan:'rgba(120,140,180,.3)');
+      ctx.lineWidth=isFocus?2.5:(kept?2:1);
+      ctx.beginPath();ctx.rect(cx-bw/2,y-bh/2,bw,bh);ctx.fill();ctx.stroke();
+      ctx.fillStyle=kept?'#e7edf9':'#5e7197';ctx.font=(isFocus?'bold ':'')+'12px monospace';ctx.textAlign='center';
+      ctx.fillText(w,cx,y+4);
+      if(isFocus){ctx.fillStyle=COL.green;ctx.font='10px monospace';ctx.fillText('predict',cx,y-bh/2-6);}
+      else if(kept){ctx.fillStyle=COL.cyan;ctx.font='10px monospace';ctx.fillText('kept',cx,y-bh/2-6);}
+    });
+    ctx.textAlign='left';
+  });
+  function render(){kv.textContent=slider.value;cv.redraw();
+    const k=parseInt(slider.value);
+    const hist=k===0?'(nothing)':sent.slice(focus-k,focus).join(' ');
+    const name=k===0?'unigram':k===1?'bigram':k===2?'trigram':(k+1)+'-gram';
+    $('#markovOut').innerHTML='k = '+k+' previous words kept  →  this is a <span class="hl">'+name+'</span>\n'+
+      'history used to predict "'+sent[focus]+'": <span class="g">'+hist+'</span>\n'+
+      (k===0?'no context at all — the weakest model':'shorter history = easier to count, less precise');
+  }
+  slider.addEventListener('input',render);
+  render();
+});
+
+/* 05 n-gram order selector */
+window.__demos.push(function(){
+  const c=$('#ngramCanvas'); if(!c)return;
+  const sent=['<s>','I','want','to','eat'];
+  let order=1; // 0 uni,1 bi,2 tri
+  buildChips($('#ngramChips'),['Unigram','Bigram','Trigram'],1,i=>{order=i;render();});
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const n=sent.length, slot=(W-40)/n, y=H*0.62, bw=Math.min(slot*0.7,90), bh=40;
+    const cxs=sent.map((_,i)=>20+slot*(i+0.5));
+    // arrows: each word i (i>=1) looks back 'order' words
+    for(let i=1;i<sent.length;i++){
+      const back=Math.min(order,i);
+      for(let b=1;b<=back;b++){
+        const from=cxs[i], to=cxs[i-b];
+        ctx.strokeStyle='rgba(155,140,255,'+(0.8-0.2*b)+')';ctx.lineWidth=2;
+        ctx.beginPath();
+        const midy=y-bh/2-18-b*6;
+        ctx.moveTo(from,y-bh/2);ctx.quadraticCurveTo((from+to)/2,midy,to,y-bh/2);ctx.stroke();
+      }
+    }
+    sent.forEach((w,i)=>{
+      const cx=cxs[i];
+      ctx.fillStyle='rgba(56,240,216,.10)';ctx.strokeStyle=COL.cyan;ctx.lineWidth=1.6;
+      ctx.beginPath();ctx.rect(cx-bw/2,y-bh/2,bw,bh);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#e7edf9';ctx.font='12px monospace';ctx.textAlign='center';ctx.fillText(w,cx,y+4);
+    });
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();
+    const names=['Unigram (n=1)','Bigram (n=2)','Trigram (n=3)'];
+    let f;
+    if(order===0) f='P(I)·P(want)·P(to)·P(eat)';
+    else if(order===1) f='P(I|<s>)·P(want|I)·P(to|want)·P(eat|to)';
+    else f='P(want|<s> I)·P(to|I want)·P(eat|want to)';
+    $('#ngramOut').innerHTML=names[order]+': keeps '+order+' previous word(s)\n'+
+      'factorization:\n  <span class="hl">'+f+'</span>\n'+
+      (order===0?'no context — order is ignored':'longer arrows = more context, but rarer phrases');
+  }
+  render();
+});
+</script>
+
+<script>
+/* 06 MLE count-and-divide calculator */
+window.__demos.push(function(){
+  const c=$('#mleCanvas'); if(!c)return;
+  const ab=$('#mleAB'),a=$('#mleA'),abv=$('#mleABv'),av=$('#mleAv');
+  const cv=setupCanvas(c,function(ctx,W,H){
+    let nAB=parseInt(ab.value),nA=parseInt(a.value); if(nAB>nA)nAB=nA;
+    const p=nA>0?nAB/nA:0;
+    ctx.clearRect(0,0,W,H);
+    const pad=40,bot=H-22,top=24,bw=W-2*pad;
+    axisLine(ctx,pad,bot,W-pad,bot);
+    // a single proportion bar
+    ctx.fillStyle='rgba(120,140,180,.18)';ctx.fillRect(pad,top,bw,bot-top-2);
+    ctx.fillStyle=COL.cyan;ctx.fillRect(pad,top,bw*p,bot-top-2);
+    ctx.fillStyle='#06241f';ctx.font='bold 13px monospace';ctx.textAlign='left';
+    ctx.fillText('P = '+fmt(p,4),pad+8,top+22);
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';
+    ctx.fillText('0',pad,bot+14);ctx.fillText('1',W-pad-6,bot+14);ctx.textAlign='left';
+  });
+  function render(){
+    let nAB=parseInt(ab.value),nA=parseInt(a.value); if(nAB>nA){nAB=nA;ab.value=nA;}
+    abv.textContent=nAB;av.textContent=nA;cv.redraw();
+    const p=nA>0?nAB/nA:0;
+    $('#mleOut').innerHTML='P(B | A) = count(A,B) / count(A)\n'+
+      '       = <span class="hl">'+nAB+'</span> / <span class="hl">'+nA+'</span> = <span class="g">'+fmt(p,4)+'</span>\n'+
+      'so '+(p*100).toFixed(1)+'% of the time, A is followed by B';
+  }
+  ab.addEventListener('input',render);a.addEventListener('input',render);
+  render();
+});
+
+/* mini-corpus shared data */
+const MINI_SENTS=[['<s>','I','am','Sam','</s>'],['<s>','Sam','I','am','</s>'],['<s>','I','do','not','like','green','eggs','and','ham','</s>']];
+function miniCounts(){
+  const uni={}, bi={};
+  MINI_SENTS.forEach(s=>{
+    s.forEach((w,i)=>{uni[w]=(uni[w]||0)+1; if(i>0){const k=s[i-1]+' '+w; bi[k]=(bi[k]||0)+1;}});
+  });
+  return {uni,bi};
+}
+
+/* 07a mini worked readout */
+window.__demos.push(function(){
+  const el=$('#miniWorked'); if(!el)return;
+  el.innerHTML=
+    'count("I")=3   count("am")=2   count("Sam")=2   count("<s>")=3\n\n'+
+    'P(I | <s>)      = count(<s> I)/count(<s>)   = <span class="hl">2</span>/3 = <span class="g">0.667</span>\n'+
+    'P(Sam | <s>)    = count(<s> Sam)/count(<s>) = <span class="hl">1</span>/3 = <span class="g">0.333</span>\n'+
+    'P(am | I)       = count(I am)/count(I)       = <span class="hl">2</span>/3 = <span class="g">0.667</span>\n'+
+    'P(</s> | Sam)   = count(Sam </s>)/count(Sam) = <span class="hl">1</span>/2 = <span class="g">0.500</span>\n'+
+    'P(Sam | am)     = count(am Sam)/count(am)    = <span class="hl">1</span>/2 = <span class="g">0.500</span>\n'+
+    'P(do | I)       = count(I do)/count(I)       = <span class="hl">1</span>/3 = <span class="g">0.333</span>';
+});
+
+/* 07b mini interactive: click first word -> counts become probabilities */
+window.__demos.push(function(){
+  const c=$('#miniCanvas'); if(!c)return;
+  const {uni,bi}=miniCounts();
+  const firsts=['<s>','I','am','Sam','do'];
+  let cur=1;
+  // followers for each first word
+  function followers(w){
+    const out=[];
+    Object.keys(bi).forEach(k=>{const[a,b]=k.split(' ');if(a===w)out.push([b,bi[k]]);});
+    out.sort((x,y)=>y[1]-x[1]);
+    return out;
+  }
+  buildChips($('#miniSw'),firsts.map(w=>'"'+w+'"'),1,i=>{cur=i;render();});
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const w=firsts[cur], fol=followers(w), tot=uni[w]||0;
+    const items=fol.map((d,i)=>({label:d[0],v:tot?d[1]/tot:0,top:d[1]+'→'+fmt(tot?d[1]/tot:0,2),
+      col:[COL.green,COL.cyan2,COL.violet,COL.amber,COL.pink][i%5]}));
+    if(items.length===0){ctx.clearRect(0,0,W,H);ctx.fillStyle=COL.muted;ctx.font='13px monospace';ctx.fillText('"'+w+'" never starts a pair here.',20,H/2);return;}
+    barChart(ctx,W,H,items,{max:1});
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('what follows "'+w+'" (count → probability)',12,16);
+  });
+  function render(){cv.redraw();
+    const w=firsts[cur],fol=followers(w),tot=uni[w]||0;
+    let s='first word "'+w+'" appears <span class="hl">'+tot+'</span> times\n';
+    s+=fol.map(d=>'P('+d[0]+'|'+w+') = '+d[1]+'/'+tot+' = '+fmt(tot?d[1]/tot:0,3)).join('\n')||'(no followers)';
+    const sum=fol.reduce((a,d)=>a+(tot?d[1]/tot:0),0);
+    s+='\ncheck Σ = <span class="g">'+fmt(sum,3)+'</span>'+(Math.abs(sum-1)<1e-6?'  ✓':'');
+    $('#miniOut').innerHTML=s;
+  }
+  render();
+});
+
+/* 08a Berkeley raw worked */
+window.__demos.push(function(){
+  const el=$('#berkRaw'); if(!el)return;
+  el.innerHTML=
+    'P(want | i) = 827/2533 = <span class="g">0.33</span>\n'+
+    'P(to | i)   =   0/2533 = <span class="r">0</span>      (never seen "i to")\n'+
+    'P(eat | i)  =   9/2533 = <span class="g">0.0036</span>\n'+
+    'P(i | want) =   2/927  = <span class="g">0.0022</span>\n'+
+    'P(to | want)= 608/927  = <span class="g">0.66</span>   ← strong pair\n'+
+    'P(eat | to) = 686/2417 = <span class="g">0.28</span>\n'+
+    'P(i | i)    =   5/2533 = <span class="g">0.002</span>';
+});
+
+/* 08b Berkeley sentence scorer stepper */
+window.__demos.push(function(){
+  const c=$('#berkCanvas'); if(!c)return;
+  const factors=[
+    ['P(I|<s>)',0.25],['P(want|I)',0.33],['P(english|want)',0.0011],
+    ['P(food|english)',0.5],['P(</s>|food)',0.68]
+  ];
+  let shown=0;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const pad=46,bot=H-30,top=24;
+    let prod=1;const pts=[];for(let i=0;i<factors.length;i++){prod*=factors[i][1];pts.push(prod);}
+    const maxLog=Math.log10(1),minLog=Math.log10(pts[pts.length-1])-0.6;
+    const X=i=>pad+i*((W-2*pad)/(factors.length-1||1));
+    const Y=v=>{const l=Math.log10(Math.max(v,1e-12));return top+(maxLog-l)/(maxLog-minLog)*(bot-top);};
+    axisLine(ctx,pad,bot,W-pad,bot);
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('sentence probability so far (log scale)',pad,16);
+    ctx.strokeStyle=COL.amber;ctx.lineWidth=2.4;ctx.beginPath();
+    for(let i=0;i<shown;i++){const x=X(i),y=Y(pts[i]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    ctx.stroke();
+    for(let i=0;i<shown;i++){const x=X(i),y=Y(pts[i]);
+      ctx.fillStyle=i===shown-1?COL.green:COL.amber;ctx.beginPath();ctx.arc(x,y,i===shown-1?6:4,0,7);ctx.fill();
+      ctx.fillStyle=COL.muted;ctx.font='9px monospace';ctx.textAlign='center';ctx.fillText(factors[i][0].replace('P(','').replace(')',''),x,bot+13);}
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();
+    let prod=1;for(let i=0;i<shown;i++)prod*=factors[i][1];
+    let s='P(<s> I want english food </s>) =\n';
+    s+=factors.slice(0,shown).map(f=>f[0]+'='+f[1]).join(' × ')||'(press Next factor)';
+    s+='\nrunning product = '+(shown?('<span class="'+(shown===factors.length?'g':'hl')+'">'+fmtSig(prod)+'</span>'):'1');
+    if(shown===factors.length)s+='\n→ ≈ <span class="g">0.000031</span>, exactly the slide value';
+    $('#berkOut').innerHTML=s;
+  }
+  $('#berkNext').addEventListener('click',()=>{if(shown<factors.length){shown++;render();}});
+  $('#berkReset').addEventListener('click',()=>{shown=0;render();});
+  render();
+});
+
+/* 09 log space: product vs log-sum */
+window.__demos.push(function(){
+  const c=$('#logCanvas'); if(!c)return;
+  const ps=[0.25,0.33,0.0011,0.5,0.68,0.1,0.05];
+  let added=0, logView=false;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const pad=46,bot=H-30,top=26;
+    let prod=1;const prods=[],logs=[];let ls=0;
+    for(let i=0;i<ps.length;i++){prod*=ps[i];prods.push(prod);ls+=Math.log10(ps[i]);logs.push(ls);}
+    const X=i=>pad+i*((W-2*pad)/(ps.length-1||1));
+    axisLine(ctx,pad,bot,W-pad,bot);
+    if(!logView){
+      // linear product, crashing to zero
+      const Y=v=>bot-(v/1)*(bot-top);
+      ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('raw product (linear) — crashes toward 0',pad,16);
+      ctx.strokeStyle=COL.red;ctx.lineWidth=2.4;ctx.beginPath();
+      for(let i=0;i<added;i++){const x=X(i),y=Y(prods[i]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+      ctx.stroke();
+      for(let i=0;i<added;i++){const x=X(i),y=Y(prods[i]);ctx.fillStyle=i===added-1?COL.amber:COL.red;ctx.beginPath();ctx.arc(x,y,i===added-1?6:3,0,7);ctx.fill();}
+    } else {
+      const minL=logs[logs.length-1]-0.5, maxL=0;
+      const Y=v=>top+(maxL-v)/(maxL-minL)*(bot-top);
+      ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('sum of log10(p) — steady, safe',pad,16);
+      ctx.strokeStyle=COL.green;ctx.lineWidth=2.4;ctx.beginPath();
+      for(let i=0;i<added;i++){const x=X(i),y=Y(logs[i]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+      ctx.stroke();
+      for(let i=0;i<added;i++){const x=X(i),y=Y(logs[i]);ctx.fillStyle=i===added-1?COL.amber:COL.green;ctx.beginPath();ctx.arc(x,y,i===added-1?6:3,0,7);ctx.fill();}
+    }
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();
+    let prod=1,ls=0;for(let i=0;i<added;i++){prod*=ps[i];ls+=Math.log10(ps[i]);}
+    $('#logOut').innerHTML='words added: '+added+'\n'+
+      'raw product   = <span class="'+(prod<1e-6?'r':'hl')+'">'+(added?fmtSig(prod):'1')+'</span>'+(prod>0&&prod<1e-7?'  ← near underflow':'')+'\n'+
+      'sum of logs   = <span class="g">'+(added?fmt(ls,3):'0')+'</span>   (add, never multiply)\n'+
+      'view: '+(logView?'log-sum (safe)':'raw product (risky)');
+  }
+  $('#logAdd').addEventListener('click',()=>{if(added<ps.length){added++;render();}});
+  $('#logReset').addEventListener('click',()=>{added=0;render();});
+  $('#logToggle').addEventListener('click',function(){logView=!logView;this.textContent='view: '+(logView?'log-sum':'product');render();});
+  render();
+});
+
+/* 10 web scale: grow corpus, zeros fill in */
+window.__demos.push(function(){
+  const c=$('#googleCanvas'); if(!c)return;
+  const sl=$('#gScale'),slv=$('#gScalev');
+  // each continuation has a "rarity" threshold; it appears once corpus >= threshold
+  const conts=[['incoming',5],['following',8],['index',12],['basis',20],['primary',35],['lone',60],['nth',88],['ultimate',97]];
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const scale=parseInt(sl.value);
+    ctx.clearRect(0,0,W,H);
+    const pad=30, n=conts.length, slot=(W-2*pad)/n, y=H*0.5, bw=Math.min(slot*0.8,96),bh=50;
+    ctx.fillStyle=COL.muted;ctx.font='12px monospace';ctx.fillText('"serve as the ___"  (grey = not seen yet)',pad,22);
+    conts.forEach((d,i)=>{
+      const cx=pad+slot*(i+0.5), seen=scale>=d[1];
+      ctx.fillStyle=seen?'rgba(98,232,138,.16)':'rgba(120,140,180,.05)';
+      ctx.strokeStyle=seen?COL.green:'rgba(120,140,180,.3)';ctx.lineWidth=seen?2:1;
+      ctx.beginPath();ctx.rect(cx-bw/2,y-bh/2,bw,bh);ctx.fill();ctx.stroke();
+      ctx.fillStyle=seen?'#e7edf9':'#5e7197';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText(d[0],cx,y+4);
+    });
+    ctx.textAlign='left';
+  });
+  function render(){slv.textContent=sl.value;cv.redraw();
+    const scale=parseInt(sl.value),seen=conts.filter(d=>scale>=d[1]).length;
+    $('#googleOut').innerHTML='corpus size = '+scale+' / 100\n'+
+      'continuations now seen: <span class="g">'+seen+'</span> of '+conts.length+'\n'+
+      (seen<conts.length?'still <span class="r">'+(conts.length-seen)+' zero(s)</span> — rare phrases linger even at scale':'all seen — but real vocab is far bigger, so zeros never fully vanish');
+  }
+  sl.addEventListener('input',render);
+  render();
+});
+</script>
+
+<script>
+/* 11 zeros: click a bar to zero it */
+window.__demos.push(function(){
+  const c=$('#zeroCanvas'); if(!c)return;
+  const base=[['P(I|<s>)',0.25],['P(want|I)',0.33],['P(the|want)',0.10],['P(offer|the)',0.04],['P(</s>|offer)',0.5]];
+  let zeroed=[false,false,false,false,false];
+  buildChips($('#zeroChips'),base.map((f,i)=>'zero '+f[0]),-1,i=>{zeroed[i]=!zeroed[i];$$('#zeroChips button')[i].classList.toggle('active',zeroed[i]);render();});
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const items=base.map((f,i)=>({label:f[0].replace('P(','').replace(')',''),v:zeroed[i]?0:f[1],
+      top:zeroed[i]?'0':f[1].toString(),col:zeroed[i]?COL.red:COL.cyan,outline:zeroed[i]}));
+    barChart(ctx,W,H,items,{max:0.6});
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('each bar = one bigram factor (click a chip to set it to 0)',12,16);
+  });
+  function render(){
+    $$('#zeroChips button').forEach((b,i)=>b.classList.toggle('active',zeroed[i]));
+    cv.redraw();
+    let prod=1,anyZero=false;
+    base.forEach((f,i)=>{const v=zeroed[i]?0:f[1];prod*=v;if(zeroed[i])anyZero=true;});
+    $('#zeroOut').innerHTML='sentence P = product of all factors\n'+
+      '          = '+base.map((f,i)=>zeroed[i]?'<span class="r">0</span>':f[1]).join(' × ')+'\n'+
+      '          = <span class="'+(prod===0?'r':'g')+'">'+(prod===0?'0':fmtSig(prod))+'</span>'+
+      (anyZero?'\n→ one zero factor nukes the whole sentence':'\n→ all factors positive, so the sentence is possible');
+  }
+  render();
+});
+
+/* 12 add-1 smoothing */
+window.__demos.push(function(){
+  const el=$('#lapWorked');
+  if(el)el.innerHTML=
+    'add 1 to each pair count, add V=1446 below:\n'+
+    'P*(want|i) = (827+1)/(2533+1446) = 828/3979 = <span class="g">0.21</span>  (was 0.33)\n'+
+    'P*(to|i)   =   (0+1)/(2533+1446) =   1/3979 = <span class="g">0.00025</span> (was <span class="r">0</span>)\n'+
+    'P*(eat|i)  =   (9+1)/(2533+1446) =  10/3979 = <span class="g">0.0025</span>\n'+
+    'P*(to|want)= (608+1)/(927+1446)  = 609/2373 = <span class="g">0.26</span>\n'+
+    'P*(eat|to) = (686+1)/(2417+1446) = 687/3863 = <span class="g">0.18</span>';
+  const c=$('#lapCanvas'); if(!c)return;
+  const k=$('#lapK'),v=$('#lapV'),kv=$('#lapKv'),vv=$('#lapVv');
+  // a seen pair (count 827, first 2533) and an unseen pair (count 0, first 2533)
+  const cSeen=827,cFirst=2533;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const kk=parseFloat(k.value),V=parseInt(v.value);
+    const pSeen=(cSeen+kk)/(cFirst+kk*V), pUnseen=(0+kk)/(cFirst+kk*V);
+    const pRaw=cSeen/cFirst;
+    const items=[
+      {label:'seen pair\n(raw 0.33)',v:pSeen,top:fmt(pSeen,3),col:COL.green,outline:true},
+      {label:'unseen pair\n(raw 0)',v:pUnseen,top:fmtSig(pUnseen),col:COL.red},
+      {label:'raw seen\n(no smoothing)',v:pRaw,top:fmt(pRaw,3),col:'rgba(120,140,180,.5)'}
+    ];
+    barChart(ctx,W,H,items,{max:0.4,pad:80});
+  });
+  function render(){kv.textContent=parseFloat(k.value).toFixed(1);vv.textContent=v.value;cv.redraw();
+    const kk=parseFloat(k.value),V=parseInt(v.value);
+    const pSeen=(cSeen+kk)/(cFirst+kk*V),pUnseen=(0+kk)/(cFirst+kk*V);
+    $('#lapOut').innerHTML='add-k = '+kk.toFixed(1)+'   V = '+V+'\n'+
+      'seen   P* = (827+'+kk.toFixed(1)+')/(2533+'+kk.toFixed(1)+'·'+V+') = <span class="g">'+fmt(pSeen,4)+'</span>\n'+
+      'unseen P* = ('+kk.toFixed(1)+')/(2533+'+kk.toFixed(1)+'·'+V+') = <span class="r">'+fmtSig(pUnseen)+'</span>\n'+
+      (kk===0?'k=0 → no smoothing, the zero is back':'mass flows: seen ↓, unseen ↑ as k or V grows');
+  }
+  k.addEventListener('input',render);v.addEventListener('input',render);
+  render();
+});
+
+/* 13a interpolation mixer (3 lambdas sum to 1) */
+window.__demos.push(function(){
+  const c=$('#interpCanvas'); if(!c)return;
+  const l1=$('#lam1'),l2=$('#lam2'),l1v=$('#lam1v'),l2v=$('#lam2v');
+  // fixed component probabilities for one word
+  const pTri=0.020, pBi=0.060, pUni=0.0008;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    let a=parseFloat(l1.value),b=parseFloat(l2.value);
+    if(a+b>1){b=1-a;l2.value=b;}
+    const cc=1-a-b;
+    const blend=a*pTri+b*pBi+cc*pUni;
+    const items=[
+      {label:'trigram\nP=0.020',v:pTri,top:'×'+a.toFixed(2),col:COL.green},
+      {label:'bigram\nP=0.060',v:pBi,top:'×'+b.toFixed(2),col:COL.cyan2},
+      {label:'unigram\nP=0.0008',v:pUni,top:'×'+cc.toFixed(2),col:COL.violet},
+      {label:'BLEND','v':blend,top:fmt(blend,4),col:COL.amber,outline:true}
+    ];
+    barChart(ctx,W,H,items,{max:0.07,pad:70});
+  });
+  function render(){
+    let a=parseFloat(l1.value),b=parseFloat(l2.value);
+    if(a+b>1){b=1-a;l2.value=b;}
+    l1v.textContent=a.toFixed(2);l2v.textContent=b.toFixed(2);
+    const cc=1-a-b, blend=a*pTri+b*pBi+cc*pUni;
+    cv.redraw();
+    $('#interpOut').innerHTML='λ1(tri)='+a.toFixed(2)+'  λ2(bi)='+b.toFixed(2)+'  λ3(uni)=<span class="hl">'+cc.toFixed(2)+'</span>\n'+
+      'check Σλ = <span class="g">'+(a+b+cc).toFixed(2)+'</span>  ✓ (λ3 auto-fills the rest)\n'+
+      'blend = '+a.toFixed(2)+'·0.020 + '+b.toFixed(2)+'·0.060 + '+cc.toFixed(2)+'·0.0008\n'+
+      '      = <span class="g">'+fmt(blend,4)+'</span>';
+  }
+  l1.addEventListener('input',render);l2.addEventListener('input',render);
+  render();
+});
+
+/* 13b backoff ladder */
+window.__demos.push(function(){
+  const c=$('#backoffCanvas'); if(!c)return;
+  // trigram unseen, bigram unseen, unigram seen -> backs off twice
+  const levels=[{name:'trigram  P(w | u v)',seen:false},{name:'bigram   P(w | v)',seen:false},{name:'unigram  P(w)',seen:true,val:0.0008}];
+  let step=0; // how many we have tried
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const pad=40, rowH=46, y0=30;
+    levels.forEach((lv,i)=>{
+      const y=y0+i*rowH, tried=i<step, isCur=i===step-1;
+      const ok=tried&&lv.seen;
+      ctx.fillStyle=isCur?(lv.seen?'rgba(98,232,138,.14)':'rgba(255,107,129,.12)'):(tried?'rgba(120,140,180,.06)':'rgba(120,140,180,.03)');
+      ctx.strokeStyle=tried?(lv.seen?COL.green:COL.red):'rgba(120,140,180,.3)';ctx.lineWidth=isCur?2.5:1.4;
+      ctx.beginPath();ctx.rect(pad,y,W-2*pad,rowH-10);ctx.fill();ctx.stroke();
+      ctx.fillStyle=tried?'#e7edf9':'#5e7197';ctx.font='13px monospace';ctx.textAlign='left';
+      ctx.fillText(lv.name,pad+14,y+rowH/2-2);
+      ctx.textAlign='right';
+      ctx.fillStyle=tried?(lv.seen?COL.green:COL.red):'#5e7197';ctx.font='12px monospace';
+      ctx.fillText(tried?(lv.seen?('found: '+lv.val):'no evidence → back off'):'(not tried)',W-pad-14,y+rowH/2-2);
+      ctx.textAlign='left';
+    });
+  });
+  function render(){cv.redraw();
+    let s='backoff: try the longest context first\n';
+    for(let i=0;i<step;i++){s+=levels[i].name.split(' ')[0]+': '+(levels[i].seen?('<span class="g">found '+levels[i].val+'</span>'):'<span class="r">zero → back off</span>')+'\n';}
+    if(step===0)s+='(press "try / back off")';
+    else if(levels[step-1].seen)s+='→ stop: use this estimate, the most context with evidence';
+    $('#backoffOut').innerHTML=s;
+  }
+  $('#boTry').addEventListener('click',()=>{if(step<levels.length&&!(step>0&&levels[step-1].seen)){step++;render();}});
+  $('#boReset').addEventListener('click',()=>{step=0;render();});
+  render();
+});
+
+/* 14 held-out tuning */
+window.__demos.push(function(){
+  const c=$('#heldCanvas'); if(!c)return;
+  const sl=$('#hoLam'),slv=$('#hoLamv');
+  // held-out likelihood as a function of lambda: a hump peaking near 0.62
+  const bestLam=0.62;
+  const heldL=x=>Math.exp(-8*Math.pow(x-bestLam,2))*0.9+0.05;
+  const trainL=x=>Math.exp(-8*Math.pow(x-0.95,2))*0.9+0.05; // train prefers high trigram weight (overfit)
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const lam=parseFloat(sl.value);
+    ctx.clearRect(0,0,W,H);
+    const pad=46,bot=H-30,top=24;
+    const X=x=>pad+x*(W-2*pad), Y=v=>bot-v*(bot-top);
+    axisLine(ctx,pad,bot,W-pad,bot);
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('likelihood vs λ (trigram weight)',pad,16);
+    ctx.fillText('λ →',W-pad-20,bot+16);
+    // train curve (dim)
+    ctx.strokeStyle='rgba(120,140,180,.5)';ctx.lineWidth=1.6;ctx.beginPath();
+    for(let i=0;i<=100;i++){const x=i/100,y=Y(trainL(x));i?ctx.lineTo(X(x),y):ctx.moveTo(X(x),y);}ctx.stroke();
+    // held-out curve (green)
+    ctx.strokeStyle=COL.green;ctx.lineWidth=2.4;ctx.beginPath();
+    for(let i=0;i<=100;i++){const x=i/100,y=Y(heldL(x));i?ctx.lineTo(X(x),y):ctx.moveTo(X(x),y);}ctx.stroke();
+    // marker
+    ctx.fillStyle=COL.amber;ctx.beginPath();ctx.arc(X(lam),Y(heldL(lam)),6,0,7);ctx.fill();
+    // peak marker
+    ctx.strokeStyle='rgba(255,203,107,.5)';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(X(bestLam),top);ctx.lineTo(X(bestLam),bot);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=COL.green;ctx.font='10px monospace';ctx.fillText('held-out',X(0.62)+8,Y(heldL(0.62))-8);
+    ctx.fillStyle=COL.muted;ctx.fillText('train (overfits)',X(0.9)-30,Y(trainL(0.9))-8);
+  });
+  function render(){slv.textContent=parseFloat(sl.value).toFixed(2);cv.redraw();
+    const lam=parseFloat(sl.value);
+    $('#heldOut').innerHTML='λ (trigram weight) = '+lam.toFixed(2)+'\n'+
+      'held-out likelihood = <span class="'+(Math.abs(lam-0.62)<0.05?'g':'hl')+'">'+fmt(heldL(lam),3)+'</span>'+(Math.abs(lam-0.62)<0.03?'  ← at the peak ✓':'')+'\n'+
+      'best λ ≈ <span class="g">0.62</span> (maximises held-out, NOT train)\n'+
+      'train would pick λ≈0.95 — that is overfitting';
+  }
+  sl.addEventListener('input',render);
+  $('#hoBest').addEventListener('click',()=>{sl.value=0.62;render();});
+  render();
+});
+
+/* 15 unknown words -> UNK */
+window.__demos.push(function(){
+  const c=$('#unkCanvas'); if(!c)return;
+  const vocab=new Set(['i','want','to','eat','food','the','a','please','some']);
+  const sents=[['i','want','sushi','please'],['a','tasty','burrito','now'],['please','book','a','table']];
+  let cur=0;
+  buildChips($('#unkSw'),sents.map(s=>'"'+s.join(' ')+'"'),0,i=>{cur=i;render();});
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const s=sents[cur],n=s.length,slot=(W-40)/n,y=H*0.5,bw=Math.min(slot*0.8,150),bh=46;
+    s.forEach((w,i)=>{
+      const known=vocab.has(w),cx=20+slot*(i+0.5);
+      ctx.fillStyle=known?'rgba(56,240,216,.12)':'rgba(255,203,107,.14)';
+      ctx.strokeStyle=known?COL.cyan:COL.amber;ctx.lineWidth=2;
+      ctx.beginPath();ctx.rect(cx-bw/2,y-bh/2,bw,bh);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#e7edf9';ctx.font='12px monospace';ctx.textAlign='center';
+      ctx.fillText(known?w:'<UNK>',cx,y+4);
+      if(!known){ctx.fillStyle=COL.amber;ctx.font='10px monospace';ctx.fillText('was "'+w+'"',cx,y+bh/2+14);}
+    });
+    ctx.textAlign='left';
+  });
+  function render(){cv.redraw();
+    const s=sents[cur],oov=s.filter(w=>!vocab.has(w));
+    $('#unkOut').innerHTML='vocabulary = {i, want, to, eat, food, the, a, please, some}\n'+
+      'mapped sentence: '+s.map(w=>vocab.has(w)?w:'<span class="hl"><UNK></span>').join(' ')+'\n'+
+      'out-of-vocab words → UNK: <span class="hl">'+(oov.join(', ')||'none')+'</span>\n'+
+      'every stranger gets the one learned <UNK> probability — no hard zero';
+  }
+  render();
+});
+
+/* 16 stupid backoff */
+window.__demos.push(function(){
+  const c=$('#sbCanvas'); if(!c)return;
+  // toggle which orders are seen; score = ratio at first seen, times 0.4 per backoff
+  const orders=[{name:'trigram',ratio:0.12},{name:'bigram',ratio:0.28},{name:'unigram',ratio:0.004}];
+  let seen=[false,false,true];
+  buildChips($('#sbChips'),orders.map((o,i)=>o.name+' seen'),-1,i=>{seen[i]=!seen[i];render();});
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const pad=40,rowH=48,y0=24;
+    let backoffs=0, found=-1;
+    for(let i=0;i<orders.length;i++){if(seen[i]){found=i;break;}backoffs++;}
+    orders.forEach((o,i)=>{
+      const y=y0+i*rowH, isFound=i===found, skipped=i<found||(found<0);
+      ctx.fillStyle=isFound?'rgba(98,232,138,.14)':'rgba(120,140,180,.05)';
+      ctx.strokeStyle=isFound?COL.green:(seen[i]?'rgba(98,232,138,.4)':'rgba(255,107,129,.4)');ctx.lineWidth=isFound?2.5:1.4;
+      ctx.beginPath();ctx.rect(pad,y,W-2*pad,rowH-12);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#e7edf9';ctx.font='13px monospace';ctx.textAlign='left';ctx.fillText(o.name,pad+14,y+rowH/2-4);
+      ctx.textAlign='right';ctx.fillStyle=seen[i]?COL.green:COL.red;ctx.font='12px monospace';
+      ctx.fillText(seen[i]?('count>0 → ratio '+o.ratio):'count 0 → ×0.4 backoff',W-pad-14,y+rowH/2-4);
+      ctx.textAlign='left';
+    });
+  });
+  function render(){
+    $$('#sbChips button').forEach((b,i)=>b.classList.toggle('active',seen[i]));
+    cv.redraw();
+    let backoffs=0,found=-1;
+    for(let i=0;i<orders.length;i++){if(seen[i]){found=i;break;}backoffs++;}
+    let s='S = score (not a probability)\n';
+    if(found<0){s+='nothing seen → S = 0';}
+    else{
+      const score=orders[found].ratio*Math.pow(0.4,backoffs);
+      s+='backed off '+backoffs+' time(s), each ×0.4\n';
+      s+='S = '+(backoffs?('0.4^'+backoffs+' × '):'')+orders[found].ratio+' = <span class="g">'+fmt(score,5)+'</span>\n';
+      s+='used the '+orders[found].name+' ratio after '+backoffs+' backoff(s)';
+    }
+    $('#sbOut').innerHTML=s;
+  }
+  render();
+});
+</script>
+
+<script>
+/* 17 extrinsic vs intrinsic: fast filter, slow final */
+window.__demos.push(function(){
+  const c=$('#evalCanvas'); if(!c)return;
+  const sl=$('#evN'),slv=$('#evNv');
+  const intrinsicMin=0.2, extrinsicDays=3; // per idea
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const n=parseInt(sl.value);
+    const tIntr=n*intrinsicMin; // minutes for all
+    const survivors=Math.max(1,Math.round(n*0.2));
+    const tExtr=survivors*extrinsicDays; // days, only survivors
+    const items=[
+      {label:'intrinsic\nall '+n+' ideas',v:tIntr,top:fmt(tIntr,1)+' min',col:COL.green,outline:true},
+      {label:'extrinsic\n'+survivors+' survivors',v:tExtr*60*24/ (60),top:tExtr+' days',col:COL.red}
+    ];
+    // normalize on a log-ish scale for display: minutes vs days are very different
+    const disp=[{label:items[0].label,v:Math.log10(tIntr+1),top:items[0].top,col:COL.green,outline:true},
+                {label:items[1].label,v:Math.log10(tExtr*1440+1),top:items[1].top,col:COL.red}];
+    barChart(ctx,W,H,disp,{max:Math.log10(40*1440),pad:80});
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('time cost (log scale): screen fast, then test slow',12,16);
+  });
+  function render(){slv.textContent=sl.value;cv.redraw();
+    const n=parseInt(sl.value),survivors=Math.max(1,Math.round(n*0.2));
+    $('#evalOut').innerHTML='ideas to try: '+n+'\n'+
+      'intrinsic (perplexity): screen all '+n+' in <span class="g">'+(n*intrinsicMin).toFixed(1)+' min</span>\n'+
+      'extrinsic (real task): test only the <span class="hl">'+survivors+'</span> survivors → '+(survivors*extrinsicDays)+' days\n'+
+      'fast score filters; slow score decides';
+  }
+  sl.addEventListener('input',render);
+  render();
+});
+
+/* 18 Shannon game */
+window.__demos.push(function(){
+  const c=$('#shCanvas'); if(!c)return;
+  const games=[
+    {ctx:'pizza with cheese and ___',true:'mushrooms',
+      ctxMod:[['mushrooms',0.42],['pepperoni',0.30],['onions',0.16],['rocks',0.02],['the',0.10]]},
+    {ctx:'33rd President of the US was ___',true:'Truman',
+      ctxMod:[['Truman',0.55],['Roosevelt',0.20],['Lincoln',0.10],['banana',0.01],['a',0.14]]},
+    {ctx:'I saw a ___',true:'cat',
+      ctxMod:[['cat',0.30],['car',0.26],['man',0.24],['the',0.04],['idea',0.16]]}
+  ];
+  let g=0, useUni=false;
+  // unigram = ignore context: roughly flat-ish by overall word frequency
+  const uniProb=[['the',0.30],['a',0.22],['cat',0.10],['mushrooms',0.04],['idea',0.08]];
+  buildChips($('#shChips'),games.map(x=>'"'+x.ctx+'"'),0,i=>{g=i;render();});
+  buildChips($('#shModelChips'),['Context model','Unigram (no context)'],0,i=>{useUni=(i===1);render();});
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const game=games[g];
+    let data;
+    if(!useUni){data=game.ctxMod.slice();}
+    else{
+      // unigram: assign each candidate its overall frequency, true word gets low generic freq
+      data=game.ctxMod.map(d=>[d[0], (d[0]==='the')?0.30:(d[0]==='a')?0.22:0.12]);
+      const s=data.reduce((a,v)=>a+v[1],0);data=data.map(d=>[d[0],d[1]/s]);
+    }
+    const items=data.map(d=>({label:d[0],v:d[1],top:(d[1]*100).toFixed(0)+'%',
+      col:d[0]===game.true?COL.green:COL.cyan2,outline:d[0]===game.true}));
+    barChart(ctx,W,H,items,{max:0.6,pad:60});
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('bet over next word ('+(useUni?'unigram: flat':'context: peaked')+'); true word outlined',12,16);
+  });
+  function render(){cv.redraw();
+    const game=games[g];
+    let pTrue;
+    if(!useUni){pTrue=game.ctxMod.find(d=>d[0]===game.true)[1];}
+    else{const data=game.ctxMod.map(d=>[d[0],(d[0]==='the')?0.30:(d[0]==='a')?0.22:0.12]);const s=data.reduce((a,v)=>a+v[1],0);pTrue=data.find(d=>d[0]===game.true)[1]/s;}
+    $('#shOut').innerHTML='sentence: "'+game.ctx+'"   true word: <span class="g">'+game.true+'</span>\n'+
+      'model: '+(useUni?'unigram (ignores context)':'context-aware')+'\n'+
+      'probability on the true word = <span class="'+(pTrue>0.25?'g':'r')+'">'+(pTrue*100).toFixed(0)+'%</span>\n'+
+      (useUni?'flat bet → high surprise → worse model':'bet piled on the true word → low surprise → better model');
+  }
+  render();
+});
+
+/* 19a perplexity worked: branching factor */
+window.__demos.push(function(){
+  const el=$('#ppWorked'); if(!el)return;
+  el.innerHTML=
+    'random digits 0–9, each P = 1/10, N digits:\n'+
+    'P(w1..wN) = (1/10)^N\n'+
+    'PP = [ (1/10)^N ]^(−1/N)\n'+
+    '   = (1/10)^( N · −1/N )\n'+
+    '   = (1/10)^(−1)\n'+
+    '   = <span class="g">10</span>   ← the branching factor';
+});
+
+/* 19b perplexity meter */
+window.__demos.push(function(){
+  const c=$('#ppCanvas'); if(!c)return;
+  const conf=$('#ppConf'),V=$('#ppV'),confv=$('#ppConfv'),Vv=$('#ppVv');
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const p=parseInt(conf.value)/100, v=parseInt(V.value);
+    // remaining mass spread over v-1 other words
+    const pOther=(1-p)/(v-1);
+    // perplexity of a single step where true word has prob p (geometric-mean inverse on true word)
+    const pp=1/p; // effective choices = 1/P(true)
+    ctx.clearRect(0,0,W,H);
+    // draw a dial (arc) from 1 to V
+    const cx=W*0.28,cy=H*0.62,R=Math.min(W*0.2,H*0.42);
+    ctx.strokeStyle='rgba(120,140,180,.25)';ctx.lineWidth=10;ctx.beginPath();ctx.arc(cx,cy,R,Math.PI,2*Math.PI);ctx.stroke();
+    const frac=clamp((pp-1)/(v-1),0,1);
+    ctx.strokeStyle=frac<0.33?COL.green:frac<0.66?COL.amber:COL.red;ctx.lineWidth=10;
+    ctx.beginPath();ctx.arc(cx,cy,R,Math.PI,Math.PI+frac*Math.PI);ctx.stroke();
+    ctx.fillStyle='#e7edf9';ctx.font='bold 22px monospace';ctx.textAlign='center';ctx.fillText('PP='+fmt(pp,1),cx,cy-6);
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('1 = sure',cx-R,cy+18);ctx.fillText(v+' = lost',cx+R,cy+18);
+    // bars: true word vs others
+    const items=[{label:'true word',v:p,top:(p*100).toFixed(0)+'%',col:COL.green,outline:true}];
+    for(let i=0;i<Math.min(4,v-1);i++)items.push({label:'other',v:pOther,top:(pOther*100).toFixed(0)+'%',col:'rgba(120,140,180,.5)'});
+    // mini bar chart on right half
+    const ox=W*0.52, ow=W*0.42, bot=H-30, top=30, slot=ow/items.length, bw=Math.min(slot*0.6,40);
+    axisLine(ctx,ox,bot,ox+ow,bot);
+    const mx=Math.max(...items.map(d=>d.v),0.01);
+    items.forEach((d,i)=>{const x=ox+slot*(i+0.5),h=(d.v/mx)*(bot-top);
+      ctx.fillStyle=d.col;ctx.fillRect(x-bw/2,bot-h,bw,h);
+      if(d.outline){ctx.strokeStyle=COL.amber;ctx.lineWidth=2;ctx.strokeRect(x-bw/2,bot-h,bw,h);}
+      ctx.fillStyle='#cfe0f5';ctx.font='10px monospace';ctx.textAlign='center';ctx.fillText(d.top,x,bot-h-5);});
+    ctx.textAlign='left';
+  });
+  function render(){confv.textContent=conf.value;Vv.textContent=V.value;cv.redraw();
+    const p=parseInt(conf.value)/100,v=parseInt(V.value),pp=1/p;
+    $('#ppOut').innerHTML='P(true word) = '+(p*100).toFixed(0)+'%   vocab V = '+v+'\n'+
+      'perplexity ≈ 1/P(true) = 1/'+p.toFixed(2)+' = <span class="g">'+fmt(pp,2)+'</span>\n'+
+      'branching factor = effective choices per step = <span class="hl">'+fmt(pp,1)+'</span>\n'+
+      (pp<1.5?'almost sure → perplexity near 1':pp>v*0.8?'nearly lost → perplexity near V='+v:'middling confidence');
+  }
+  conf.addEventListener('input',render);V.addEventListener('input',render);
+  render();
+});
+
+/* 19c WSJ perplexity bars */
+window.__demos.push(function(){
+  const c=$('#wsjCanvas'); if(!c)return;
+  const models=[['Unigram',962],['Bigram',170],['Trigram',109]];
+  let cur=2;
+  buildChips($('#wsjChips'),models.map(m=>m[0]),2,i=>{cur=i;render();});
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const items=models.map((m,i)=>({label:m[0],v:m[1],top:m[1].toString(),
+      col:[COL.red,COL.amber,COL.green][i],outline:i===cur}));
+    barChart(ctx,W,H,items,{max:1050,pad:80});
+    ctx.fillStyle=COL.muted;ctx.font='11px monospace';ctx.fillText('WSJ perplexity (lower is better)',12,16);
+  });
+  function render(){cv.redraw();
+    const m=models[cur];
+    $('#wsjOut').innerHTML='model: '+m[0]+'   perplexity = <span class="g">'+m[1]+'</span>\n'+
+      'effective choices per word ≈ '+m[1]+'\n'+
+      'context cuts it: 962 (uni) → 170 (bi) → 109 (tri)\n'+
+      'lower perplexity = the model is less surprised by real text';
+  }
+  render();
+});
+
+/* 20 synthesis: the one axis */
+window.__demos.push(function(){
+  const c=$('#synCanvas'); if(!c)return;
+  const sl=$('#synCtx'),slv=$('#synCtxv');
+  const rows=[
+    {name:'Unigram (n=1)',ctx:'none',pred:'weak',zeros:'almost none',pp:962},
+    {name:'Bigram (n=2)',ctx:'1 word',pred:'fair',zeros:'some',pp:170},
+    {name:'Trigram (n=3)',ctx:'2 words',pred:'good',zeros:'many',pp:109},
+    {name:'4-gram (n=4)',ctx:'3 words',pred:'better',zeros:'lots',pp:95},
+    {name:'5-gram (n=5)',ctx:'4 words',pred:'best (if seen)',zeros:'severe',pp:90}
+  ];
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const k=parseInt(sl.value);
+    ctx.clearRect(0,0,W,H);
+    const pad=30,rowH=(H-40)/rows.length,y0=20;
+    rows.forEach((r,i)=>{
+      const y=y0+i*rowH, on=i===k;
+      ctx.fillStyle=on?'rgba(56,240,216,.14)':'rgba(120,140,180,.04)';
+      ctx.strokeStyle=on?COL.cyan:'rgba(120,140,180,.25)';ctx.lineWidth=on?2.5:1;
+      ctx.beginPath();ctx.rect(pad,y,W-2*pad,rowH-8);ctx.fill();ctx.stroke();
+      ctx.fillStyle=on?'#fff':'#7f93b5';ctx.font=(on?'bold ':'')+'12px monospace';ctx.textAlign='left';
+      ctx.fillText(r.name,pad+12,y+rowH/2);
+      ctx.fillStyle=on?COL.muted:'#5e7197';ctx.font='11px monospace';
+      ctx.fillText('context: '+r.ctx+'   predict: '+r.pred,pad+170,y+rowH/2);
+      ctx.textAlign='right';ctx.fillStyle=on?COL.amber:'#5e7197';
+      ctx.fillText('PP≈'+r.pp+'  zeros: '+r.zeros,W-pad-12,y+rowH/2);
+      ctx.textAlign='left';
+    });
+  });
+  function render(){slv.textContent=sl.value;cv.redraw();
+    const r=rows[parseInt(sl.value)];
+    $('#synOut').innerHTML='context level = '+sl.value+'  →  <span class="hl">'+r.name+'</span>\n'+
+      'prediction quality: <span class="g">'+r.pred+'</span>   perplexity ≈ '+r.pp+'\n'+
+      'zeros / data sparsity: <span class="r">'+r.zeros+'</span>\n'+
+      'the whole lecture is managing this one trade-off: more context vs more zeros';
+  }
+  sl.addEventListener('input',render);
+  render();
+});
+
+/* check-yourself quiz */
+window.__demos.push(function(){
+  const b=$('#cyBtn'); if(!b)return;
+  b.addEventListener('click',()=>{const a=$('#cyA');a.classList.toggle('show');b.textContent=a.classList.contains('show')?'Hide answer':'Reveal answer';});
+});
+
+/* boot — typeset AFTER demos build their DOM */
+window.addEventListener('load',()=>{
+  runDemos(); initTheme(); initReveal(); initStory(); onScroll();
+  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();
+});
+</script>
+</body>
+</html>

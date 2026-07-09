@@ -1,0 +1,2170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NLP Session 5 — Neural Networks &amp; Neural Language Models (Interactive)</title>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-svg.min.js"></script>
+
+<style>
+:root{
+  --bg:#070b16;
+  --bg2:#0b1120;
+  --panel:#0e1729;
+  --panel2:#121d36;
+  --line:#1f2d4d;
+  --ink:#e7edf9;
+  --muted:#93a4c8;
+  --dim:#64759c;
+  --cyan:#38f0d8;
+  --cyan2:#19c4ff;
+  --violet:#9b8cff;
+  --pink:#ff6ec7;
+  --amber:#ffcb6b;
+  --green:#62e88a;
+  --red:#ff6b81;
+  --glow: 0 0 18px rgba(56,240,216,.45);
+  --r:16px;
+  --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{overflow-x:hidden}
+body{
+  margin:0;background:
+    radial-gradient(1200px 600px at 80% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 10%, rgba(155,140,255,.10), transparent 55%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;font-size:16px;
+  overflow-wrap:anywhere;word-break:break-word;
+}
+a{color:var(--cyan2);text-decoration:none}
+
+/* layout */
+.shell{display:grid;grid-template-columns:288px 1fr;max-width:1500px;margin:0 auto}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 16px 60px;
+  border-right:1px solid var(--line);background:linear-gradient(180deg,var(--bg2),transparent)}
+.brand{font-weight:800;letter-spacing:.3px;font-size:15px;color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow)}
+.brand small{display:block;color:var(--dim);font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.toc{margin-top:18px;display:flex;flex-direction:column;gap:1px}
+.toc a{color:var(--muted);font-size:13.5px;padding:7px 12px;border-radius:9px;display:flex;gap:9px;align-items:center;border:1px solid transparent;transition:.15s}
+.toc a .n{font-family:var(--mono);font-size:11px;color:var(--dim);min-width:20px}
+.toc a:hover{background:var(--panel);color:var(--ink)}
+.toc a.active{background:linear-gradient(90deg,rgba(56,240,216,.16),rgba(56,240,216,.02));color:#fff;border-color:rgba(56,240,216,.35)}
+.toc a.active .n{color:var(--cyan)}
+.toc .grp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:14px 12px 5px;font-weight:700}
+
+main{padding:0 0 120px;min-width:0}
+.progress{position:fixed;top:0;left:288px;right:0;height:3px;background:transparent;z-index:50}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:var(--glow)}
+
+section{padding:64px 56px;border-bottom:1px solid var(--line);scroll-margin-top:10px}
+section:nth-child(even){background:linear-gradient(180deg,rgba(255,255,255,.012),transparent)}
+.wrap{max-width:920px;margin:0 auto;min-width:0}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:26px;height:2px;background:var(--cyan);display:inline-block;border-radius:2px}
+h1{font-size:clamp(30px,5vw,52px);line-height:1.08;margin:.35em 0 .2em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,34px);margin:.25em 0 .5em;font-weight:800;letter-spacing:-.01em;color:#fff}
+h3{font-size:19px;margin:1.6em 0 .5em;color:#fff;font-weight:700}
+h4{font-size:15px;margin:1.2em 0 .4em;color:var(--cyan);font-weight:700;letter-spacing:.02em}
+p{color:var(--ink)}
+.lead{font-size:18.5px;color:var(--muted)}
+.muted{color:var(--muted)}
+strong{color:#fff}
+code{font-family:var(--mono);background:var(--panel2);padding:.12em .42em;border-radius:6px;font-size:.88em;color:var(--cyan);white-space:pre-wrap}
+ul.muted li,ul li{margin:4px 0}
+
+/* cards & callouts */
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:22px 0}
+.lab{background:linear-gradient(180deg,#0c1830,#0a1322);border:1px solid rgba(56,240,216,.28);border-radius:var(--r);padding:22px 24px;margin:26px 0;position:relative;overflow:hidden}
+.lab::before{content:"\26A1 INTERACTIVE";position:absolute;top:0;right:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:#06241f;background:var(--cyan);padding:4px 12px;border-bottom-left-radius:10px;font-weight:800}
+.note{border-left:3px solid var(--violet);background:rgba(155,140,255,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0;color:var(--muted)}
+.note b,.note strong{color:#cdc4ff}
+.key{border-left:3px solid var(--amber);background:rgba(255,203,107,.07);padding:12px 18px;border-radius:0 10px 10px 0;margin:18px 0}
+.key b{color:var(--amber)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:880px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* controls */
+.ctrl{display:flex;align-items:center;gap:12px;margin:10px 0;font-size:14px;flex-wrap:wrap}
+.ctrl label{min-width:62px;font-family:var(--mono);color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:5px;border-radius:4px;background:var(--line);flex:1;min-width:120px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow);cursor:pointer;border:2px solid #06241f}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--cyan);cursor:pointer;border:2px solid #06241f}
+input[type=range]:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.val{font-family:var(--mono);color:var(--cyan);min-width:54px;text-align:right;font-size:13.5px}
+button.btn{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:13px;transition:.15s;min-height:40px}
+button.btn:hover{border-color:var(--cyan);color:#fff}
+button.btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+button.btn.active{background:var(--cyan);color:#06241f;border-color:var(--cyan);font-weight:700}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;align-items:center}
+
+/* tables */
+.tablewrap{overflow-x:auto;margin:8px 0}
+table.tt{border-collapse:collapse;font-family:var(--mono);font-size:14px;margin:8px 0}
+table.tt th,table.tt td{border:1px solid var(--line);padding:8px 16px;text-align:center;word-break:break-word}
+table.tt th{background:var(--panel2);color:var(--muted)}
+table.tt td.one{color:var(--green);font-weight:700}
+table.tt td.zero{color:var(--dim)}
+table.tt tr.cur td{background:rgba(56,240,216,.12)}
+.readout{font-family:var(--mono);font-size:13.5px;background:#06101f;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:14px;white-space:pre-wrap;color:var(--cyan);overflow-x:auto}
+.readout .hl{color:var(--amber)}
+.readout .g{color:var(--green)}
+.readout .v{color:var(--violet)}
+.readout .p{color:var(--pink)}
+canvas{display:block;max-width:100%;height:auto}
+.eqbox{background:#06101f;border:1px solid var(--line);border-radius:12px;padding:6px 18px;margin:16px 0;overflow-x:auto;color:#e7edf9}
+mjx-container[display="true"]{overflow-x:auto;max-width:100%}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted);margin:2px 4px 2px 0}
+.foot{max-width:920px;margin:40px auto 0;color:var(--dim);font-size:13px;padding:0 56px}
+.pill{font-family:var(--mono);font-size:11px;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 10px;color:var(--muted)}
+.hero-net{margin:34px 0 6px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);font-family:var(--mono);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+/* prompt blocks */
+pre.prompt{background:#06101f;border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-family:var(--mono);font-size:13px;color:var(--ink);white-space:pre-wrap;overflow-x:auto;position:relative}
+.copybtn{position:absolute;top:8px;right:8px;font-family:var(--mono);font-size:11px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:7px;padding:4px 9px;cursor:pointer}
+.copybtn:hover{border-color:var(--cyan);color:#fff}
+/* bit switches */
+.bitsw{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);font-family:var(--mono);font-size:18px;cursor:pointer;color:var(--dim);user-select:none}
+.bitsw.on{background:rgba(56,240,216,.18);border-color:var(--cyan);color:var(--cyan);font-weight:700}
+/* reveal-answer cards */
+.recall{border:1px dashed var(--line);border-radius:12px;padding:16px 18px;margin:18px 0;background:rgba(255,203,107,.04)}
+.recall .ans{display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px;color:var(--muted)}
+.recall.open .ans{display:block}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* scroll-reveal */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .65s ease, transform .65s cubic-bezier(.2,.8,.3,1)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1 !important;transform:none !important;transition:none}html{scroll-behavior:auto}}
+body{transition:background .35s ease,color .35s ease}
+
+/* top controls */
+.topctl{position:fixed;top:14px;right:18px;z-index:60;display:flex;gap:9px}
+.topbtn{font-family:var(--mono);font-size:12.5px;background:rgba(18,29,54,.82);border:1px solid var(--line);color:var(--ink);
+  padding:9px 14px;border-radius:30px;cursor:pointer;display:flex;align-items:center;gap:7px;backdrop-filter:blur(8px);transition:.18s}
+.topbtn:hover{border-color:var(--cyan);color:#fff}
+.topbtn.primary{background:linear-gradient(90deg,var(--violet),var(--cyan));color:#06241f;border:none;font-weight:700}
+.topbtn.primary:hover{color:#06241f;filter:brightness(1.08)}
+[data-theme="light"] .topbtn{background:rgba(255,255,255,.9);border-color:#dde4f0;color:#16223d}
+[data-theme="light"] .topbtn:hover{color:#0a4a57}
+
+/* guided story mode */
+.spot{position:fixed;z-index:71;border:2px solid var(--cyan);border-radius:16px;
+  box-shadow:0 0 0 9999px rgba(2,5,12,.66), 0 0 28px rgba(56,240,216,.55);
+  transition:all .5s cubic-bezier(.3,.9,.3,1);pointer-events:none}
+.storycard{position:fixed;z-index:73;left:50%;bottom:28px;transform:translateX(-50%);width:min(640px,92vw);
+  background:linear-gradient(180deg,#0f1b33,#0a1322);border:1px solid rgba(56,240,216,.42);border-radius:18px;padding:20px 24px;
+  box-shadow:0 22px 64px rgba(0,0,0,.55);color:#e7edf9;animation:popcard .35s cubic-bezier(.2,.9,.3,1)}
+@keyframes popcard{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+.storycard .stp{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan)}
+.storycard h3{margin:6px 0 6px;color:#fff;font-size:21px}
+.storycard p{color:#aebbd6;font-size:14.5px;margin:0;line-height:1.6}
+.storynav{display:flex;align-items:center;gap:8px;margin-top:16px;flex-wrap:wrap}
+.storynav .sp{flex:1}
+.storynav .btn{padding:7px 12px}
+.storydots{display:flex;gap:5px;flex-wrap:wrap;max-width:260px}
+.storydots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.2s;cursor:pointer}
+.storydots i.on{background:var(--cyan);transform:scale(1.35)}
+
+/* mobile */
+@media(max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)}
+  .progress{left:0}
+  section{padding:44px 20px}
+  .toc{max-height:200px}
+}
+
+/* LIGHT THEME (page chrome only — interactive consoles stay dark) */
+[data-theme="light"] body{
+  background:
+    radial-gradient(1200px 600px at 82% -5%, rgba(25,196,255,.10), transparent 55%),
+    radial-gradient(1000px 500px at 0% 8%, rgba(155,140,255,.13), transparent 55%),
+    #eef2f8;
+  color:#16223d;
+}
+[data-theme="light"] h1,[data-theme="light"] h2{color:#0d1730}
+[data-theme="light"] h3{color:#16223d}
+[data-theme="light"] h4{color:#0a8198}
+[data-theme="light"] p{color:#28364f}
+[data-theme="light"] .lead{color:#46566f}
+[data-theme="light"] .muted{color:#586a8a}
+[data-theme="light"] strong{color:#0a1326}
+[data-theme="light"] .kicker{color:#0a8198}
+[data-theme="light"] .kicker::before{background:#0a8198}
+[data-theme="light"] a{color:#0a72b8}
+[data-theme="light"] section{border-bottom-color:#dde4f0}
+[data-theme="light"] section:nth-child(even){background:linear-gradient(180deg,rgba(13,23,48,.025),transparent)}
+[data-theme="light"] .card{background:linear-gradient(180deg,#ffffff,#f5f8fe);border-color:#dde4f0;box-shadow:0 1px 3px rgba(20,40,80,.05)}
+[data-theme="light"] .card h4{color:#0a8198}
+[data-theme="light"] .card .muted,[data-theme="light"] .card p{color:#43516e}
+[data-theme="light"] .note{background:rgba(124,108,255,.09);color:#3a3357}
+[data-theme="light"] .note b,[data-theme="light"] .note strong{color:#4b3bb0}
+[data-theme="light"] .key{background:rgba(214,158,46,.11)}
+[data-theme="light"] .key b{color:#946708}
+[data-theme="light"] .recall{background:rgba(214,158,46,.06)}
+[data-theme="light"] .sidebar{background:linear-gradient(180deg,#ffffff,transparent);border-right-color:#dde4f0}
+[data-theme="light"] .brand{color:#0d1730}
+[data-theme="light"] .toc a{color:#46566f}
+[data-theme="light"] .toc a:hover{background:#eef2fb;color:#0d1730}
+[data-theme="light"] .toc a.active{background:linear-gradient(90deg,rgba(10,129,152,.14),transparent);color:#0a4a57;border-color:rgba(10,129,152,.4)}
+[data-theme="light"] .toc a.active .n{color:#0a8198}
+[data-theme="light"] .toc .grp{color:#8693b0}
+[data-theme="light"] table.tt th{background:#eef2f9;color:#46566f}
+[data-theme="light"] table.tt td{color:#16223d;border-color:#d8e0ee}
+[data-theme="light"] .foot{color:#7a89a8}
+[data-theme="light"] .tag{color:#43516e;border-color:#d2dcec}
+[data-theme="light"] .pill{color:#43516e;background:#eef2f9;border-color:#d8e0ee}
+[data-theme="light"] .legend{color:#586a8a}
+[data-theme="light"] .bitsw{background:#eef2f9;border-color:#d8e0ee;color:#8693b0}
+/* keep console text light inside dark interactive panels */
+[data-theme="light"] .lab h4{color:#38f0d8}
+[data-theme="light"] .lab p,[data-theme="light"] .lab .muted{color:#93a4c8}
+[data-theme="light"] .lab strong,[data-theme="light"] .lab b{color:#fff}
+</style>
+</head>
+<body>
+<script>(function(){try{var t=localStorage.getItem('lectheme5');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
+<div class="progress"><i id="progbar"></i></div>
+
+<div class="topctl">
+  <button class="topbtn primary" id="tourBtn">&#9654; Guided tour</button>
+  <button class="topbtn" id="themeBtn">&#9728; Light</button>
+</div>
+
+<div class="spot" id="storyspot" style="display:none"></div>
+<div class="storycard" id="storycard" style="display:none">
+  <div class="stp" id="storyStep"></div>
+  <h3 id="storyTitle"></h3>
+  <p id="storyText"></p>
+  <div class="storynav">
+    <div class="storydots" id="storyDots"></div>
+    <div class="sp"></div>
+    <button class="btn" id="storyPrev">&#9664; prev</button>
+    <button class="btn" id="storyPlay">&#9208; pause</button>
+    <button class="btn" id="storyNext">next &#9654;</button>
+    <button class="btn" id="storyExit">&#10005; exit</button>
+  </div>
+</div>
+
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="brand"><span class="dot"></span><div>NLP Session 5<small>Neural Nets &middot; Neural LMs</small></div></div>
+  <nav class="toc" id="toc">
+    <div class="grp">Foundations</div>
+    <a href="#intro"><span class="n">00</span> Overview &amp; map</a>
+    <a href="#neuron"><span class="n">01</span> The Neural Unit</a>
+    <a href="#activations"><span class="n">02</span> Activation Functions</a>
+    <div class="grp">The XOR Story</div>
+    <a href="#perceptron"><span class="n">03</span> Perceptron: AND &amp; OR</a>
+    <a href="#xor"><span class="n">04</span> The XOR Problem</a>
+    <a href="#xornet"><span class="n">05</span> Solving XOR</a>
+    <div class="grp">Feedforward Networks</div>
+    <a href="#ffn"><span class="n">06</span> Feedforward &amp; Notation</a>
+    <a href="#softmax"><span class="n">07</span> Softmax</a>
+    <a href="#biastrick"><span class="n">08</span> The Bias Trick</a>
+    <div class="grp">NLP Applications</div>
+    <a href="#sentiment"><span class="n">09</span> Text Classification</a>
+    <a href="#embeddings"><span class="n">10</span> Embeddings &amp; Pooling</a>
+    <div class="grp">Neural Language Models</div>
+    <a href="#lm"><span class="n">11</span> What an LM Is</a>
+    <a href="#onehot"><span class="n">12</span> One-hot &amp; E Matrix</a>
+    <a href="#whynlm"><span class="n">13</span> Why Neural LMs Win</a>
+    <a href="#forward"><span class="n">14</span> NLM Forward Pass</a>
+    <a href="#ngram"><span class="n">15</span> N-gram vs Neural LM</a>
+    <div class="grp">Training, LLMs &amp; Beyond</div>
+    <a href="#training"><span class="n">16</span> Training the Network</a>
+    <a href="#llm"><span class="n">17</span> LLMs &amp; Prompting</a>
+    <a href="#transfer"><span class="n">18</span> Transfer Learning</a>
+    <a href="#summary"><span class="n">19</span> Synthesis &amp; Recap</a>
+  </nav>
+</aside>
+
+<main>
+
+<section id="intro">
+ <div class="wrap">
+  <div class="kicker">Interactive Edition &middot; Session 5</div>
+  <h1>Neural Networks &amp;<br>Neural Language Models</h1>
+  <p class="lead">We start with one tiny unit. We give it a switch. We meet a puzzle one unit cannot solve, and fix it with layers. Then we point networks at language, predict the next word, and arrive at the large language models behind modern AI. Intuition first, then the exact math, then a lab you can play with.</p>
+
+  <div class="hero-net">
+    <canvas id="heroCanvas" width="900" height="220" style="width:100%;height:auto"></canvas>
+    <div class="legend">
+      <span><i style="background:var(--cyan2)"></i> inputs</span>
+      <span><i style="background:var(--violet)"></i> hidden units</span>
+      <span><i style="background:var(--pink)"></i> output</span>
+    </div>
+  </div>
+
+  <h3>The map: click any stop to jump</h3>
+  <p class="muted">This lecture is one climb, in six bands. Each box is a chapter. Each leans on the one before it. Click a box to jump there.</p>
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; The whole lecture, at a glance</h4>
+    <p class="muted" style="font-size:14px">Each node is a chapter. The line shows the path: unit, switch, the XOR puzzle, layers, language, training, then large models. Click a node to go to it.</p>
+    <canvas id="mapCanvas" width="900" height="320" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="mapOut">Hover a node to see what it covers. Click to jump.</div>
+  </div>
+
+  <div class="grid3">
+    <div class="card"><h4>What you will learn</h4><p class="muted" style="font-size:14px">How a unit decides, why one line is too weak, how layers fix it, how networks read language, and how training works.</p></div>
+    <div class="card"><h4>How to use it</h4><p class="muted" style="font-size:14px">Read top to bottom, or jump via the sidebar. Every &#9889; panel is live. Try the <strong>&#9654; Guided tour</strong>, or the <strong>&#9728;</strong> button for light or dark.</p></div>
+    <div class="card"><h4>The rhythm</h4><p class="muted" style="font-size:14px">Every chapter has the same shape. A hook, an analogy, the math step by step, a worked example, a lab, an ML link, then a pitfall.</p></div>
+  </div>
+  <div class="note" style="margin-top:22px"><b>One term up front.</b> A <em>neural network</em> is a stack of tiny math units that turn numbers into a prediction. It is loosely inspired by brain cells. But hold that lightly: this is <em>not</em> a model of your brain. It is just a function of numbers.</div>
+ </div>
+</section>
+
+<section id="neuron">
+ <div class="wrap">
+  <div class="kicker">01 &middot; The building block</div>
+  <h2>The Neural Unit</h2>
+  <p class="lead">A unit takes a few numbers in, weighs each one, adds a bias, and squashes the total into a clean answer. That is the whole atom of deep learning. Everything large is built from it.</p>
+
+  <div class="note"><b>Analogy first.</b> A unit is a tiny vote-counter. Each input gets a <strong>weight</strong>, which says how much it matters. The unit adds up the weighted votes. It adds one baseline number called the <strong>bias</strong>. Then it squashes the total into a yes/no-ish answer. Like deciding to walk: sun counts a lot, wind a little, and your mood is the baseline.</div>
+
+  <h3>Step 1 &mdash; the weighted sum</h3>
+  <p>Take inputs \(x_1, x_2, \dots, x_n\). Each input \(x_i\) has a matching <strong>weight</strong> \(w_i\). There is one shared <strong>bias</strong> \(b\). The unit first forms the <strong>weighted sum</strong>, called \(z\):</p>
+  <div class="eqbox">$$ z \;=\; b + \sum_{i=1}^{n} w_i x_i $$</div>
+  <p>The same thing is shorter as a <strong>dot product</strong>. Put the weights in a vector \(\mathbf{w}\) and the inputs in \(\mathbf{x}\). The dot product multiplies matching parts and adds them:</p>
+  <div class="eqbox">$$ z \;=\; \mathbf{w}\cdot\mathbf{x} + b $$</div>
+
+  <h3>Step 2 &mdash; the activation</h3>
+  <p>The raw sum \(z\) can be any number. We pass it through a curved <strong>activation</strong> \(f\) to get the output \(y\). The classic one is the <strong>sigmoid</strong> \(\sigma\), which squashes any number into the range between 0 and 1:</p>
+  <div class="eqbox">$$ y \;=\; \sigma(z) \;=\; \frac{1}{1 + e^{-z}} $$</div>
+  <p>Here \(e \approx 2.718\) is Euler's number. When \(z\) is large, \(y\) nears 1 (a strong yes). When \(z\) is very negative, \(y\) nears 0 (a no). At \(z=0\), \(y=0.5\), perfectly on the fence.</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; walk it step by step</h4>
+    <p class="muted" style="font-size:14px">The slide's neuron: weights \(w=[0.2,0.3,0.9]\), bias \(b=0.5\), inputs \(x=[0.5,0.6,0.1]\). Press Next to reveal each step. The final answer should be \(y \approx 0.7045\).</p>
+    <div class="chips"><button class="btn" id="nuStep">&#9654; Next step</button><button class="btn" id="nuReset">&#8634; Reset</button></div>
+    <div class="readout" id="nuOut" style="min-height:150px"></div>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Build the sum, watch \(y\) form</h4>
+    <p class="muted" style="font-size:14px">Drag the three weights and the bias. The edges into the unit get thicker and brighter as a weight grows. Cyan means a positive weight, pink means negative. Watch \(z\) and the output \(y\) update live, term by term, in the console.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="nuSliders"></div>
+        <div class="readout" id="nuLive"></div>
+      </div>
+      <div><canvas id="nuCanvas" width="440" height="300" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>One sigmoid unit is exactly <em>logistic regression</em>, a complete yes/no classifier: spam or not, fraud or not. A deep network is just thousands of these units in layers. Each layer's outputs feed the next. Everything large is built from this one atom.</p>
+
+  <div class="key"><b>Pitfall &mdash; the bias and the bend both matter.</b> Without the bias \(b\), the unit can only split inputs with a line through the origin. Without a <em>nonlinear</em> activation, stacking units just gives one big line, and the network gains nothing.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> We used the sigmoid as the bend. But it is one of several. Next we meet tanh and ReLU, and see why the choice changes how fast a network learns.</p>
+ </div>
+</section>
+
+<section id="activations">
+ <div class="wrap">
+  <div class="kicker">02 &middot; The bend that gives power</div>
+  <h2>Activation Functions</h2>
+  <p class="lead">The activation is the curved step inside a unit. Without it, a whole network collapses into one straight line. The bend is what lets networks learn rich, twisty patterns. We meet the three most common bends.</p>
+
+  <div class="note"><b>Analogy first.</b> An activation is a dimmer switch for a unit's score. A plain wire passes voltage straight through. A dimmer reshapes it: low stays low, high saturates near full. The shape you pick changes how fast the unit learns.</div>
+
+  <h3>The three switches</h3>
+  <p>The <strong>sigmoid</strong> squashes any number into the range between 0 and 1. It reads nicely as a probability. Its weakness: far from zero the curve is almost flat, so learning slows there.</p>
+  <div class="eqbox">$$ \sigma(z) \;=\; \frac{1}{1 + e^{-z}} $$</div>
+  <p>The <strong>tanh</strong> (hyperbolic tangent) has the same S-shape, but it is centred on zero. Its range is between \(-1\) and \(1\):</p>
+  <div class="eqbox">$$ \tanh(z) \;=\; \frac{e^{z} - e^{-z}}{e^{z} + e^{-z}} $$</div>
+  <p>The <strong>ReLU</strong> (rectified linear unit) is the simplest and most common today. It keeps positive scores and sets negative ones to zero:</p>
+  <div class="eqbox">$$ \mathrm{ReLU}(z) \;=\; \max(0,\, z) $$</div>
+  <p>ReLU has a sharp kink at zero, not a smooth curve. For positive \(z\), its slope is a constant 1. That steady slope helps deep networks learn fast.</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; same scores, three switches</h4>
+    <p class="muted" style="font-size:14px">Feed \(z=2\) and \(z=-2\) through each activation. Press Next to reveal each line.</p>
+    <div class="chips"><button class="btn" id="acStep">&#9654; Next step</button><button class="btn" id="acReset">&#8634; Reset</button></div>
+    <div class="readout" id="acOut" style="min-height:130px"></div>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Plot the switch, read its slope</h4>
+    <p class="muted" style="font-size:14px">Pick a switch. Drag the slider (or move the mouse over the canvas) to scrub \(z\). The dot shows \(f(z)\); the yellow line shows the slope there. Look for this: ReLU's slope is a flat 1 for \(z>0\), while the sigmoid's slope dies to almost zero out at the edges.</p>
+    <div class="chips">
+      <button class="btn active" id="acSig">sigmoid</button>
+      <button class="btn" id="acTanh">tanh</button>
+      <button class="btn" id="acRelu">ReLU</button>
+    </div>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="acSliders"></div>
+        <div class="readout" id="acLive"></div>
+      </div>
+      <div><canvas id="acCanvas" width="440" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>ReLU is the default hidden activation in most deep networks, from image models to transformers. Sigmoid and tanh live inside the gates of recurrent networks. Sigmoid is also the final layer for a yes/no output. The choice is a real design decision.</p>
+
+  <div class="key"><b>Pitfall &mdash; saturation and dead units.</b> Sigmoid and tanh flatten far from zero, so gradients shrink and learning stalls. This is the vanishing-gradient trap. ReLU avoids it mostly, but a unit stuck at negative \(z\) can die and output zero forever.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Now we have a unit with a switch. But can one unit do basic logic? AND and OR, yes. The next chapter starts the story that nearly killed neural networks.</p>
+ </div>
+</section>
+
+<section id="perceptron">
+ <div class="wrap">
+  <div class="kicker">03 &middot; The strict gatekeeper</div>
+  <h2>The Perceptron: AND and OR</h2>
+  <p class="lead">Before networks, there was the perceptron. It is the simplest unit: weights, a bias, and a hard 0/1 output, with no smooth switch. It fires a 1 when the weighted sum clears zero, and a 0 otherwise.</p>
+
+  <div class="note"><b>Analogy first.</b> A perceptron is a strict bouncer at a door. It adds up the weighted inputs plus the bias. If the total clears the bar (above zero), it says yes (1). If not, it says no (0). There is no maybe.</div>
+
+  <h3>The rule</h3>
+  <div class="eqbox">$$ \text{output} = \begin{cases} 1 & \text{if } \mathbf{w}\cdot\mathbf{x} + b > 0 \\ 0 & \text{otherwise} \end{cases} $$</div>
+  <p>We can build logic gates. The <strong>AND</strong> gate fires only when both inputs are 1. Use \(w=[1,1]\) and \(b=-1\), so \(z = x_1 + x_2 - 1\). The <strong>OR</strong> gate fires when at least one input is 1. Use \(w=[1,1]\) and \(b=0\).</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; AND and OR, every row</h4>
+    <p class="muted" style="font-size:14px">Press Next to walk both truth tables, one input pair at a time, with the real arithmetic.</p>
+    <div class="chips"><button class="btn" id="pcStep">&#9654; Next step</button><button class="btn" id="pcReset">&#8634; Reset</button></div>
+    <div class="readout" id="pcOut" style="min-height:150px"></div>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Flip the inputs, build the gate</h4>
+    <p class="muted" style="font-size:14px">Pick AND or OR. Click the two input switches to flip them between 0 and 1. The canvas shows the four corners; green means the gate fires. The white dot is your current input. The console shows the sum \(z\) and the output.</p>
+    <div class="chips">
+      <button class="btn active" id="pcAnd">AND gate</button>
+      <button class="btn" id="pcOr">OR gate</button>
+      <span class="muted" style="font-size:13px">x&#8321;</span>
+      <span class="bitsw" id="pcX1">0</span>
+      <span class="muted" style="font-size:13px">x&#8322;</span>
+      <span class="bitsw" id="pcX2">0</span>
+    </div>
+    <div class="grid2" style="align-items:start">
+      <div><canvas id="pcCanvas" width="380" height="340" style="width:100%;height:auto"></canvas></div>
+      <div><div class="readout" id="pcLive"></div></div>
+    </div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>The perceptron is the historical seed of neural networks. Its update rule was the first learning algorithm for a linear classifier. Modern units keep its weighted-sum core. But they swap the hard 0/1 step for a smooth switch, so gradient descent can train them.</p>
+
+  <div class="key"><b>Pitfall &mdash; one line is the only weapon.</b> A perceptron draws one straight cut, the line \(\mathbf{w}\cdot\mathbf{x}+b=0\). AND and OR each need just one cut, so they fit. The moment a task needs two cuts, a single perceptron fails.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> AND and OR were easy. Now meet the gate that breaks one perceptron, and cooled the whole field for years: XOR.</p>
+ </div>
+</section>
+
+<section id="xor">
+ <div class="wrap">
+  <div class="kicker">04 &middot; The puzzle that broke perceptrons</div>
+  <h2>The XOR Problem</h2>
+  <p class="lead">Here is the question that nearly killed neural networks. Can one unit do basic logic? In 1969, Minsky and Papert showed the answer is no for XOR. XOR should fire only when the two inputs <strong>differ</strong>.</p>
+
+  <div class="note"><b>Analogy first.</b> Picture two light switches, one at each end of a staircase. The light is on only when the switches <em>disagree</em>. Flip either one and the light flips. No single threshold on the total can capture this rule.</div>
+
+  <h3>The truth table and why no line works</h3>
+  <div class="tablewrap">
+  <table class="tt">
+    <tr><th>x&#8321;</th><th>x&#8322;</th><th>XOR</th></tr>
+    <tr><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td></tr>
+    <tr><td class="zero">0</td><td class="one">1</td><td class="one">1</td></tr>
+    <tr><td class="one">1</td><td class="zero">0</td><td class="one">1</td></tr>
+    <tr><td class="one">1</td><td class="one">1</td><td class="zero">0</td></tr>
+  </table>
+  </div>
+  <p>A perceptron's boundary is the line \(w_1 x_1 + w_2 x_2 + b = 0\). It splits the plane in two. XOR needs the two "yes" corners, \((0,1)\) and \((1,0)\), on one side. But those corners sit on <em>opposite diagonals</em>. So do the two "no" corners. The classes are <strong>not linearly separable</strong>: no straight line can fence them apart.</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; one line always fails</h4>
+    <p class="muted" style="font-size:14px">We prove it. Suppose a line scores both "yes" corners positive. Press Next to reach the contradiction.</p>
+    <div class="chips"><button class="btn" id="xoStep">&#9654; Next step</button><button class="btn" id="xoReset">&#8634; Reset</button></div>
+    <div class="readout" id="xoOut" style="min-height:150px"></div>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Try to separate XOR with one line</h4>
+    <p class="muted" style="font-size:14px">You drive a straight line with three sliders: \(w_1\), \(w_2\), and the bias \(b\). Green corners are XOR = 1, pink are XOR = 0. The line shades one side as "yes". Try to get all four correct. You will cap out at <strong>3 of 4</strong>, every time. That is the lesson.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="xoSliders"></div>
+        <div class="readout" id="xoLive"></div>
+      </div>
+      <div><canvas id="xoCanvas" width="380" height="380" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>XOR is the textbook example of a problem that needs depth. Real data is full of "it depends" patterns, where the right answer flips based on a combination. A single linear layer cannot model those. The fix, adding a hidden layer, is the reason deep networks exist.</p>
+
+  <div class="key"><b>Pitfall &mdash; "hard" does not mean "complex".</b> XOR is tiny. The lesson is narrow: one straight cut is too weak. The instant a task needs a bent or split boundary, one unit fails, no matter how you tune its weights.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> One line cannot do it. So we add a layer in between. Watch the same XOR become easy.</p>
+ </div>
+</section>
+
+<section id="xornet">
+ <div class="wrap">
+  <div class="kicker">05 &middot; The fix: a hidden layer</div>
+  <h2>Solving XOR with Two Layers</h2>
+  <p class="lead">The fix is to stack units into layers. We add a <strong>hidden layer</strong> between the input and the output. It rewrites the raw inputs as new, more useful numbers. In that new space, XOR becomes linearly separable.</p>
+
+  <div class="note"><b>Analogy first.</b> The hidden layer is a translator. It re-describes the inputs as facts that make the answer easy. For XOR, one hidden unit learns "<em>at least one input is on</em>". The other learns "<em>both inputs are on</em>". From those two facts, XOR is just "at least one, but not both".</div>
+
+  <h3>The network</h3>
+  <p>Here is the standard 2-layer ReLU network from Jurafsky and Martin. The hidden layer:</p>
+  <div class="eqbox">$$ W = \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix},\quad \mathbf{b} = \begin{bmatrix} 0 \\ -1 \end{bmatrix},\quad \mathbf{h} = \mathrm{ReLU}(W\mathbf{x} + \mathbf{b}) $$</div>
+  <p>The output unit, with no bias:</p>
+  <div class="eqbox">$$ \mathbf{w}_{\text{out}} = [\,1,\ -2\,],\quad y = \mathbf{w}_{\text{out}}\cdot\mathbf{h} = h_1 - 2h_2 $$</div>
+  <p>Each hidden unit has a job. Unit \(h_1 = \mathrm{ReLU}(x_1 + x_2)\) counts how many inputs are on. Unit \(h_2 = \mathrm{ReLU}(x_1 + x_2 - 1)\) switches on only when <em>both</em> are on. The output subtracts twice \(h_2\) to cancel the "both on" case.</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; verify all four inputs</h4>
+    <p class="muted" style="font-size:14px">Press Next to compute \(h_1, h_2\), then \(y = h_1 - 2h_2\), for each input. The outputs should be 0, 1, 1, 0.</p>
+    <div class="chips"><button class="btn" id="xnStep">&#9654; Next step</button><button class="btn" id="xnReset">&#8634; Reset</button></div>
+    <div class="readout" id="xnOut" style="min-height:160px"></div>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Flip the inputs, watch the layers light up</h4>
+    <p class="muted" style="font-size:14px">Click the two input switches. The canvas lights the units that fire: cyan inputs, violet hidden units, pink output. Look for this: \(h_2\) stays dark until <strong>both</strong> inputs are on. That single unit is the whole trick.</p>
+    <div class="chips">
+      <span class="muted" style="font-size:13px">x&#8321;</span>
+      <span class="bitsw" id="xnX1">0</span>
+      <span class="muted" style="font-size:13px">x&#8322;</span>
+      <span class="bitsw" id="xnX2">0</span>
+    </div>
+    <canvas id="xnCanvas" width="640" height="300" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="xnLive"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>This tiny example is the whole reason for deep learning. Hidden layers learn useful intermediate features, called a <em>representation</em>. A vision network's early layers find edges, then shapes, then objects. Each layer reshapes the data so the next layer's job is simpler.</p>
+
+  <div class="key"><b>Pitfall &mdash; the magic is the hidden features.</b> It is not the output weights. Remove the hidden layer and keep a linear output, and you are back to one line. XOR fails again. Depth plus a nonlinear switch is what buys the power.</div>
+
+  <div class="recall">
+    <strong>Check yourself.</strong> Why can a 2-layer network solve XOR when one perceptron cannot?
+    <button class="btn" data-reveal style="margin-left:8px">Reveal</button>
+    <div class="ans">The hidden ReLU layer rewrites the inputs into new features, "any on" and "both on". In that new space the two classes <em>are</em> linearly separable, so the output unit can split them with one line.</div>
+  </div>
+
+  <p class="muted"><b>Bridge &rarr;</b> One hidden layer already buys a lot. Let us name the general machine: the feedforward network, and its layer notation.</p>
+ </div>
+</section>
+
+<section id="ffn">
+ <div class="wrap">
+  <div class="kicker">06 &middot; The core machine</div>
+  <h2>Feedforward Networks &amp; Notation</h2>
+  <p class="lead">A feedforward neural network is just many units in layers, with data flowing one way: input to output, no loops. Another name is the multi-layer perceptron, or MLP. Let us set the notation we use for the rest of the lecture.</p>
+
+  <div class="note"><b>Analogy first.</b> A feedforward network is an assembly line. Each station (layer) takes the previous station's parts (numbers), applies its own work (weights and a switch), and passes the result forward. Nothing flows backward during prediction. It marches from input to answer.</div>
+
+  <h3>Logistic regression is a one-layer network</h3>
+  <p>We do not count the input layer, because it does no computing. It just holds the numbers. So logistic regression, one sigmoid unit, is a <strong>one-layer network</strong>. For several outputs, a layer uses a weight <em>matrix</em> \(W\), a bias <em>vector</em> \(\mathbf{b}\), and produces a vector of scores.</p>
+
+  <h3>Two layers and the layer notation</h3>
+  <p>A two-layer network adds one hidden layer: \(\mathbf{h} = g(W\mathbf{x} + \mathbf{b})\), where \(g\) is a hidden switch like ReLU. For deeper nets, we number layers with a bracket superscript:</p>
+  <div class="eqbox">$$ \mathbf{a}^{[0]} = \mathbf{x},\qquad \mathbf{z}^{[\ell]} = W^{[\ell]} \mathbf{a}^{[\ell-1]} + \mathbf{b}^{[\ell]},\qquad \mathbf{a}^{[\ell]} = g\big(\mathbf{z}^{[\ell]}\big) $$</div>
+  <p>Name each symbol. \(\ell\) (the Greek letter ell) is the layer number. \(W^{[\ell]}\) is that layer's weight matrix. \(\mathbf{b}^{[\ell]}\) is its bias vector. \(\mathbf{z}^{[\ell]}\) is its pre-switch scores. \(\mathbf{a}^{[\ell]}\) is its switched output. The input is \(\mathbf{a}^{[0]} = \mathbf{x}\). Each layer feeds the next.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Stack the layers, watch a value flow</h4>
+    <p class="muted" style="font-size:14px">Pick how many hidden layers, and how wide each is. Press <strong>push input</strong> to send a value through. Each layer lights as the value reaches it. Look for this: depth and width are just more units, wired the same way.</p>
+    <div class="chips">
+      <button class="btn" id="ffnPush">&#9654; push input</button>
+      <button class="btn" id="ffnReset">&#8634; reset</button>
+    </div>
+    <div id="ffnSliders"></div>
+    <canvas id="ffnCanvas" width="700" height="280" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="ffnLive"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>The layer notation above is exactly what deep-learning libraries implement, layer by layer. A "deep" network just means many such layers. Each \(W^{[\ell]}\) is a learned matrix. The whole network is one big function, built from these stacked pieces.</p>
+
+  <div class="key"><b>Pitfall &mdash; the input layer is not a real layer.</b> It only holds numbers; it computes nothing. So a "one-layer network" has one computing layer, not two. Count the layers that have weights, not the input.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> A network needs to output a clean answer. For many classes, that final step is the softmax. Let us play with it.</p>
+ </div>
+</section>
+
+<section id="softmax">
+ <div class="wrap">
+  <div class="kicker">07 &middot; Scores into probabilities</div>
+  <h2>Softmax</h2>
+  <p class="lead">The sigmoid gives one probability, good for a yes/no choice. For many classes we need many probabilities that add to 1. The softmax does this. It is the many-class big sister of the sigmoid.</p>
+
+  <div class="note"><b>Analogy first.</b> Softmax is like splitting a pie among contestants by their scores. Raise \(e\) to each score so all are positive. Then give each one a slice in proportion to its share of the total. A big score grabs a big slice. The slices always add up to the whole pie.</div>
+
+  <h3>The formula, in two moves</h3>
+  <p>Given a score vector \(\mathbf{z} = [z_1, \dots, z_k]\), the probability of class \(i\) is:</p>
+  <div class="eqbox">$$ \mathrm{softmax}(\mathbf{z})_i \;=\; \frac{e^{z_i}}{\sum_{j=1}^{k} e^{z_j}} $$</div>
+  <p>Move one: make every score positive by raising \(e\) to it. Move two: divide by the total of all of them, so the parts sum to one. The raw scores \(z_i\) are called <strong>logits</strong>; they can be any size.</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; the slide's six logits</h4>
+    <p class="muted" style="font-size:14px">Logits \(z=[0.6, 1.1, -1.5, 1.2, 3.2, -1.1]\). Press Next to raise \(e\), sum, and divide. The answers should match \([0.055, 0.090, 0.0067, 0.10, 0.74, 0.010]\).</p>
+    <div class="chips"><button class="btn" id="smStep">&#9654; Next step</button><button class="btn" id="smReset">&#8634; Reset</button></div>
+    <div class="readout" id="smOut" style="min-height:160px"></div>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; The softmax bar race</h4>
+    <p class="muted" style="font-size:14px">Drag any logit slider. Watch the bars reshape. Look for this: raising one logit makes its bar grow by <strong>stealing</strong> probability from the others. The bars always add to exactly 1, shown in the sum-check.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="smSliders"></div>
+        <div class="readout" id="smLive"></div>
+      </div>
+      <div><canvas id="smCanvas" width="440" height="320" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Softmax is the final layer of almost every classifier with more than two classes. Examples: image labels, the next-token distribution in a language model, and intent labels in a chatbot. We will use it ourselves in the neural language model soon.</p>
+
+  <div class="key"><b>Pitfall &mdash; logits are not probabilities yet.</b> The raw scores can be any size, even negative. Only after the exponentials and the division do they become a valid distribution that adds to 1. Skipping the division is a classic bug.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> One small notation trick tidies every layer: folding the bias into the weights. It takes one minute.</p>
+ </div>
+</section>
+
+<section id="biastrick">
+ <div class="wrap">
+  <div class="kicker">08 &middot; A tidy notation trick</div>
+  <h2>The Bias Trick</h2>
+  <p class="lead">Carrying the bias \(b\) as a separate term is a little clumsy. There is a neat trick. Add a fake input that is always 1, and treat its weight as the bias. Then the whole unit is one clean dot product.</p>
+
+  <div class="note"><b>Analogy first.</b> Think of a shopping bill with a fixed delivery fee. Instead of writing "items plus a separate fee", you add one fake item, "delivery", priced at the fee, with quantity 1. Now the bill is one plain sum. The bias is that fixed delivery fee.</div>
+
+  <h3>The trick in symbols</h3>
+  <p>Add a dummy input \(a_0 = 1\) to each layer. Give it weight \(w_0\). Then \(w_0 \cdot 1 = w_0\) plays the exact role of the bias \(b\):</p>
+  <div class="eqbox">$$ \mathbf{w}\cdot\mathbf{x} + b \;=\; w_0(1) + w_1 x_1 + \dots + w_n x_n $$</div>
+  <p>Nothing changes in the math. We just folded the bias \(b\) in as the weight \(w_0\) on a constant input of 1. It is purely a tidier way to write the same computation.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Two forms, one answer</h4>
+    <p class="muted" style="font-size:14px">Slide the weights and bias. The left form keeps \(b\) separate. The right form folds it in as \(w_0\) on a dummy input of 1. Look for this: the two sums always give the <strong>exact same</strong> \(z\). It is the same model, written two ways.</p>
+    <div id="btSliders"></div>
+    <div class="readout" id="btLive"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>This trick is everywhere in textbooks and code. It lets a layer be written as a single matrix multiply, with the bias as an extra column. It removes a special case, which makes the math and the implementation cleaner.</p>
+
+  <div class="key"><b>Pitfall &mdash; do not double-count the bias.</b> If you fold the bias into the weights, do not <em>also</em> add a separate \(b\). Pick one form. Mixing both adds the bias twice and silently breaks the model.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> We now have the full machine. Time to point it at language. First job: classify text, like sentiment.</p>
+ </div>
+</section>
+
+<section id="sentiment">
+ <div class="wrap">
+  <div class="kicker">09 &middot; Networks read language</div>
+  <h2>Text Classification &amp; Sentiment</h2>
+  <p class="lead">Now we point the network at text. The first job is classification, like sentiment: read a review and output one number, the chance it is positive. A plain unit on word flags is logistic regression. A hidden layer adds the power to read combinations.</p>
+
+  <div class="note"><b>Analogy first.</b> Judging a review is like reading a friend's text. A single word like "terrible" is a strong clue. But "not terrible" flips the meaning. A flat word count misses the flip. A hidden layer can learn the combination "not" plus "terrible" and treat it differently.</div>
+
+  <h3>From words to a label</h3>
+  <p>Simple features can be binary flags: "does the word <em>great</em> appear?" A one-layer network on these flags is logistic regression. A <strong>hidden layer</strong> lets the network model nonlinear interactions between features, which is exactly what "not good" needs. For more than two labels, say positive, neutral, negative, we add more output units and a softmax layer.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Toggle words, flip the verdict</h4>
+    <p class="muted" style="font-size:14px">Click words to include them in a review. The bar shows the predicted chance of "positive". One model is <strong>flat</strong> (single-word weights only). The other has a <strong>hidden layer</strong> that knows the phrase "not good". Toggle "not" and "good" together. Look for this: only the hidden-layer model flips the verdict.</p>
+    <div class="chips" id="seWords"></div>
+    <div class="chips">
+      <button class="btn active" id="seFlat">flat model</button>
+      <button class="btn" id="seDeep">hidden-layer model</button>
+    </div>
+    <canvas id="seCanvas" width="700" height="150" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="seLive"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Sentiment, spam filtering, topic labels, and intent detection all use this exact shape. A network reads text features and outputs a class. Adding a hidden layer is what lets it catch phrases and negation, not just isolated words.</p>
+
+  <div class="key"><b>Pitfall &mdash; single-word features miss context.</b> "Not good" and "good" share the word "good". A flat bag-of-words model scores them alike. Only a model that sees word <em>combinations</em> can tell them apart.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Hand-built word flags are slow and brittle. The modern fix is to feed the network learned vectors, called embeddings.</p>
+ </div>
+</section>
+
+<section id="embeddings">
+ <div class="wrap">
+  <div class="kicker">10 &middot; Words as vectors</div>
+  <h2>Embeddings &amp; Pooling</h2>
+  <p class="lead">Instead of hand-built flags, feed the network <strong>embeddings</strong>: dense vectors that stand for words and are learned from data. Each word becomes a short list of numbers that captures its meaning. Similar words get similar vectors.</p>
+
+  <div class="note"><b>Analogy first.</b> An embedding is a word's address in a "meaning map". Words with similar meanings live in the same neighbourhood. "cat" and "dog" are next-door. "car" is across town. Distance on the map means difference in meaning.</div>
+
+  <h3>The fixed-size problem</h3>
+  <p>Texts vary in length, but a feedforward network wants a fixed-size input. The slides give two fixes.</p>
+  <ul class="muted">
+    <li><strong>Pad or truncate.</strong> Pick a fixed length. Cut longer texts; pad shorter ones with a blank token.</li>
+    <li><strong>Pool into one vector.</strong> Combine all the word vectors into one <strong>sentence embedding</strong>. Take the element-wise mean (average each dimension) or the element-wise max.</li>
+  </ul>
+
+  <div class="card">
+    <h4>Worked example &mdash; pool three word vectors</h4>
+    <p class="muted" style="font-size:14px">Vectors \(\mathbf{e}_1=[2,0]\), \(\mathbf{e}_2=[0,4]\), \(\mathbf{e}_3=[1,2]\). Press Next to compute the mean and the max, dimension by dimension.</p>
+    <div class="chips"><button class="btn" id="emStep">&#9654; Next step</button><button class="btn" id="emReset">&#8634; Reset</button></div>
+    <div class="readout" id="emOut" style="min-height:140px"></div>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; The meaning map, and pooling</h4>
+    <p class="muted" style="font-size:14px">Pick words for a short text. Their vectors appear as arrows. Press <strong>pool</strong> to draw the mean vector (one fixed-size point) for any length of text. Look for this: a 2-word text and a 4-word text both collapse to a single 2-D point.</p>
+    <div class="chips" id="emWords"></div>
+    <div class="chips">
+      <button class="btn" id="emPoolBtn">&#9654; pool (mean)</button>
+      <button class="btn" id="emClear">&#8634; clear</button>
+    </div>
+    <canvas id="emCanvas" width="440" height="340" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="emLive"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Embeddings power nearly all modern NLP. Word vectors (word2vec, GloVe) were the first wave. Mean-pooling is a strong, cheap baseline for classification. Today's models pool with attention instead, but the goal is the same: turn variable text into fixed numbers.</p>
+
+  <div class="key"><b>Pitfall &mdash; mean-pooling forgets order.</b> "Dog bites man" and "man bites dog" pool to the same vector. For tasks where order matters, plain averaging is too crude. That limit is one reason recurrent nets and transformers exist.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Embeddings are the bridge to language modeling. Next: the model that predicts the next word, the seed of every LLM.</p>
+ </div>
+</section>
+
+<section id="lm">
+ <div class="wrap">
+  <div class="kicker">11 &middot; Predicting the next word</div>
+  <h2>What a Language Model Is</h2>
+  <p class="lead">A language model predicts the next word, given the words so far. It outputs a probability for every word in the vocabulary. A <strong>neural</strong> language model does this with a network. This is the direct ancestor of today's large language models.</p>
+
+  <div class="note"><b>Analogy first.</b> A language model is a very good autocomplete. You type "I made sure the cat gets ___" and it ranks every possible next word. "fed" scores high; "purple" scores low. The whole job is that ranking, turned into a probability for each word.</div>
+
+  <h3>The chain rule and the Markov shortcut</h3>
+  <p>The probability of a whole sentence factors by the <strong>chain rule</strong>: each word given the words before it.</p>
+  <div class="eqbox">$$ P(w_1, \dots, w_n) = \prod_{i=1}^{n} P(w_i \mid w_1, \dots, w_{i-1}) $$</div>
+  <p>Conditioning on <em>all</em> prior words is too much. So we make the <strong>Markov assumption</strong>: only the last few words matter. We can back off from a long history down to none:</p>
+  <div class="eqbox">$$ P(w_i \mid w_{i-4}, \dots, w_{i-1}) \;\rightarrow\; P(w_i \mid w_{i-1}) \;\rightarrow\; P(w_i) $$</div>
+  <p>A sentence can be any length. So we use a fixed-length <strong>sliding window</strong>. We look at a fixed number of prior words, then slide forward by one.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Slide the window over a sentence</h4>
+    <p class="muted" style="font-size:14px">Set the window size. Press <strong>slide</strong> to move it one word at a time. The highlighted words are the context; the next word is what the model predicts. Look for this: the window is fixed-size, but the sentence can be any length.</p>
+    <div class="chips">
+      <button class="btn" id="lmSlide">&#9654; slide &rarr;</button>
+      <button class="btn" id="lmReset">&#8634; reset</button>
+    </div>
+    <div id="lmSliders"></div>
+    <canvas id="lmCanvas" width="700" height="120" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="lmLive"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Every chat model, phone keyboard, and code assistant is, at heart, a next-word (next-token) predictor. The sliding window here is the simple version. Transformers replace it with attention over a long context, but the core job is the same.</p>
+
+  <div class="key"><b>Pitfall &mdash; a fixed window is short-sighted.</b> A 3-word window cannot use a clue from ten words back. That hard limit on context is exactly what recurrent nets and transformers were built to fix.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> How does a word actually enter the network as numbers? Through a one-hot vector and an embedding lookup.</p>
+ </div>
+</section>
+
+<section id="onehot">
+ <div class="wrap">
+  <div class="kicker">12 &middot; Words become numbers</div>
+  <h2>One-hot Vectors &amp; the Embedding Matrix</h2>
+  <p class="lead">A word first enters the network as a one-hot vector: a long list with a single 1. That carries no meaning. So an embedding matrix maps it to a short, dense, meaningful vector. The matrix is just a lookup table.</p>
+
+  <div class="note"><b>Analogy first.</b> A one-hot vector is like a seat number in a huge stadium: row 5, and zero everywhere else. It tells you <em>which</em> word, but nothing about it. The embedding matrix is the program that says what the person in that seat is actually like.</div>
+
+  <h3>One-hot, then lookup</h3>
+  <p>A <strong>one-hot vector</strong> is as long as the vocabulary \(|V|\), with a 1 at the word's index and 0 elsewhere. If "toothpaste" is word number 5, then \(x_5 = 1\) and all other entries are 0.</p>
+  <p>An <strong>embedding matrix</strong> \(E\) maps that one-hot to a dense vector. Multiplying \(E\) by a one-hot just selects one column of \(E\): the word's embedding. So \(E\) is a lookup table, one dense vector per word.</p>
+  <div class="eqbox">$$ \mathbf{e} \;=\; E \, \mathbf{x}_{\text{one-hot}} \;=\; \text{the column of } E \text{ for that word} $$</div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Pick a word, watch the lookup</h4>
+    <p class="muted" style="font-size:14px">Click a word. Its one-hot vector lights up (a single 1). The matching column of the embedding matrix \(E\) highlights, and its dense vector drops into the output. Look for this: the one-hot just <strong>selects</strong> a column; no real multiplication is needed.</p>
+    <div class="chips" id="ohWords"></div>
+    <canvas id="ohCanvas" width="700" height="300" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="ohLive"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Every NLP model starts here. Token IDs index into an embedding table. That table is one of the largest and most important learned parts of a language model. Looking up a row is the model's very first step on any input.</p>
+
+  <div class="key"><b>Pitfall &mdash; one-hot is huge and meaningless.</b> A one-hot has length \(|V|\), often tens of thousands. And "cat" and "dog" are as far apart as "cat" and "Tuesday". The embedding step is what adds meaning and shrinks the size.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Those dense embeddings are exactly why neural LMs beat old n-gram models. Let us see the generalization happen.</p>
+ </div>
+</section>
+
+<section id="whynlm">
+ <div class="wrap">
+  <div class="kicker">13 &middot; The big win</div>
+  <h2>Why Neural LMs Beat N-gram LMs</h2>
+  <p class="lead">An n-gram model only knows word <em>identities</em>. To it, "cat" and "dog" are two unrelated symbols. A neural LM knows word <em>meanings</em> through embeddings. So knowledge about "cat" transfers to "dog". That sharing is called generalization.</p>
+
+  <div class="note"><b>Analogy first.</b> An n-gram model is someone who memorized exact phrases. If they never heard "dog gets fed", they are stuck. A neural LM is someone who understands that dogs and cats are both pets. They guess "fed" for the dog because they saw it for the cat.</div>
+
+  <h3>The slide's example</h3>
+  <p>Say the training text has "I have to make sure that the cat gets fed". But it never has "dog" in that spot. Now test on "... make sure that the dog gets ___". An n-gram model has never seen "dog gets", so it cannot predict "fed". A neural LM sees that "dog" sits near "cat" in embedding space, and reuses the pattern to predict "fed".</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Drag "dog" toward "cat", watch "fed" appear</h4>
+    <p class="muted" style="font-size:14px">The model was trained on "cat gets fed". Drag the "dog" point around the meaning map. The bar shows the model's probability for "fed" after "dog gets". Look for this: as "dog" nears "cat", the chance of "fed" climbs. An n-gram model's bar stays flat at zero.</p>
+    <div class="grid2" style="align-items:start">
+      <div><canvas id="wnCanvas" width="380" height="340" style="width:100%;height:auto"></canvas></div>
+      <div><div class="readout" id="wnLive"></div></div>
+    </div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Generalization over similar words is the core advantage of neural language models. It is why they need less exact repetition than n-gram models. The same idea, scaled up, lets large models answer questions they never saw word-for-word in training.</p>
+
+  <div class="key"><b>Pitfall &mdash; generalization needs good embeddings.</b> If "dog" and "cat" had unrelated vectors, the transfer would fail. The quality of the embeddings decides how well the model shares knowledge across words.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Now let us run the full neural LM forward, from three words to a next-word distribution.</p>
+ </div>
+</section>
+
+<section id="forward">
+ <div class="wrap">
+  <div class="kicker">14 &middot; The full prediction</div>
+  <h2>The Neural LM Forward Pass</h2>
+  <p class="lead">Here is the whole prediction, step by step. Take the context words. Look up each embedding. Join them into one vector. Run a hidden layer, then scores, then softmax. The output is a probability for every word in the vocabulary.</p>
+
+  <div class="note"><b>Analogy first.</b> It is an assembly line for a guess. Three words go in. Each gets translated to its meaning vector. The vectors are stapled together. A mixing step blends them. A final step scores every possible next word and turns the scores into chances.</div>
+
+  <h3>The math, named symbol by symbol</h3>
+  <div class="eqbox">$$ \mathbf{e} = [\,\mathbf{e}_{w_{t-3}};\ \mathbf{e}_{w_{t-2}};\ \mathbf{e}_{w_{t-1}}\,] $$</div>
+  <div class="eqbox">$$ \mathbf{h} = g(W\mathbf{e} + \mathbf{b}),\qquad \mathbf{z} = U\mathbf{h},\qquad \mathbf{y} = \mathrm{softmax}(\mathbf{z}) $$</div>
+  <p>Name each piece. \(\mathbf{e}\) is the joined context embedding (this joining is called <strong>concatenation</strong>). \(W\) is the hidden weight matrix and \(\mathbf{b}\) its bias. \(g\) is the hidden switch, like ReLU. \(\mathbf{h}\) is the hidden vector. \(U\) is the output weight matrix, one row per vocabulary word. \(\mathbf{z}\) is the score vector, of length \(|V|\). And \(\mathbf{y}\) is the softmax output: a probability for every word.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Run the forward pass</h4>
+    <p class="muted" style="font-size:14px">Press <strong>next stage</strong> to push the three context words through the pipeline. Each stage lights as it computes: one-hot, embeddings, join, hidden, scores, softmax. The bars at the end are the predicted next-word probabilities. Look for this: the whole model is just lookups, a mix, and a softmax.</p>
+    <div class="chips">
+      <button class="btn" id="fwStep">&#9654; next stage</button>
+      <button class="btn" id="fwReset">&#8634; reset</button>
+    </div>
+    <canvas id="fwCanvas" width="700" height="300" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="fwLive"></div>
+  </div>
+
+  <h3>Training the embeddings: freeze or learn</h3>
+  <p>Where does \(E\) come from? Two choices. <strong>Freeze</strong>: start \(E\) from a method like word2vec and keep it fixed; train only \(W, U, \mathbf{b}\). <strong>Learn jointly</strong>: let \(E\) update with the network, useful when the task needs special representations.</p>
+
+  <h4>Where this shows up in ML</h4>
+  <p>This feedforward next-word predictor is the seed Bengio planted in 2003. Swap its fixed window for attention and you get the transformer, the engine of GPT and every modern LLM. The forward pass above is the core idea, scaled up.</p>
+
+  <div class="key"><b>Pitfall &mdash; the output layer is large.</b> The matrix \(U\) has one row per vocabulary word, so the final softmax is over \(|V|\) classes. For big vocabularies this is the most expensive step, and there are tricks to speed it up.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Neural LMs are powerful, but not free. Let us weigh them against the cheaper n-gram model.</p>
+ </div>
+</section>
+
+<section id="ngram">
+ <div class="wrap">
+  <div class="kicker">15 &middot; The trade-off</div>
+  <h2>N-gram vs Neural LM</h2>
+  <p class="lead">Neither model wins everywhere. The neural LM is more accurate and generalizes better. The n-gram model is faster, cheaper, and easier to inspect. For a small task, the simple tool can still be the right one.</p>
+
+  <div class="note"><b>Analogy first.</b> An n-gram model is a bicycle: cheap, simple, easy to fix. A neural LM is a car: faster and goes further, but it costs more fuel and is harder to repair. For a trip to the corner shop, the bicycle wins.</div>
+
+  <h3>Side by side</h3>
+  <div class="tablewrap">
+  <table class="tt">
+    <tr><th>Property</th><th>N-gram LM</th><th>Neural LM</th></tr>
+    <tr><td>History length</td><td>short</td><td class="one">longer</td></tr>
+    <tr><td>Similar words</td><td>unrelated</td><td class="one">shared</td></tr>
+    <tr><td>Accuracy</td><td>lower</td><td class="one">higher</td></tr>
+    <tr><td>Speed / cost</td><td class="one">fast, cheap</td><td>slower, heavier</td></tr>
+    <tr><td>Interpretable</td><td class="one">easy</td><td>harder</td></tr>
+    <tr><td>Best for</td><td>small tasks</td><td>large tasks</td></tr>
+  </table>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Slide the one axis: how much context</h4>
+    <p class="muted" style="font-size:14px">This is the through-line of the whole lecture: how much context a method uses. Drag the slider from "tiny task, little data" to "huge task, lots of data". Watch which model the trade-off favours, and why. Look for this: the right tool depends on the task, not on which is fancier.</p>
+    <div id="ngSliders"></div>
+    <canvas id="ngCanvas" width="700" height="220" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="ngLive"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>This "match the model to the task" judgement is everyday ML engineering. A tiny autocomplete on a watch may use an n-gram model. A cloud assistant uses a giant neural one. Cost, latency, and data all push the choice.</p>
+
+  <div class="key"><b>Pitfall &mdash; bigger is not always better.</b> A neural LM on a tiny dataset can overfit and cost more than it is worth. When data and the task are small, the cheaper n-gram model often wins on both speed and reliability.</div>
+
+  <div class="recall">
+    <strong>Check yourself.</strong> Give one task where an n-gram model is the better choice, and say why.
+    <button class="btn" data-reveal style="margin-left:8px">Reveal</button>
+    <div class="ans">A phone keyboard's offline autocomplete. It must be tiny, fast, and run with little memory and power. The accuracy gap matters less than speed and size, so the cheap n-gram model fits.</div>
+  </div>
+
+  <p class="muted"><b>Bridge &rarr;</b> We have built and used networks. But how do they <em>learn</em> their weights? Meet the loss and gradient descent.</p>
+ </div>
+</section>
+
+<section id="training">
+ <div class="wrap">
+  <div class="kicker">16 &middot; How the network learns</div>
+  <h2>Training the Network</h2>
+  <p class="lead">A network starts with random weights and predicts badly. Training fixes that. We measure the error with a <strong>loss</strong>, then nudge every weight to make the loss smaller. We repeat many times. Full backpropagation is the next lecture.</p>
+
+  <div class="note"><b>Analogy first.</b> Training is downhill walking in fog. The loss is a landscape: high where the model is wrong, low where it is right. You feel the slope under your boots. You step the opposite way, downhill, by a small amount. Repeat until you reach a low valley.</div>
+
+  <h3>The cross-entropy loss</h3>
+  <p>For a yes/no model we use the <strong>cross-entropy loss</strong>. Let \(y\) be the true label (0 or 1) and \(\hat{y}\) the predicted probability of class 1:</p>
+  <div class="eqbox">$$ L_{\mathrm{CE}} = -\big[\, y \log \hat{y} + (1-y)\log(1-\hat{y}) \,\big] $$</div>
+  <p>Read it as surprise. If the true label is 1, the loss is \(-\log \hat{y}\). A confident-and-right guess gives near-zero loss. A confident-and-wrong guess blows the loss up. So it punishes confident mistakes hard.</p>
+
+  <h3>One downhill step</h3>
+  <p>To shrink the loss, we adjust each weight against its slope:</p>
+  <div class="eqbox">$$ w \;\leftarrow\; w - \eta\,\frac{\partial L}{\partial w} $$</div>
+  <p>Here \(\eta\) (the Greek letter eta) is the <strong>learning rate</strong>: how big a step we take. The term \(\partial L/\partial w\) is the slope. The minus sign turns "uphill slope" into a "downhill step". To find the slope we use the <strong>chain rule</strong>, multiplying small slopes. Running it backward through a network is <strong>backpropagation</strong>, the next lecture.</p>
+
+  <div class="card">
+    <h4>Worked example &mdash; the logistic gradient, then one step</h4>
+    <p class="muted" style="font-size:14px">For one sigmoid unit the gradient simplifies to \((\hat{y}-y)\,x_j\). Press Next to derive it, then take one step with \(\hat{y}=0.7\), \(y=1\), \(x_j=2\), \(\eta=0.1\).</p>
+    <div class="chips"><button class="btn" id="trStep">&#9654; Next step</button><button class="btn" id="trReset">&#8634; Reset</button></div>
+    <div class="readout" id="trOut" style="min-height:170px"></div>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Roll the ball, then crank \(\eta\)</h4>
+    <p class="muted" style="font-size:14px">The cyan ball sits on a bowl-shaped loss. Press <strong>step</strong> to apply one update; the yellow trail shows its path. Slide the learning rate \(\eta\). Look for this: small \(\eta\) crawls, a good \(\eta\) glides to the bottom, large \(\eta\) overshoots, and above \(\eta=2\) it diverges and flies off.</p>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <div id="trSliders"></div>
+        <div class="chips" style="margin-top:8px">
+          <button class="btn" id="gdStep">step &#9656;</button>
+          <button class="btn" id="gdRun">run &times;20</button>
+          <button class="btn" id="gdReset">&#8634; reset</button>
+        </div>
+        <div class="readout" id="gdLive"></div>
+      </div>
+      <div><canvas id="gdCanvas" width="440" height="340" style="width:100%;height:auto"></canvas></div>
+    </div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>This loop, loss then gradient then step, is how every neural network is trained, from a tiny classifier to GPT. Real models have millions of weights, and backpropagation computes the slope for all of them at once. But each weight takes the exact step above.</p>
+
+  <div class="key"><b>Pitfall &mdash; the learning rate is delicate.</b> Too small and training crawls for ages. Too large and the steps overshoot the valley, bouncing or even diverging to infinity. Picking \(\eta\) well is one of the key practical skills in deep learning.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Scale this training up to billions of weights and a huge text corpus, and you get a large language model. Let us meet them, and how to talk to them.</p>
+ </div>
+</section>
+
+<section id="llm">
+ <div class="wrap">
+  <div class="kicker">17 &middot; Scaling up</div>
+  <h2>LLMs &amp; Prompting</h2>
+  <p class="lead">A large language model (LLM) is just a very large neural language model. It is usually a transformer, trained on a huge amount of text, to predict the next token. At billions of parameters, one model can write, summarize, translate, and answer questions.</p>
+
+  <div class="note"><b>Analogy first.</b> An LLM is the next-word predictor from earlier, grown enormous. Same core job: given the text so far, guess what comes next. With vast data and size, that single skill turns into something that looks like broad language ability.</div>
+
+  <h3>Prompts, completions, and prompt engineering</h3>
+  <p>You talk to an LLM with a <strong>prompt</strong>: the text you give it. It replies with a <strong>completion</strong>: the text it generates. <strong>Prompt engineering</strong> is the craft of writing prompts that get good completions. Small wording changes can change the output a lot.</p>
+
+  <h3>In-context learning: zero-shot and few-shot</h3>
+  <p>LLMs can learn a task from the prompt alone, with no weight changes. This is <strong>in-context learning</strong>. <strong>Zero-shot</strong>: you describe the task and give no examples. <strong>Few-shot</strong>: you include a few worked examples in the prompt, and the model copies the pattern.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Zero-shot vs few-shot, side by side</h4>
+    <p class="muted" style="font-size:14px">Same sentiment task, two prompt styles. Toggle between them and read the exact prompt the model sees. Look for this: few-shot adds worked examples before your input, which steers both the answer and its <strong>format</strong>. Use the copy button to grab a prompt.</p>
+    <div class="chips">
+      <button class="btn active" id="psZero">zero-shot</button>
+      <button class="btn" id="psFew">few-shot (2 examples)</button>
+    </div>
+    <pre class="prompt" id="psPrompt"><button class="copybtn" id="psCopy">copy</button></pre>
+    <div class="readout" id="psLive"></div>
+  </div>
+
+  <h3>Generative AI, assistants, and tools</h3>
+  <p><strong>Generative AI</strong> means models that create new content: text, images, audio, or code. LLMs are the text branch. Common shapes from the slides:</p>
+  <ul class="muted">
+    <li><strong>AI assistants</strong>: notification (alerts you), FAQ (answers common questions), contextual (uses your situation), personalized (adapts to you), autonomous (acts on its own).</li>
+    <li><strong>Generative tools</strong>: image generation (text to picture) and code generation (text to working code).</li>
+  </ul>
+
+  <h4>Where this shows up in ML</h4>
+  <p>An LLM is the scaled-up cousin of the neural LM you built by hand. Prompt engineering is now a core skill. Zero-shot and few-shot prompting let one frozen model do new tasks with no retraining, which is a large practical win.</p>
+
+  <div class="key"><b>Pitfall &mdash; fluent is not the same as correct.</b> LLMs predict plausible text, not verified truth. They can state wrong facts with full confidence; this is called <em>hallucination</em>. Always check important outputs.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> Training a big model needs huge data. When your task has little, you reuse a pre-trained one. That is transfer learning.</p>
+ </div>
+</section>
+
+<section id="transfer">
+ <div class="wrap">
+  <div class="kicker">18 &middot; Reuse what was learned</div>
+  <h2>Transfer Learning</h2>
+  <p class="lead">Deep learning is hungry for labelled data, often more than 50,000 examples. And labelled target data is often scarce. Transfer learning solves this. You reuse a model trained on a big task and adapt it to your smaller one.</p>
+
+  <div class="note"><b>Analogy first.</b> If you can already drive a car, learning to drive a truck is fast. You keep most of the skill (steering, road sense) and adjust only a few things (size, mirrors). You do not relearn driving from zero. That reuse is transfer learning.</div>
+
+  <h3>The recipe, and two kinds</h3>
+  <p>Take a pre-trained model. <strong>Freeze</strong> its learned weights (hold them fixed). Add new layers for your task. Train only the new layers on your small target data. The slides name two kinds.</p>
+  <ul class="muted">
+    <li><strong>Transductive transfer</strong>: no labelled target data. You adapt a model across domains. This is <em>domain adaptation</em>.</li>
+    <li><strong>Inductive transfer</strong>: you do have labelled target data. This covers multi-task learning and pretraining, like learning word embeddings first.</li>
+  </ul>
+  <p><strong>Fine-tuning</strong> goes further: you let the pre-trained layers update too, not just the new ones. This works best when your new dataset is large and similar to the original. With little data, freezing is safer.</p>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; Freeze or fine-tune? Cars to trucks</h4>
+    <p class="muted" style="font-size:14px">A model is pre-trained on cars. Choose how much target (truck) data you have, and whether to freeze or fine-tune. The layers light up: blue = frozen (reused), green = trained. Look for this: with little data, fine-tuning everything overfits; freezing wins.</p>
+    <div class="chips">
+      <button class="btn active" id="tfFreeze">freeze + new head</button>
+      <button class="btn" id="tfFine">fine-tune all</button>
+    </div>
+    <div id="tfSliders"></div>
+    <canvas id="tfCanvas" width="700" height="220" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="tfLive"></div>
+  </div>
+
+  <h4>Where this shows up in ML</h4>
+  <p>Transfer learning is everywhere: image and speech recognition, named-entity recognition, sentiment, cross-lingual tasks, even game-playing. Modern NLP runs on it. You take a pre-trained language model and fine-tune it, instead of training from scratch.</p>
+
+  <div class="key"><b>Pitfall &mdash; match the domains.</b> Transfer helps only when source and target are related. A model trained on photos will not transfer well to medical scans without care. And fine-tuning all layers on tiny data overfits fast.</div>
+
+  <p class="muted"><b>Bridge &rarr;</b> That is the full climb. Let us pull every idea together into one picture.</p>
+ </div>
+</section>
+
+<section id="summary">
+ <div class="wrap">
+  <div class="kicker">19 &middot; Tying it together</div>
+  <h2>Synthesis &amp; Recap</h2>
+  <p class="lead">One climb, from a single unit to the models behind modern AI. Each idea leaned on the one before it. If these click, a great deal of the rest of deep learning has a home to land in.</p>
+
+  <div class="grid3">
+    <div class="card"><h4>1 &middot; The unit</h4><p class="muted" style="font-size:14px">Weighted sum, a bias, a switch: \(y=\sigma(\mathbf{w}\cdot\mathbf{x}+b)\). The atom of every network.</p></div>
+    <div class="card"><h4>2 &middot; The XOR lesson</h4><p class="muted" style="font-size:14px">One line is too weak. A hidden layer builds new features, so depth makes hard tasks solvable.</p></div>
+    <div class="card"><h4>3 &middot; Softmax</h4><p class="muted" style="font-size:14px">Turns scores into probabilities that add to 1. The final step for many-class output.</p></div>
+    <div class="card"><h4>4 &middot; Embeddings</h4><p class="muted" style="font-size:14px">Words as dense vectors. Similar words sit close, so models generalize across them.</p></div>
+    <div class="card"><h4>5 &middot; Neural LM</h4><p class="muted" style="font-size:14px">Look up, join, mix, softmax to a next-word distribution. The seed of every LLM.</p></div>
+    <div class="card"><h4>6 &middot; Training &amp; transfer</h4><p class="muted" style="font-size:14px">Gradient descent shrinks the loss. Transfer learning reuses a pre-trained model.</p></div>
+  </div>
+
+  <div class="lab">
+    <h4 style="margin-top:4px">&#9889; The grand tour: one slider, the whole arc</h4>
+    <p class="muted" style="font-size:14px">Drag the slider through the lecture's stages, from one unit to a large language model. Each stop lights the matching idea and prints its one-line summary. Look for this: every stage is built from the stage before it.</p>
+    <div id="sySliders"></div>
+    <canvas id="syCanvas" width="760" height="200" style="width:100%;height:auto"></canvas>
+    <div class="readout" id="syLive"></div>
+  </div>
+
+  <div class="note" style="margin-top:22px"><b>The thread.</b> A network is units (idea 1) in layers that build features (idea 2). It ends in a softmax (idea 3). For language, it reads embeddings (idea 4) and predicts the next word (idea 5). It learns by gradient descent, and reuses big models by transfer (idea 6). Scale that up, and you get the LLMs you use every day.</div>
+  <div class="chips" style="margin-top:18px">
+    <span class="tag">analogy before algebra</span>
+    <span class="tag">every symbol named</span>
+    <span class="tag">every slide example worked</span>
+    <span class="tag">bespoke canvas labs</span>
+    <span class="tag">self-contained &middot; file safe</span>
+  </div>
+ </div>
+</section>
+
+<div class="foot">
+  NLP Session 5 &middot; Neural Networks &amp; Neural Language Models (Dr. Chetana Gavankar), based on Jurafsky &amp; Martin SLP3 ch.7.
+  Interactive companion. Math rendered with MathJax. Every visual is hand-drawn on a canvas; this page opens straight from a file.
+</div>
+</main>
+</div>
+
+<script>
+/* ====================== shared utilities ====================== */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=(x,d=3)=>{ if(!isFinite(x))return '∞'; if(Math.abs(x)<1e-9)x=0; return x.toFixed(d); };
+const sigmoid=z=>1/(1+Math.exp(-z));
+const relu=z=>Math.max(0,z);
+const tanhf=z=>Math.tanh(z);
+const dsig=z=>{const s=sigmoid(z);return s*(1-s);};
+
+/* slider factory: builds a .ctrl row, wires onInput, returns a getter */
+function makeSlider(host,opt,onInput){
+  const row=document.createElement('div');row.className='ctrl';
+  const lab=document.createElement('label');lab.innerHTML=opt.label;
+  const inp=document.createElement('input');
+  inp.type='range';inp.id=opt.id;
+  inp.min=opt.min;inp.max=opt.max;inp.step=opt.step;inp.value=opt.value;
+  const val=document.createElement('span');val.className='val';
+  const dec=(opt.step+'').includes('.')?(opt.step+'').split('.')[1].length:0;
+  const show=()=>{val.textContent=parseFloat(inp.value).toFixed(dec);};
+  inp.addEventListener('input',()=>{show();if(onInput)onInput(parseFloat(inp.value));});
+  row.appendChild(lab);row.appendChild(inp);row.appendChild(val);host.appendChild(row);
+  show();
+  return ()=>parseFloat(inp.value);
+}
+
+/* DPR-aware canvas: sizes the backing store, redraws on resize */
+function setupCanvas(canvas,drawFn){
+  const ctx=canvas.getContext('2d');
+  function resize(){
+    const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+    const rect=canvas.getBoundingClientRect();
+    const cssW=rect.width||canvas.width;
+    const cssH=cssW*(canvas.height/canvas.width);
+    canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*dpr);
+    canvas.height=Math.round(cssH*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawFn(ctx,cssW,cssH);
+  }
+  let raf=null;
+  window.addEventListener('resize',()=>{if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(resize);});
+  resize();
+  return {redraw:()=>{const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+    drawFn(ctx,canvas.width/dpr,canvas.height/dpr);}};
+}
+
+/* node + edge primitives reused by several network canvases */
+function drawEdge(ctx,a,b,wt,scale){
+  scale=scale||3;
+  const pos=wt>=0, m=Math.min(1,Math.abs(wt)/scale);
+  ctx.strokeStyle=pos?'rgba(56,240,216,'+(0.22+0.6*m)+')':'rgba(255,110,129,'+(0.22+0.6*m)+')';
+  ctx.lineWidth=1+3*m;
+  ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+}
+function drawNode(ctx,p,col,txt,on,r){
+  r=r||20;
+  ctx.beginPath();ctx.arc(p.x,p.y,r,0,7);
+  ctx.fillStyle=on?col:'#0e1729';ctx.fill();
+  if(on){ctx.shadowColor=col;ctx.shadowBlur=14;ctx.fill();ctx.shadowBlur=0;}
+  ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.stroke();
+  ctx.fillStyle=on?'#06101f':'#fff';ctx.font='bold 12px monospace';ctx.textAlign='center';
+  ctx.fillText(txt,p.x,p.y+4);ctx.textAlign='left';
+}
+
+/* registry: each demo registers, runDemos() fires them all */
+window.__demos=[];
+function runDemos(){ window.__demos.forEach(f=>{try{f();}catch(e){console.error(e);}}); }
+
+/* a small step-stepper helper used by every worked-example card */
+function makeStepper(stepBtnId,resetBtnId,outId,steps){
+  const out=$(outId); if(!out)return;
+  let i=0;
+  function render(){let s='';for(let k=0;k<=i;k++)s+=(k?'\n\n':'')+steps[k];out.innerHTML=s;
+    if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([out]);}
+  render();
+  const sb=$(stepBtnId), rb=$(resetBtnId);
+  if(sb)sb.addEventListener('click',()=>{if(i<steps.length-1){i++;render();}});
+  if(rb)rb.addEventListener('click',()=>{i=0;render();});
+}
+
+/* ====================== chrome ====================== */
+const tocLinks=$$('#toc a');
+const sections=tocLinks.map(a=>$(a.getAttribute('href')));
+function onScroll(){
+  const st=window.scrollY, h=document.body.scrollHeight-window.innerHeight;
+  $('#progbar').style.width=(100*st/(h||1))+'%';
+  let idx=0;
+  sections.forEach((sec,i)=>{ if(sec && sec.offsetTop-130<=st) idx=i; });
+  tocLinks.forEach((a,i)=>a.classList.toggle('active',i===idx));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+
+function initTheme(){
+  const btn=$('#themeBtn'); if(!btn)return;
+  const sync=()=>{const light=document.documentElement.getAttribute('data-theme')==='light';btn.innerHTML=light?'🌙 Dark':'☀ Light';};
+  sync();
+  btn.addEventListener('click',()=>{
+    const root=document.documentElement, light=root.getAttribute('data-theme')==='light';
+    if(light){root.removeAttribute('data-theme');try{localStorage.setItem('lectheme5','dark');}catch(e){}}
+    else{root.setAttribute('data-theme','light');try{localStorage.setItem('lectheme5','light');}catch(e){}}
+    sync();
+  });
+}
+
+function initReveal(){
+  if(!('IntersectionObserver' in window))return;
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),
+    {threshold:0.04,rootMargin:'0px 0px -4% 0px'});
+  $$('section .wrap > *').forEach(el=>{
+    if(el.classList.contains('lab')||el.querySelector('canvas')) return;
+    el.classList.add('reveal'); io.observe(el);
+  });
+}
+
+/* reveal-answer recall cards */
+function initRecall(){
+  $$('[data-reveal]').forEach(b=>b.addEventListener('click',()=>{
+    const card=b.closest('.recall'); if(card){card.classList.toggle('open');
+      b.textContent=card.classList.contains('open')?'Hide':'Reveal';}
+  }));
+}
+
+/* copy buttons */
+function initCopy(){
+  $$('.copybtn').forEach(b=>b.addEventListener('click',()=>{
+    const pre=b.closest('pre'); if(!pre)return;
+    const txt=pre.innerText.replace(/^copy\s*/,'').trim();
+    if(navigator.clipboard)navigator.clipboard.writeText(txt);
+    const old=b.textContent;b.textContent='copied!';setTimeout(()=>b.textContent=old,1200);
+  }));
+}
+
+/* guided story mode */
+const STORY=[
+ {id:'intro',t:'Welcome',x:'We climb from one tiny unit all the way to large language models. Intuition first, then the exact math, then a lab. Use prev / next or the arrow keys; space pauses.'},
+ {id:'neuron',t:'The neural unit',x:'Everything starts here: a weighted sum, a bias, a squash. Drag the sliders and watch z and y form, term by term.'},
+ {id:'activations',t:'Activation functions',x:'The bend that gives power. Toggle sigmoid, tanh, and ReLU, then scrub x to read the value and the slope.'},
+ {id:'perceptron',t:'AND and OR',x:'A perceptron is one line. Flip the input switches and watch it build the AND and OR gates cleanly.'},
+ {id:'xor',t:'The XOR problem',x:'Now try to fence XOR with one line. You cap out at 3 of 4, every time. That is the puzzle that broke perceptrons.'},
+ {id:'xornet',t:'Solving XOR',x:'Add a hidden layer. Flip the inputs and watch h2 stay dark until both are on. That one unit is the whole trick.'},
+ {id:'ffn',t:'Feedforward networks',x:'Name the machine: units in layers. Push a value through and watch each layer light up in turn.'},
+ {id:'softmax',t:'Softmax',x:'Turn scores into probabilities. Drag a logit and watch its bar steal mass from the rest. The bars always sum to 1.'},
+ {id:'biastrick',t:'The bias trick',x:'Fold the bias into the weights as w0 on a dummy input of 1. Two forms, the exact same z.'},
+ {id:'sentiment',t:'Text classification',x:'Toggle words in a review. Only the hidden-layer model flips its verdict on the phrase "not good".'},
+ {id:'embeddings',t:'Embeddings and pooling',x:'Words as vectors on a meaning map. Pool any number of them into one fixed-size point.'},
+ {id:'lm',t:'What an LM is',x:'A very good autocomplete. Slide a fixed window over the sentence to pick the context for the next word.'},
+ {id:'onehot',t:'One-hot and E',x:'Click a word. Its one-hot selects a column of the embedding matrix. That column is its meaning vector.'},
+ {id:'whynlm',t:'Why neural LMs win',x:'Drag "dog" toward "cat" and watch the chance of "fed" climb. That sharing is generalization.'},
+ {id:'forward',t:'The forward pass',x:'Run the whole pipeline: look up, join, mix, score, softmax. The bars are the next-word probabilities.'},
+ {id:'ngram',t:'N-gram vs neural',x:'Slide the one axis the lecture is really about: how much context a method uses. The right tool depends on the task.'},
+ {id:'training',t:'Training',x:'Walk downhill on the loss. Crank the learning rate eta and watch the ball overshoot, then diverge above 2.'},
+ {id:'llm',t:'LLMs and prompting',x:'A giant neural LM. Toggle zero-shot and few-shot and read the exact prompt the model sees.'},
+ {id:'transfer',t:'Transfer learning',x:'Reuse a pre-trained model. Choose freeze or fine-tune and watch which layers are reused versus trained.'},
+ {id:'summary',t:'Synthesis',x:'One slider sweeps the whole arc, from one unit to a large language model. Each stage builds on the last. That wraps the tour!'}
+];
+let storyI=0,storyPlaying=false,storyTimer=null,storyActive=false;
+function storySec(){return $('#'+STORY[storyI].id);}
+function positionSpot(){
+  const sec=storySec(); if(!sec)return; const el=sec.querySelector('h1,h2')||sec;
+  const r=el.getBoundingClientRect(), sp=$('#storyspot');
+  sp.style.display='block';
+  sp.style.left=(r.left-12)+'px'; sp.style.top=(r.top-10)+'px';
+  sp.style.width=(r.width+24)+'px'; sp.style.height=(r.height+20)+'px';
+}
+function showStory(){
+  const s=STORY[storyI];
+  $('#storyStep').textContent='Step '+(storyI+1)+' / '+STORY.length;
+  $('#storyTitle').textContent=s.t; $('#storyText').innerHTML=s.x;
+  $$('#storyDots i').forEach((d,i)=>d.classList.toggle('on',i===storyI));
+  const sec=storySec();
+  if(sec){const y=sec.getBoundingClientRect().top+window.scrollY-86;window.scrollTo({top:y,behavior:'smooth'});}
+  setTimeout(positionSpot,520);
+}
+function resetTimer(){clearInterval(storyTimer);if(storyPlaying)storyTimer=setInterval(()=>{if(storyI===STORY.length-1){togglePlay();}else nextStory();},9000);}
+function nextStory(){storyI=(storyI+1)%STORY.length;showStory();resetTimer();}
+function prevStory(){storyI=(storyI-1+STORY.length)%STORY.length;showStory();resetTimer();}
+function togglePlay(){storyPlaying=!storyPlaying;$('#storyPlay').innerHTML=storyPlaying?'⏸ pause':'▶ play';resetTimer();}
+function spotFollow(){if(storyActive)positionSpot();}
+function startStory(){
+  storyActive=true;storyI=0;storyPlaying=true;
+  $('#storycard').style.display='block';$('#storyPlay').innerHTML='⏸ pause';
+  $('#storyDots').innerHTML=STORY.map((_,i)=>'<i data-i="'+i+'"></i>').join('');
+  $$('#storyDots i').forEach(d=>d.addEventListener('click',()=>{storyI=+d.dataset.i;showStory();resetTimer();}));
+  showStory();resetTimer();
+  window.addEventListener('scroll',spotFollow,{passive:true});
+  window.addEventListener('resize',positionSpot);
+}
+function endStory(){
+  storyActive=false;storyPlaying=false;clearInterval(storyTimer);
+  $('#storycard').style.display='none';$('#storyspot').style.display='none';
+  window.removeEventListener('scroll',spotFollow);window.removeEventListener('resize',positionSpot);
+}
+function initStory(){
+  if(!$('#tourBtn'))return;
+  $('#tourBtn').addEventListener('click',startStory);
+  $('#storyExit').addEventListener('click',endStory);
+  $('#storyNext').addEventListener('click',nextStory);
+  $('#storyPrev').addEventListener('click',prevStory);
+  $('#storyPlay').addEventListener('click',togglePlay);
+  document.addEventListener('keydown',e=>{if(!storyActive)return;
+    if(e.key==='Escape')endStory();else if(e.key==='ArrowRight')nextStory();
+    else if(e.key==='ArrowLeft')prevStory();else if(e.key===' '){e.preventDefault();togglePlay();}});
+}
+
+/* ============================================================
+   DEMOS
+   ============================================================ */
+
+/* hero: an animated little network that pulses */
+window.__demos.push(function(){
+  const c=$('#heroCanvas'); if(!c)return; const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;
+  const inX=70, h1X=W*0.4, h2X=W*0.62, outX=W-80;
+  const ins=[H*0.32,H*0.5,H*0.68], h1=[H*0.26,H*0.5,H*0.74], h2=[H*0.38,H*0.62], out=[H*0.5];
+  let t=0;
+  function frame(){
+    ctx.clearRect(0,0,W,H); t+=0.02;
+    function edges(A,ax,B,bx,col){A.forEach(ay=>B.forEach(by=>{
+      const a=0.10+0.10*(Math.sin(t*1.3+ay*0.03+by*0.02)*0.5+0.5);
+      ctx.strokeStyle=col.replace('A',a.toFixed(3));ctx.lineWidth=1.1;
+      ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();}));}
+    edges(ins,inX,h1,h1X,'rgba(56,240,216,A)');
+    edges(h1,h1X,h2,h2X,'rgba(155,140,255,A)');
+    edges(h2,h2X,out,outX,'rgba(255,110,199,A)');
+    function nodes(A,x,base){A.forEach((y,i)=>{const r=9+1.6*Math.sin(t*1.6+i+x*0.01);
+      ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=base;ctx.shadowColor=base;ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0;});}
+    nodes(ins,inX,'#19c4ff');nodes(h1,h1X,'#9b8cff');nodes(h2,h2X,'#9b8cff');nodes(out,outX,'#ff6ec7');
+    requestAnimationFrame(frame);
+  }
+  frame();
+});
+
+/* big-picture MAP: clickable lecture overview */
+window.__demos.push(function(){
+  const c=$('#mapCanvas'); if(!c)return;
+  const nodes=[
+    {id:'neuron',t:'unit',d:'01 The unit: weigh, add bias, squash.'},
+    {id:'activations',t:'switch',d:'02 Activations: the bend that gives power.'},
+    {id:'xor',t:'XOR',d:'04 The puzzle one unit cannot solve.'},
+    {id:'xornet',t:'layers',d:'05 Hidden layers fix XOR.'},
+    {id:'softmax',t:'softmax',d:'07 Scores into probabilities.'},
+    {id:'embeddings',t:'embed',d:'10 Words as dense vectors.'},
+    {id:'forward',t:'neural LM',d:'14 Predict the next word.'},
+    {id:'training',t:'train',d:'16 Gradient descent shrinks the loss.'},
+    {id:'llm',t:'LLM',d:'17 Scale up to large language models.'}
+  ];
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const n=nodes.length, pad=54, y0=H*0.36, amp=H*0.2;
+    nodes.forEach((nd,i)=>{nd.x=pad+(W-2*pad)*i/(n-1); nd.y=y0+amp*Math.sin(i*0.9);});
+    ctx.strokeStyle='rgba(56,240,216,.35)';ctx.lineWidth=2;ctx.beginPath();
+    nodes.forEach((nd,i)=>{i?ctx.lineTo(nd.x,nd.y):ctx.moveTo(nd.x,nd.y);});ctx.stroke();
+    nodes.forEach((nd,i)=>{
+      const col=i<2?'#19c4ff':i<4?'#9b8cff':i<7?'#62e88a':'#ff6ec7';
+      ctx.beginPath();ctx.arc(nd.x,nd.y,18,0,7);ctx.fillStyle='#0e1729';ctx.fill();
+      ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.stroke();
+      ctx.fillStyle='#cfe6ff';ctx.font='11px monospace';ctx.textAlign='center';
+      ctx.fillText(nd.t,nd.x,nd.y+34);ctx.textAlign='left';
+    });
+  });
+  function pick(e){
+    const r=c.getBoundingClientRect();
+    const x=(e.clientX-r.left)*(c.width/r.width)/(Math.max(1,Math.min(2,window.devicePixelRatio||1)));
+    const y=(e.clientY-r.top)*(c.height/r.height)/(Math.max(1,Math.min(2,window.devicePixelRatio||1)));
+    let best=null,bd=1e9;
+    nodes.forEach(nd=>{const d=Math.hypot(nd.x-x,nd.y-y);if(d<bd){bd=d;best=nd;}});
+    return bd<28?best:null;
+  }
+  c.addEventListener('mousemove',e=>{const nd=pick(e);c.style.cursor=nd?'pointer':'default';
+    if(nd)$('#mapOut').innerHTML='<span class="hl">'+nd.d+'</span>\nclick to jump there.';});
+  c.addEventListener('click',e=>{const nd=pick(e);if(nd)location.hash='#'+nd.id;});
+});
+
+/* 01 NEURON: worked-example stepper */
+window.__demos.push(function(){
+  const w=[0.2,0.3,0.9], x=[0.5,0.6,0.1], b=0.5;
+  const t=w.map((wi,i)=>wi*x[i]);
+  const dot=t.reduce((a,v)=>a+v,0), z=dot+b, y=sigmoid(z);
+  makeStepper('#nuStep','#nuReset','#nuOut',[
+    'Step 0 — given:\n  w = [0.2, 0.3, 0.9]\n  x = [0.5, 0.6, 0.1]\n  b = 0.5',
+    'Step 1 — multiply each input by its weight:\n  0.2·0.5 = <span class="hl">0.10</span>\n  0.3·0.6 = <span class="hl">0.18</span>\n  0.9·0.1 = <span class="hl">0.09</span>',
+    'Step 2 — add the products (the dot product w·x):\n  0.10 + 0.18 + 0.09 = <span class="g">'+fmt(dot,2)+'</span>',
+    'Step 3 — add the bias b:\n  z = w·x + b = '+fmt(dot,2)+' + 0.5 = <span class="g">'+fmt(z,2)+'</span>',
+    'Step 4 — apply the sigmoid:\n  e^(−0.87) ≈ 0.4190\n  y = 1 / (1 + 0.4190) = <span class="g">'+fmt(y,4)+'</span>',
+    'Step 5 — sense-check:\n  y is between 0 and 1, and above 0.5.\n  So this unit leans "yes", fairly confidently. ✓'
+  ]);
+});
+
+/* 01 NEURON: interactive weights -> z and y, edges thicken with weight */
+window.__demos.push(function(){
+  const c=$('#nuCanvas'); if(!c)return;
+  const host=$('#nuSliders'); host.innerHTML='';
+  const x=[0.5,0.6,0.1];
+  const g1=makeSlider(host,{id:'nw1',label:'w₁',min:'-1.5',max:'1.5',step:'0.05',value:'0.2'},()=>render());
+  const g2=makeSlider(host,{id:'nw2',label:'w₂',min:'-1.5',max:'1.5',step:'0.05',value:'0.3'},()=>render());
+  const g3=makeSlider(host,{id:'nw3',label:'w₃',min:'-1.5',max:'1.5',step:'0.05',value:'0.9'},()=>render());
+  const gb=makeSlider(host,{id:'nbb',label:'bias b',min:'-1.5',max:'1.5',step:'0.05',value:'0.5'},()=>render());
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const w=[g1(),g2(),g3()], b=gb();
+    const z=w[0]*x[0]+w[1]*x[1]+w[2]*x[2]+b, y=sigmoid(z);
+    ctx.clearRect(0,0,W,H);
+    const inX=46, sumX=W*0.54, outX=W-50, ys=[H*0.26,H*0.5,H*0.74];
+    w.forEach((wi,i)=>{drawEdge(ctx,{x:inX+16,y:ys[i]},{x:sumX-26,y:H/2},wi,1.5);
+      ctx.fillStyle='#93a4c8';ctx.font='10.5px monospace';
+      ctx.fillText('w'+(i+1)+'='+fmt(wi,2),(inX+sumX)/2-32,(ys[i]+H/2)/2+(i==1?0:(i<1?-6:12)));});
+    x.forEach((xi,i)=>{drawNode(ctx,{x:inX,y:ys[i]},'#19c4ff',fmt(xi,1),false,15);
+      ctx.fillStyle='#64759c';ctx.font='10.5px monospace';ctx.textAlign='center';ctx.fillText('x'+(i+1),inX-26,ys[i]+4);ctx.textAlign='left';});
+    ctx.fillStyle='#ffcb6b';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText('b='+fmt(b,2),sumX,H*0.13);
+    ctx.strokeStyle='rgba(255,203,107,.5)';ctx.beginPath();ctx.moveTo(sumX,H*0.17);ctx.lineTo(sumX,H/2-26);ctx.stroke();
+    drawNode(ctx,{x:sumX,y:H/2},'#9b8cff','Σ',true,26);
+    ctx.fillStyle='#cdc4ff';ctx.font='11px monospace';ctx.fillText('z='+fmt(z,2),sumX,H/2+44);
+    drawEdge(ctx,{x:sumX+28,y:H/2},{x:outX-22,y:H/2},1,1);
+    ctx.fillStyle='#64759c';ctx.fillText('σ',(sumX+outX)/2,H/2-12);
+    drawNode(ctx,{x:outX,y:H/2},'#ff6ec7',fmt(y,2),y>0.5,22);
+    ctx.fillStyle='#ff6ec7';ctx.fillText('y',outX,H/2+42);ctx.textAlign='left';
+  });
+  function render(){cv.redraw();
+    const w=[g1(),g2(),g3()], b=gb();
+    const z=w[0]*x[0]+w[1]*x[1]+w[2]*x[2]+b, y=sigmoid(z);
+    $('#nuLive').innerHTML=
+      'z = w·x + b\n  = '+fmt(w[0],2)+'·0.5 + '+fmt(w[1],2)+'·0.6 + '+fmt(w[2],2)+'·0.1 + '+fmt(b,2)+'\n'+
+      '  = <span class="hl">'+fmt(z,3)+'</span>\n'+
+      'y = σ(z) = <span class="g">'+fmt(y,4)+'</span>  →  '+(y>=0.5?'<span class="g">leans YES</span>':'<span class="p">leans no</span>');
+  }
+  render();
+});
+
+/* 02 ACTIVATIONS: worked-example stepper */
+window.__demos.push(function(){
+  makeStepper('#acStep','#acReset','#acOut',[
+    'Step 0 — feed z = 2 and z = −2 through each switch.',
+    'Step 1 — sigmoid(2) = 1/(1+e^(−2)) = 1/(1+0.1353) = <span class="g">0.881</span>',
+    'Step 2 — sigmoid(−2) = 1/(1+e^(2)) = 1/(1+7.389) = <span class="g">0.119</span>',
+    'Step 3 — tanh(2) = (e²−e^(−2))/(e²+e^(−2)) = (7.389−0.135)/(7.389+0.135) = <span class="g">0.964</span>',
+    'Step 4 — ReLU(2) = max(0,2) = <span class="g">2</span>;   ReLU(−2) = max(0,−2) = <span class="g">0</span>',
+    'Step 5 — note: sigmoid and tanh saturate near their limits. ReLU just passes 2 and zeroes −2. ✓'
+  ]);
+});
+
+/* 02 ACTIVATIONS: plotter with mode toggle + scrub */
+window.__demos.push(function(){
+  const c=$('#acCanvas'); if(!c)return;
+  const host=$('#acSliders'); host.innerHTML='';
+  let mode='sig';
+  const F={sig:{f:sigmoid,lo:-6,hi:6,ylo:-0.1,yhi:1.1,name:'sigmoid σ(z)'},
+           tanh:{f:tanhf,lo:-4,hi:4,ylo:-1.15,yhi:1.15,name:'tanh(z)'},
+           relu:{f:relu,lo:-4,hi:4,ylo:-0.6,yhi:4,name:'ReLU(z)'}};
+  const getZ=makeSlider(host,{id:'acz',label:'z',min:'-4',max:'4',step:'0.05',value:'1'},()=>render());
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const cfg=F[mode], pad=40;
+    const X=v=>pad+(v-cfg.lo)/(cfg.hi-cfg.lo)*(W-2*pad);
+    const Y=v=>H-pad-(v-cfg.ylo)/(cfg.yhi-cfg.ylo)*(H-2*pad);
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(120,150,210,.2)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad,Y(0));ctx.lineTo(W-pad,Y(0));ctx.stroke();
+    if(cfg.lo<0&&cfg.hi>0){ctx.beginPath();ctx.moveTo(X(0),pad);ctx.lineTo(X(0),H-pad);ctx.stroke();}
+    ctx.fillStyle='#64759c';ctx.font='11px monospace';ctx.fillText('z',W-pad+4,Y(0)+4);ctx.fillText(cfg.name,pad,pad-8);
+    ctx.strokeStyle='#38f0d8';ctx.lineWidth=2.6;ctx.beginPath();let first=true;
+    for(let px=pad;px<=W-pad;px++){const zz=cfg.lo+(px-pad)/(W-2*pad)*(cfg.hi-cfg.lo);const yy=Y(cfg.f(zz));if(first){ctx.moveTo(px,yy);first=false;}else ctx.lineTo(px,yy);}
+    ctx.stroke();
+    const z=clamp(getZ(),cfg.lo,cfg.hi), fz=cfg.f(z);
+    const hh=1e-3, slope=(cfg.f(z+hh)-cfg.f(z-hh))/(2*hh);
+    ctx.strokeStyle='rgba(255,203,107,.85)';ctx.lineWidth=2;ctx.beginPath();
+    const span=(cfg.hi-cfg.lo)*0.22;
+    ctx.moveTo(X(z-span),Y(fz-slope*span));ctx.lineTo(X(z+span),Y(fz+slope*span));ctx.stroke();
+    ctx.fillStyle='#ffcb6b';ctx.beginPath();ctx.arc(X(z),Y(fz),5,0,7);ctx.fill();
+  });
+  function render(){cv.redraw();
+    const cfg=F[mode], z=clamp(getZ(),cfg.lo,cfg.hi), fz=cfg.f(z);
+    const hh=1e-3, slope=(cfg.f(z+hh)-cfg.f(z-hh))/(2*hh);
+    $('#acLive').innerHTML='switch = '+cfg.name+'\nz = '+fmt(z,2)+'\nf(z) = <span class="g">'+fmt(fz,4)+'</span>\nslope f\'(z) = <span class="hl">'+fmt(slope,4)+'</span>'+
+      (mode==='relu'?'\n  (flat 1 for z>0, flat 0 for z<0)':mode==='sig'?'\n  (slope dies to ~0 far from 0)':'\n  (slope dies to ~0 far from 0)');
+  }
+  function setMode(m,btn){mode=m;$$('#acSig,#acTanh,#acRelu').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render();}
+  $('#acSig').addEventListener('click',e=>setMode('sig',e.target));
+  $('#acTanh').addEventListener('click',e=>setMode('tanh',e.target));
+  $('#acRelu').addEventListener('click',e=>setMode('relu',e.target));
+  c.addEventListener('mousemove',e=>{const cfg=F[mode];const r=c.getBoundingClientRect();
+    const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+    const px=(e.clientX-r.left)*(c.width/r.width)/dpr;const pad=40,W=c.width/dpr;
+    const zz=clamp(cfg.lo+(px-pad)/(W-2*pad)*(cfg.hi-cfg.lo),cfg.lo,cfg.hi);
+    const sl=$('#acz');sl.value=zz;sl.dispatchEvent(new Event('input'));});
+  render();
+});
+
+/* 03 PERCEPTRON: AND/OR worked stepper */
+window.__demos.push(function(){
+  makeStepper('#pcStep','#pcReset','#pcOut',[
+    'AND, w=[1,1], b=−1, fire when z>0:',
+    '  (0,0): z = 0+0−1 = −1 → <span class="p">0</span>\n  (0,1): z = 0+1−1 = 0 → <span class="p">0</span>',
+    '  (1,0): z = 1+0−1 = 0 → <span class="p">0</span>\n  (1,1): z = 1+1−1 = 1 → <span class="g">1</span>   (only this one fires) ✓',
+    'OR, w=[1,1], b=0, fire when z>0:',
+    '  (0,0): z = 0+0 = 0 → <span class="p">0</span>\n  (0,1): z = 0+1 = 1 → <span class="g">1</span>',
+    '  (1,0): z = 1+0 = 1 → <span class="g">1</span>\n  (1,1): z = 1+1 = 2 → <span class="g">1</span>   (all but 0,0 fire) ✓'
+  ]);
+});
+
+/* 03 PERCEPTRON: bit switches + corner canvas (AND/OR) */
+window.__demos.push(function(){
+  const c=$('#pcCanvas'); if(!c)return;
+  let mode='and', x1=0, x2=0;
+  function fires(a,b){return mode==='and'?(a+b-1)>0:(a+b)>0;}
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const pad=46, lo=-0.4, hi=1.4;
+    const X=v=>pad+(v-lo)/(hi-lo)*(W-2*pad), Y=v=>H-pad-(v-lo)/(hi-lo)*(H-2*pad);
+    ctx.clearRect(0,0,W,H);
+    // shade fire side coarsely
+    const step=12;
+    for(let px=pad;px<W-pad;px+=step)for(let py=pad;py<H-pad;py+=step){
+      const ux=lo+(px-pad)/(W-2*pad)*(hi-lo), uy=hi-(py-pad)/(H-2*pad)*(hi-lo);
+      ctx.fillStyle=fires(ux,uy)?'rgba(98,232,138,.09)':'rgba(120,140,180,.05)';
+      ctx.fillRect(px,py,step,step);
+    }
+    // decision line: x1+x2 = (mode==and?1:0)
+    const k=(mode==='and')?1:0;
+    ctx.strokeStyle='#ffcb6b';ctx.lineWidth=2.2;ctx.setLineDash([6,4]);
+    ctx.beginPath();ctx.moveTo(X(k-hi),Y(hi));ctx.lineTo(X(hi),Y(k-hi));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#64759c';ctx.font='11px monospace';ctx.fillText('x₁',W-pad+2,Y(0)+4);ctx.fillText('x₂',X(0)-6,pad-4);
+    [[0,0],[0,1],[1,0],[1,1]].forEach(([a,b])=>{
+      const on=fires(a,b);
+      ctx.beginPath();ctx.arc(X(a),Y(b),13,0,7);
+      ctx.fillStyle=on?'#62e88a':'#ff6b81';ctx.fill();
+      ctx.fillStyle='#06101f';ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.fillText(on?'1':'0',X(a),Y(b)+4);ctx.textAlign='left';
+    });
+    // current input dot
+    ctx.strokeStyle='#fff';ctx.lineWidth=2.4;ctx.beginPath();ctx.arc(X(x1),Y(x2),17,0,7);ctx.stroke();
+  });
+  function render(){cv.redraw();
+    const z=(mode==='and')?(x1+x2-1):(x1+x2), on=z>0;
+    $('#pcLive').innerHTML='gate = '+mode.toUpperCase()+'\ninput x = ['+x1+', '+x2+']\n'+
+      'z = '+(mode==='and'?(x1+'+'+x2+'−1'):(x1+'+'+x2))+' = <span class="hl">'+z+'</span>\n'+
+      'output = '+(on?'<span class="g">1 (fires)</span>':'<span class="p">0</span>');
+  }
+  $('#pcX1').addEventListener('click',function(){x1=x1?0:1;this.textContent=x1;this.classList.toggle('on',!!x1);render();});
+  $('#pcX2').addEventListener('click',function(){x2=x2?0:1;this.textContent=x2;this.classList.toggle('on',!!x2);render();});
+  $('#pcAnd').addEventListener('click',e=>{mode='and';$('#pcAnd').classList.add('active');$('#pcOr').classList.remove('active');render();});
+  $('#pcOr').addEventListener('click',e=>{mode='or';$('#pcOr').classList.add('active');$('#pcAnd').classList.remove('active');render();});
+  render();
+});
+
+/* 04 XOR: contradiction stepper */
+window.__demos.push(function(){
+  makeStepper('#xoStep','#xoReset','#xoOut',[
+    'Boundary: z = w₁x₁ + w₂x₂ + b. Want the two "1" corners positive, the two "0" corners negative.',
+    'Step 1 — want (0,1) positive:  w₂ + b > 0',
+    'Step 2 — want (1,0) positive:  w₁ + b > 0',
+    'Step 3 — add them:  w₁ + w₂ + 2b > 0',
+    'Step 4 — want (1,1) negative:  w₁ + w₂ + b < 0\nStep 5 — want (0,0) negative:  b < 0',
+    'Step 6 — add steps 4 and 5:  w₁ + w₂ + 2b < 0.\n  This clashes with step 3 (which needed > 0). <span class="p">Contradiction.</span>',
+    'So no weights and bias satisfy all four rows. One perceptron can never do XOR. ✓'
+  ]);
+});
+
+/* 04 XOR: draggable line, caps at 3/4 */
+window.__demos.push(function(){
+  const c=$('#xoCanvas'); if(!c)return;
+  const host=$('#xoSliders'); host.innerHTML='';
+  const pts=[{a:0,b:0,y:0},{a:0,b:1,y:1},{a:1,b:0,y:1},{a:1,b:1,y:0}];
+  const g1=makeSlider(host,{id:'xw1',label:'w₁',min:'-3',max:'3',step:'0.1',value:'1'},()=>render());
+  const g2=makeSlider(host,{id:'xw2',label:'w₂',min:'-3',max:'3',step:'0.1',value:'1'},()=>render());
+  const gb=makeSlider(host,{id:'xb',label:'b',min:'-3',max:'3',step:'0.1',value:'-0.5'},()=>render());
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const w1=g1(),w2=g2(),b=gb(),pad=44,lo=-0.4,hi=1.4;
+    const X=v=>pad+(v-lo)/(hi-lo)*(W-2*pad), Y=v=>H-pad-(v-lo)/(hi-lo)*(H-2*pad);
+    ctx.clearRect(0,0,W,H);
+    const step=12;
+    for(let px=pad;px<W-pad;px+=step)for(let py=pad;py<H-pad;py+=step){
+      const ux=lo+(px-pad)/(W-2*pad)*(hi-lo), uy=hi-(py-pad)/(H-2*pad)*(hi-lo);
+      const z=w1*ux+w2*uy+b;
+      ctx.fillStyle=z>0?'rgba(98,232,138,.10)':'rgba(255,107,129,.07)';
+      ctx.fillRect(px,py,step,step);
+    }
+    ctx.fillStyle='#64759c';ctx.font='11px monospace';ctx.fillText('x₁',W-pad+2,Y(0)+4);ctx.fillText('x₂',X(0)-6,pad-4);
+    ctx.strokeStyle='#ffcb6b';ctx.lineWidth=2.4;
+    ctx.save();ctx.beginPath();ctx.rect(pad,pad,W-2*pad,H-2*pad);ctx.clip();
+    if(Math.abs(w2)>1e-6){const xa=-(w1*lo+b)/w2,xb=-(w1*hi+b)/w2;ctx.beginPath();ctx.moveTo(X(lo),Y(xa));ctx.lineTo(X(hi),Y(xb));ctx.stroke();}
+    else if(Math.abs(w1)>1e-6){const xv=-b/w1;ctx.beginPath();ctx.moveTo(X(xv),Y(lo));ctx.lineTo(X(xv),Y(hi));ctx.stroke();}
+    ctx.restore();
+    pts.forEach(p=>{const pred=(w1*p.a+w2*p.b+b)>0?1:0, ok=pred===p.y;
+      ctx.beginPath();ctx.arc(X(p.a),Y(p.b),14,0,7);
+      ctx.fillStyle=p.y?'#62e88a':'#ff6b81';ctx.fill();
+      ctx.lineWidth=3;ctx.strokeStyle=ok?'rgba(255,255,255,.85)':'rgba(255,80,80,.95)';ctx.stroke();
+      ctx.fillStyle='#06101f';ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.fillText(p.y,X(p.a),Y(p.b)+4);ctx.textAlign='left';});
+  });
+  function render(){cv.redraw();
+    const w1=g1(),w2=g2(),b=gb();
+    let correct=0;pts.forEach(p=>{const pred=(w1*p.a+w2*p.b+b)>0?1:0;if(pred===p.y)correct++;});
+    $('#xoLive').innerHTML='line: '+fmt(w1,1)+'·x₁ + '+fmt(w2,1)+'·x₂ + '+fmt(b,1)+' = 0\n'+
+      'correct corners: <span class="'+(correct>=4?'g':'hl')+'">'+correct+' / 4</span>\n'+
+      (correct>=4?'<span class="g">all four?! (should be impossible)</span>':'<span class="p">one line tops out at 3 / 4 — XOR is not linearly separable.</span>');
+  }
+  render();
+});
+
+/* 05 SOLVING XOR: verify stepper */
+window.__demos.push(function(){
+  makeStepper('#xnStep','#xnReset','#xnOut',[
+    'Hidden: h₁ = ReLU(x₁+x₂),  h₂ = ReLU(x₁+x₂−1).  Output: y = h₁ − 2h₂.',
+    'x=[0,0]:  h₁=ReLU(0)=0,  h₂=ReLU(−1)=0  →  y = 0 − 2·0 = <span class="g">0</span>  ✓',
+    'x=[0,1]:  h₁=ReLU(1)=1,  h₂=ReLU(0)=0   →  y = 1 − 2·0 = <span class="g">1</span>  ✓',
+    'x=[1,0]:  h₁=ReLU(1)=1,  h₂=ReLU(0)=0   →  y = 1 − 2·0 = <span class="g">1</span>  ✓',
+    'x=[1,1]:  h₁=ReLU(2)=2,  h₂=ReLU(1)=1   →  y = 2 − 2·1 = <span class="g">0</span>  ✓',
+    'Outputs: 0, 1, 1, 0 — exactly XOR. h₂ fires only on (1,1), and the output cancels it. ✓'
+  ]);
+});
+
+/* 05 SOLVING XOR: light-up 2-layer network */
+window.__demos.push(function(){
+  const c=$('#xnCanvas'); if(!c)return;
+  let x1=0,x2=0;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const h1=relu(x1+x2), h2=relu(x1+x2-1), y=h1-2*h2;
+    ctx.clearRect(0,0,W,H);
+    const inX=70,hX=W*0.5,outX=W-80, iy=[H*0.32,H*0.68], hy=[H*0.3,H*0.7], oy=H*0.5;
+    // edges in->hidden (all weight 1)
+    [x1,x2].forEach((xi,i)=>hy.forEach((hyy,j)=>{drawEdge(ctx,{x:inX+20,y:iy[i]},{x:hX-22,y:hyy},1,1);}));
+    // hidden bias labels
+    ctx.fillStyle='#64759c';ctx.font='10px monospace';ctx.textAlign='center';
+    ctx.fillText('b=0',hX,hy[0]-30);ctx.fillText('b=−1',hX,hy[1]+38);
+    // edges hidden->out (1, -2)
+    drawEdge(ctx,{x:hX+22,y:hy[0]},{x:outX-22,y:oy},1,2);
+    drawEdge(ctx,{x:hX+22,y:hy[1]},{x:outX-22,y:oy},-2,2);
+    ctx.fillStyle='#93a4c8';ctx.font='10.5px monospace';ctx.fillText('w=1',(hX+outX)/2,oy-24);ctx.fillText('w=−2',(hX+outX)/2,oy+34);
+    ctx.textAlign='left';
+    drawNode(ctx,{x:inX,y:iy[0]},'#19c4ff',''+x1,!!x1,18);
+    drawNode(ctx,{x:inX,y:iy[1]},'#19c4ff',''+x2,!!x2,18);
+    ctx.fillStyle='#64759c';ctx.font='10.5px monospace';ctx.textAlign='center';ctx.fillText('x₁',inX-30,iy[0]+4);ctx.fillText('x₂',inX-30,iy[1]+4);ctx.textAlign='left';
+    drawNode(ctx,{x:hX,y:hy[0]},'#9b8cff','h₁='+h1,h1>0,22);
+    drawNode(ctx,{x:hX,y:hy[1]},'#9b8cff','h₂='+h2,h2>0,22);
+    drawNode(ctx,{x:outX,y:oy},'#ff6ec7','y='+y,y>0.5,24);
+  });
+  function render(){cv.redraw();
+    const h1=relu(x1+x2), h2=relu(x1+x2-1), y=h1-2*h2;
+    $('#xnLive').innerHTML='x = ['+x1+', '+x2+']\n'+
+      'h₁ = ReLU('+x1+'+'+x2+')   = <span class="v">'+h1+'</span>\n'+
+      'h₂ = ReLU('+x1+'+'+x2+'−1) = <span class="v">'+h2+'</span>   '+(h2>0?'<span class="hl">(both on!)</span>':'(dark)')+'\n'+
+      'y = h₁ − 2·h₂ = '+h1+' − '+(2*h2)+' = <span class="g">'+y+'</span>  (XOR = '+(x1^x2)+')';
+  }
+  $('#xnX1').addEventListener('click',function(){x1=x1?0:1;this.textContent=x1;this.classList.toggle('on',!!x1);render();});
+  $('#xnX2').addEventListener('click',function(){x2=x2?0:1;this.textContent=x2;this.classList.toggle('on',!!x2);render();});
+  render();
+});
+
+/* 06 FFN: stack layers, push a value through (animated highlight) */
+window.__demos.push(function(){
+  const c=$('#ffnCanvas'); if(!c)return;
+  const host=$('#ffnSliders'); host.innerHTML='';
+  const getL=makeSlider(host,{id:'ffL',label:'hidden layers',min:'1',max:'4',step:'1',value:'2'},()=>{lit=-1;render();});
+  const getU=makeSlider(host,{id:'ffU',label:'units / layer',min:'2',max:'5',step:'1',value:'3'},()=>{lit=-1;render();});
+  let lit=-1; // how many layers currently lit (animation)
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const L=getL(), U=getU(), nLayers=L+2; // input + hidden*L + output
+    ctx.clearRect(0,0,W,H);
+    const pad=60, gap=(W-2*pad)/(nLayers-1);
+    function layerX(i){return pad+gap*i;}
+    function unitsIn(i){if(i===0)return 2;if(i===nLayers-1)return 2;return U;}
+    function ys(n){const a=[];for(let k=0;k<n;k++)a.push(H*0.18+(H*0.64)*(n===1?0.5:k/(n-1)));return a;}
+    // edges
+    for(let i=0;i<nLayers-1;i++){const A=ys(unitsIn(i)),B=ys(unitsIn(i+1));
+      A.forEach(ay=>B.forEach(by=>{const on=(i<lit);
+        ctx.strokeStyle=on?'rgba(56,240,216,.5)':'rgba(120,150,210,.12)';ctx.lineWidth=on?1.6:1;
+        ctx.beginPath();ctx.moveTo(layerX(i)+16,ay);ctx.lineTo(layerX(i+1)-16,by);ctx.stroke();}));}
+    // nodes
+    for(let i=0;i<nLayers;i++){const A=ys(unitsIn(i));
+      const col=i===0?'#19c4ff':i===nLayers-1?'#ff6ec7':'#9b8cff';
+      const on=(i<=lit);
+      A.forEach(ay=>{ctx.beginPath();ctx.arc(layerX(i),ay,13,0,7);
+        ctx.fillStyle=on?col:'#0e1729';ctx.fill();if(on){ctx.shadowColor=col;ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0;}
+        ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();});
+      ctx.fillStyle='#64759c';ctx.font='10.5px monospace';ctx.textAlign='center';
+      const lab=i===0?'input':i===nLayers-1?'output':('a['+i+']');ctx.fillText(lab,layerX(i),H-22);ctx.textAlign='left';}
+  });
+  function render(){cv.redraw();
+    const L=getL();
+    $('#ffnLive').innerHTML='a[0] = x  (input, not counted)\n'+L+' hidden layer(s), then the output layer.\n'+
+      'each layer: z[ℓ] = W[ℓ]·a[ℓ−1] + b[ℓ],  a[ℓ] = g(z[ℓ])\n'+
+      (lit<0?'press "push input" to send a value through.':'<span class="g">value reached layer '+lit+'</span>');
+  }
+  function push(){const total=getL()+2;lit=0;render();
+    const t=setInterval(()=>{lit++;render();if(lit>=total-1)clearInterval(t);},420);}
+  $('#ffnPush').addEventListener('click',push);
+  $('#ffnReset').addEventListener('click',()=>{lit=-1;render();});
+  render();
+});
+
+/* 07 SOFTMAX: worked stepper (the 6 logits) */
+window.__demos.push(function(){
+  const z=[0.6,1.1,-1.5,1.2,3.2,-1.1];
+  const ez=z.map(Math.exp), S=ez.reduce((a,v)=>a+v,0), p=ez.map(v=>v/S);
+  makeStepper('#smStep','#smReset','#smOut',[
+    'Step 0 — logits z = [0.6, 1.1, −1.5, 1.2, 3.2, −1.1].',
+    'Step 1 — raise e to each:\n  '+ez.map(v=>fmt(v,3)).join(', '),
+    'Step 2 — sum them (bottom of the fraction):\n  Σ = <span class="g">'+fmt(S,3)+'</span>',
+    'Step 3 — divide each by the sum:\n  '+p.map(v=>'<span class="hl">'+fmt(v,3)+'</span>').join(', '),
+    'Step 4 — sum-check:\n  '+fmt(p.reduce((a,v)=>a+v,0),4)+' ≈ <span class="g">1.000</span> ✓\n  class 5 wins big (score 3.2 was largest).'
+  ]);
+});
+
+/* 07 SOFTMAX: bar race with logit sliders */
+window.__demos.push(function(){
+  const c=$('#smCanvas'); if(!c)return;
+  const host=$('#smSliders'); host.innerHTML='';
+  const init=[0.6,1.1,-1.5,1.2,3.2,-1.1];
+  const pal=['#19c4ff','#38f0d8','#9b8cff','#ff6ec7','#ffcb6b','#62e88a'];
+  const gets=init.map((v,i)=>makeSlider(host,{id:'sm'+i,label:'z'+(i+1),min:'-3',max:'4',step:'0.1',value:''+v},()=>render()));
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const z=gets.map(g=>g()), ez=z.map(Math.exp), S=ez.reduce((a,v)=>a+v,0), p=ez.map(v=>v/S);
+    ctx.clearRect(0,0,W,H);
+    const pad=40, bw=(W-2*pad)/z.length;
+    ctx.strokeStyle='rgba(120,150,210,.2)';ctx.beginPath();ctx.moveTo(pad,H-pad);ctx.lineTo(W-pad,H-pad);ctx.stroke();
+    p.forEach((pi,i)=>{const x=pad+i*bw+bw*0.16, w=bw*0.68, h=pi*(H-2*pad);
+      ctx.fillStyle=pal[i%pal.length];ctx.fillRect(x,H-pad-h,w,h);
+      ctx.fillStyle='#cfe6ff';ctx.font='11px monospace';ctx.textAlign='center';
+      ctx.fillText((pi*100).toFixed(1)+'%',x+w/2,H-pad-h-7);
+      ctx.fillStyle='#64759c';ctx.fillText('z'+(i+1),x+w/2,H-pad+16);ctx.textAlign='left';});
+  });
+  function render(){cv.redraw();
+    const z=gets.map(g=>g()), ez=z.map(Math.exp), S=ez.reduce((a,v)=>a+v,0), p=ez.map(v=>v/S);
+    $('#smLive').innerHTML='Σ e^zⱼ = <span class="hl">'+fmt(S,3)+'</span>\n'+
+      'probs = '+p.map(v=>fmt(v,3)).join(', ')+'\n'+
+      'check Σ probs = <span class="g">'+fmt(p.reduce((a,v)=>a+v,0),4)+'</span>  ✓';
+  }
+  render();
+});
+
+/* 08 BIAS TRICK: two forms, same z */
+window.__demos.push(function(){
+  const host=$('#btSliders'); if(!host)return; host.innerHTML='';
+  const x=[0.7,0.4];
+  const g1=makeSlider(host,{id:'btw1',label:'w₁',min:'-2',max:'2',step:'0.1',value:'1.2'},()=>render());
+  const g2=makeSlider(host,{id:'btw2',label:'w₂',min:'-2',max:'2',step:'0.1',value:'-0.5'},()=>render());
+  const gb=makeSlider(host,{id:'btb',label:'bias b',min:'-2',max:'2',step:'0.1',value:'0.8'},()=>render());
+  function render(){
+    const w1=g1(),w2=g2(),b=gb();
+    const zsep=w1*x[0]+w2*x[1]+b;
+    const zfold=b*1+w1*x[0]+w2*x[1];
+    $('#btLive').innerHTML=
+      'inputs x = [0.7, 0.4]\n\n'+
+      'Form A (bias separate):\n  z = w₁x₁ + w₂x₂ + b\n    = '+fmt(w1,1)+'·0.7 + '+fmt(w2,1)+'·0.4 + '+fmt(b,1)+'\n    = <span class="hl">'+fmt(zsep,4)+'</span>\n\n'+
+      'Form B (bias folded as w₀ on dummy a₀=1):\n  z = w₀·1 + w₁x₁ + w₂x₂,  with w₀ = b = '+fmt(b,1)+'\n    = '+fmt(b,1)+'·1 + '+fmt(w1,1)+'·0.7 + '+fmt(w2,1)+'·0.4\n    = <span class="g">'+fmt(zfold,4)+'</span>\n\n'+
+      (Math.abs(zsep-zfold)<1e-9?'<span class="g">same z — it is one model, written two ways. ✓</span>':'');
+  }
+  render();
+});
+
+/* 09 SENTIMENT: word toggles, flat vs hidden-layer */
+window.__demos.push(function(){
+  const host=$('#seWords'); if(!host)return;
+  const words=['great','not','good','boring','loved'];
+  const w_flat={great:2.0,not:-0.3,good:1.6,boring:-2.0,loved:2.2};
+  const sel={};words.forEach(w=>sel[w]=false);
+  let mode='flat';
+  words.forEach(w=>{const b=document.createElement('button');b.className='btn';b.textContent=w;
+    b.addEventListener('click',()=>{sel[w]=!sel[w];b.classList.toggle('active',sel[w]);render();});host.appendChild(b);});
+  const c=$('#seCanvas');
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const score=scoreNow(), p=sigmoid(score);
+    ctx.clearRect(0,0,W,H);
+    const pad=46, barW=W-2*pad, x=pad, y=H*0.42, h=30;
+    ctx.fillStyle='#0e1729';ctx.fillRect(x,y,barW,h);
+    ctx.fillStyle=p>=0.5?'#62e88a':'#ff6b81';ctx.fillRect(x,y,barW*p,h);
+    ctx.strokeStyle='rgba(255,203,107,.6)';ctx.beginPath();ctx.moveTo(x+barW*0.5,y-8);ctx.lineTo(x+barW*0.5,y+h+8);ctx.stroke();
+    ctx.fillStyle='#cfe6ff';ctx.font='12px monospace';ctx.textAlign='center';
+    ctx.fillText('P(positive) = '+(p*100).toFixed(0)+'%',x+barW/2,y-16);
+    ctx.fillStyle='#64759c';ctx.fillText('0',x,y+h+22);ctx.fillText('0.5 (fence)',x+barW/2,y+h+22);ctx.fillText('1',x+barW,y+h+22);ctx.textAlign='left';
+  });
+  function scoreNow(){
+    let s=-0.2;
+    if(mode==='flat'){words.forEach(w=>{if(sel[w])s+=w_flat[w];});}
+    else{ // hidden model: knows "not good" flips
+      words.forEach(w=>{if(sel[w])s+=w_flat[w];});
+      if(sel['not']&&sel['good'])s-= 3.4; // the phrase "not good" pulls negative
+    }
+    return s;
+  }
+  function render(){cv.redraw();
+    const s=scoreNow(), p=sigmoid(s);
+    const chosen=words.filter(w=>sel[w]);
+    $('#seLive').innerHTML='model = '+(mode==='flat'?'flat (single words)':'hidden layer (knows phrases)')+'\n'+
+      'words: '+(chosen.length?chosen.join(', '):'(none)')+'\n'+
+      'score = <span class="hl">'+fmt(s,2)+'</span>   P(positive) = <span class="g">'+fmt(p,3)+'</span> → '+(p>=0.5?'<span class="g">positive</span>':'<span class="p">negative</span>')+
+      (mode==='deep'&&sel['not']&&sel['good']?'\n<span class="hl">phrase "not good" detected → pulled negative.</span>':'');
+  }
+  $('#seFlat').addEventListener('click',()=>{mode='flat';$('#seFlat').classList.add('active');$('#seDeep').classList.remove('active');render();});
+  $('#seDeep').addEventListener('click',()=>{mode='deep';$('#seDeep').classList.add('active');$('#seFlat').classList.remove('active');render();});
+  render();
+});
+
+/* 10 EMBEDDINGS: pool worked stepper */
+window.__demos.push(function(){
+  makeStepper('#emStep','#emReset','#emOut',[
+    'Vectors: e₁=[2,0],  e₂=[0,4],  e₃=[1,2].',
+    'Mean, dim 1:  (2 + 0 + 1)/3 = 3/3 = <span class="g">1</span>',
+    'Mean, dim 2:  (0 + 4 + 2)/3 = 6/3 = <span class="g">2</span>   →  mean = [1, 2]',
+    'Max, dim 1:  max(2, 0, 1) = <span class="g">2</span>',
+    'Max, dim 2:  max(0, 4, 2) = <span class="g">4</span>   →  max = [2, 4]',
+    'Either way, one fixed-size 2-D vector — for any length of text. ✓'
+  ]);
+});
+
+/* 10 EMBEDDINGS: meaning map + pooling */
+window.__demos.push(function(){
+  const c=$('#emCanvas'); if(!c)return;
+  const host=$('#emWords'); host.innerHTML='';
+  const vec={cat:[2.4,2.0],dog:[2.6,1.7],car:[-1.8,2.2],road:[-2.2,1.5],pet:[2.0,2.4]};
+  const sel={};Object.keys(vec).forEach(w=>sel[w]=false);
+  let pooled=false;
+  Object.keys(vec).forEach(w=>{const b=document.createElement('button');b.className='btn';b.textContent=w;
+    b.addEventListener('click',()=>{sel[w]=!sel[w];b.classList.toggle('active',sel[w]);pooled=false;render();});host.appendChild(b);});
+  const lo=-3.2,hi=3.2;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const pad=40;const X=v=>pad+(v-lo)/(hi-lo)*(W-2*pad),Y=v=>H-pad-(v-lo)/(hi-lo)*(H-2*pad);
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(120,150,210,.18)';ctx.beginPath();ctx.moveTo(X(0),pad);ctx.lineTo(X(0),H-pad);ctx.moveTo(pad,Y(0));ctx.lineTo(W-pad,Y(0));ctx.stroke();
+    ctx.fillStyle='#64759c';ctx.font='10.5px monospace';ctx.fillText('meaning dim 1',W-pad-70,Y(0)-6);ctx.fillText('dim 2',X(0)+6,pad+4);
+    Object.keys(vec).forEach(w=>{const v=vec[w],on=sel[w];
+      ctx.strokeStyle=on?'#38f0d8':'rgba(120,150,210,.35)';ctx.lineWidth=on?2.2:1.2;
+      ctx.beginPath();ctx.moveTo(X(0),Y(0));ctx.lineTo(X(v[0]),Y(v[1]));ctx.stroke();
+      ctx.fillStyle=on?'#cfe6ff':'#64759c';ctx.font=(on?'bold ':'')+'12px monospace';ctx.fillText(w,X(v[0])+4,Y(v[1])-4);});
+    if(pooled){const chosen=Object.keys(vec).filter(w=>sel[w]);if(chosen.length){
+      const mx=chosen.reduce((a,w)=>a+vec[w][0],0)/chosen.length, my=chosen.reduce((a,w)=>a+vec[w][1],0)/chosen.length;
+      ctx.fillStyle='#ffcb6b';ctx.shadowColor='#ffcb6b';ctx.shadowBlur=12;ctx.beginPath();ctx.arc(X(mx),Y(my),8,0,7);ctx.fill();ctx.shadowBlur=0;
+      ctx.fillStyle='#ffcb6b';ctx.font='bold 11px monospace';ctx.fillText('mean',X(mx)+10,Y(my)+4);}}
+  });
+  function render(){cv.redraw();
+    const chosen=Object.keys(vec).filter(w=>sel[w]);
+    let txt='text = '+(chosen.length?chosen.join(', '):'(pick words)')+'\nlength = '+chosen.length+' word(s)';
+    if(pooled&&chosen.length){const mx=chosen.reduce((a,w)=>a+vec[w][0],0)/chosen.length, my=chosen.reduce((a,w)=>a+vec[w][1],0)/chosen.length;
+      txt+='\nmean vector = [<span class="g">'+fmt(mx,2)+'</span>, <span class="g">'+fmt(my,2)+'</span>]  ← one fixed-size point';}
+    $('#emLive').innerHTML=txt;
+  }
+  $('#emPoolBtn').addEventListener('click',()=>{pooled=true;render();});
+  $('#emClear').addEventListener('click',()=>{Object.keys(sel).forEach(w=>sel[w]=false);$$('#emWords .btn').forEach(b=>b.classList.remove('active'));pooled=false;render();});
+  render();
+});
+
+/* 11 LM: sliding window */
+window.__demos.push(function(){
+  const c=$('#lmCanvas'); if(!c)return;
+  const host=$('#lmSliders'); host.innerHTML='';
+  const sent=['I','made','sure','the','cat','gets','fed','today'];
+  const getWin=makeSlider(host,{id:'lmWin',label:'window',min:'2',max:'4',step:'1',value:'3'},()=>{start=0;render();});
+  let start=0;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const win=getWin(); const n=sent.length;
+    ctx.clearRect(0,0,W,H);
+    const pad=14, bw=(W-2*pad)/n, y=H*0.4, bh=38;
+    sent.forEach((wd,i)=>{const inWin=i>=start&&i<start+win, isTarget=i===start+win;
+      const x=pad+i*bw;
+      ctx.fillStyle=inWin?'rgba(56,240,216,.18)':(isTarget?'rgba(255,110,199,.18)':'#0e1729');
+      ctx.strokeStyle=inWin?'#38f0d8':(isTarget?'#ff6ec7':'var(--line)');ctx.lineWidth=inWin||isTarget?2:1;
+      ctx.fillRect(x+3,y,bw-6,bh);ctx.strokeRect(x+3,y,bw-6,bh);
+      ctx.fillStyle='#e7edf9';ctx.font='12px monospace';ctx.textAlign='center';ctx.fillText(wd,x+bw/2,y+24);
+      ctx.fillStyle=isTarget?'#ff6ec7':'#64759c';ctx.font='9px monospace';
+      ctx.fillText(inWin?'context':(isTarget?'predict':''),x+bw/2,y+bh+14);ctx.textAlign='left';});
+  });
+  function render(){cv.redraw();
+    const win=getWin();const ctxWords=sent.slice(start,start+win), tgt=sent[start+win];
+    $('#lmLive').innerHTML='window size = '+win+'\ncontext = ['+ctxWords.join(', ')+']\n'+
+      (tgt!==undefined?'predict next word: <span class="p">'+tgt+'</span>':'<span class="hl">window reached the end — reset to slide again.</span>');
+  }
+  $('#lmSlide').addEventListener('click',()=>{const win=getWin();if(start+win<sent.length)start++;render();});
+  $('#lmReset').addEventListener('click',()=>{start=0;render();});
+  render();
+});
+
+/* 12 ONE-HOT: pick word -> highlight column of E */
+window.__demos.push(function(){
+  const c=$('#ohCanvas'); if(!c)return;
+  const host=$('#ohWords'); host.innerHTML='';
+  const words=['the','cat','dog','toothpaste','gets','fed'];
+  const E=[[0.8,-0.2,0.5,0.1],[-0.3,0.7,0.2,-0.4],[0.1,0.1,-0.6,0.9],[0.9,0.6,-0.1,-0.3],[0.4,-0.5,0.3,0.2],[-0.7,0.2,0.8,0.0]];
+  let pick=1;
+  words.forEach((w,i)=>{const b=document.createElement('button');b.className='btn'+(i===1?' active':'');b.textContent=w;
+    b.addEventListener('click',()=>{pick=i;$$('#ohWords .btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');render();});host.appendChild(b);});
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    // one-hot column on left
+    const ohX=20, cellH=Math.min(34,(H-40)/words.length), top=24;
+    ctx.fillStyle='#64759c';ctx.font='10.5px monospace';ctx.fillText('one-hot x',ohX,top-8);
+    words.forEach((w,i)=>{const on=i===pick;
+      ctx.fillStyle=on?'rgba(56,240,216,.25)':'#0e1729';ctx.strokeStyle=on?'#38f0d8':'#1f2d4d';
+      ctx.fillRect(ohX,top+i*cellH,30,cellH-3);ctx.strokeRect(ohX,top+i*cellH,30,cellH-3);
+      ctx.fillStyle=on?'#38f0d8':'#64759c';ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.fillText(on?'1':'0',ohX+15,top+i*cellH+cellH/2+2);ctx.textAlign='left';});
+    // E matrix
+    const mX=110, cw=58;
+    ctx.fillStyle='#64759c';ctx.font='10.5px monospace';ctx.fillText('embedding matrix E (row per word)',mX,top-8);
+    E.forEach((row,i)=>{row.forEach((val,j)=>{const on=i===pick;
+      ctx.fillStyle=on?'rgba(155,140,255,.30)':'rgba(120,150,210,.06)';
+      ctx.fillRect(mX+j*cw,top+i*cellH,cw-3,cellH-3);
+      if(on){ctx.strokeStyle='#9b8cff';ctx.lineWidth=1.6;ctx.strokeRect(mX+j*cw,top+i*cellH,cw-3,cellH-3);}
+      ctx.fillStyle=on?'#cdc4ff':'#5a6c8c';ctx.font=(on?'bold ':'')+'11px monospace';ctx.textAlign='center';
+      ctx.fillText(fmt(val,1),mX+j*cw+(cw-3)/2,top+i*cellH+cellH/2+2);ctx.textAlign='left';});});
+  });
+  function render(){cv.redraw();
+    $('#ohLive').innerHTML='word = "'+words[pick]+'"  (index '+pick+')\n'+
+      'one-hot: 1 at position '+pick+', 0 elsewhere\n'+
+      'E · one-hot just <span class="hl">selects row '+pick+'</span>:\n'+
+      'embedding e = [<span class="v">'+E[pick].map(v=>fmt(v,1)).join(', ')+'</span>]';
+  }
+  render();
+});
+
+/* 13 WHY NLM: drag dog toward cat -> P(fed) rises */
+window.__demos.push(function(){
+  const c=$('#wnCanvas'); if(!c)return;
+  const cat=[2.4,2.0]; let dog=[-1.5,-1.0];
+  const lo=-3.2,hi=3.2;
+  let drag=false;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const pad=38;const X=v=>pad+(v-lo)/(hi-lo)*(W-2*pad),Y=v=>H-pad-(v-lo)/(hi-lo)*(H-2*pad);
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(120,150,210,.18)';ctx.beginPath();ctx.moveTo(X(0),pad);ctx.lineTo(X(0),H-pad);ctx.moveTo(pad,Y(0));ctx.lineTo(W-pad,Y(0));ctx.stroke();
+    ctx.fillStyle='#64759c';ctx.font='10.5px monospace';ctx.fillText('meaning map',W-pad-72,Y(0)-6);
+    // cat (fixed, trained)
+    ctx.strokeStyle='#38f0d8';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(X(0),Y(0));ctx.lineTo(X(cat[0]),Y(cat[1]));ctx.stroke();
+    ctx.fillStyle='#38f0d8';ctx.beginPath();ctx.arc(X(cat[0]),Y(cat[1]),7,0,7);ctx.fill();
+    ctx.fillStyle='#cfe6ff';ctx.font='bold 12px monospace';ctx.fillText('cat (trained: "cat gets fed")',X(cat[0])+9,Y(cat[1])-4);
+    // dog (draggable)
+    ctx.strokeStyle='#ff6ec7';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(X(0),Y(0));ctx.lineTo(X(dog[0]),Y(dog[1]));ctx.stroke();
+    ctx.fillStyle='#ff6ec7';ctx.shadowColor='#ff6ec7';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(X(dog[0]),Y(dog[1]),9,0,7);ctx.fill();ctx.shadowBlur=0;
+    ctx.fillStyle='#ffd0ec';ctx.fillText('drag me: dog',X(dog[0])+10,Y(dog[1])+16);
+  });
+  function dist(){return Math.hypot(cat[0]-dog[0],cat[1]-dog[1]);}
+  function pfed(){return clamp(0.95*Math.exp(-0.45*dist()),0,0.95);}
+  function render(){cv.redraw();
+    const d=dist(), p=pfed();
+    $('#wnLive').innerHTML='context: "dog gets ___"\n'+
+      'distance(dog, cat) = <span class="hl">'+fmt(d,2)+'</span>\n'+
+      'neural LM P(next = "fed") = <span class="g">'+(p*100).toFixed(0)+'%</span>\n'+
+      'n-gram LM P(next = "fed") = <span class="p">0%</span>  (never saw "dog gets")\n'+
+      (d<1.2?'<span class="g">dog is now a neighbour of cat → it reuses "fed". ✓</span>':'drag dog closer to cat.');
+  }
+  function toData(e){const r=c.getBoundingClientRect();const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+    const px=(e.clientX-r.left)*(c.width/r.width)/dpr, py=(e.clientY-r.top)*(c.height/r.height)/dpr;
+    const pad=38,W=c.width/dpr,H=c.height/dpr;
+    return [lo+(px-pad)/(W-2*pad)*(hi-lo), hi-(py-pad)/(H-2*pad)*(hi-lo)];}
+  c.addEventListener('mousedown',e=>{drag=true;dog=toData(e);render();});
+  c.addEventListener('mousemove',e=>{if(drag){dog=toData(e);render();}});
+  window.addEventListener('mouseup',()=>{drag=false;});
+  c.addEventListener('touchstart',e=>{drag=true;dog=toData(e.touches[0]);render();e.preventDefault();},{passive:false});
+  c.addEventListener('touchmove',e=>{if(drag){dog=toData(e.touches[0]);render();e.preventDefault();}},{passive:false});
+  window.addEventListener('touchend',()=>{drag=false;});
+  render();
+});
+
+/* 14 FORWARD PASS: staged pipeline */
+window.__demos.push(function(){
+  const c=$('#fwCanvas'); if(!c)return;
+  const stages=['3 words','one-hot','embeddings','join e','hidden h','scores z','softmax y'];
+  let stage=0;
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const n=stages.length, pad=20, gap=(W-2*pad)/n, y=H*0.34, bw=gap*0.8, bh=46;
+    stages.forEach((s,i)=>{const on=i<=stage, x=pad+gap*i+gap*0.1;
+      ctx.fillStyle=on?'rgba(56,240,216,.16)':'#0e1729';ctx.strokeStyle=on?'#38f0d8':'#1f2d4d';ctx.lineWidth=on?2:1;
+      ctx.fillRect(x,y,bw,bh);ctx.strokeRect(x,y,bw,bh);
+      ctx.fillStyle=on?'#cfe6ff':'#5a6c8c';ctx.font='10.5px monospace';ctx.textAlign='center';
+      s.split(' ').forEach((ln,k)=>ctx.fillText(ln,x+bw/2,y+18+k*13));
+      if(i<n-1){ctx.strokeStyle=i<stage?'#38f0d8':'rgba(120,150,210,.25)';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(x+bw,y+bh/2);ctx.lineTo(x+gap,y+bh/2);ctx.stroke();}
+      ctx.textAlign='left';});
+    // output bars if at final stage
+    if(stage>=n-1){const p=[0.05,0.74,0.10,0.06,0.05], lab=['cat','fed','dog','run','sit'], pal=['#19c4ff','#62e88a','#9b8cff','#ffcb6b','#ff6ec7'];
+      const bx=pad, by=H-26, bw2=(W-2*pad)/p.length;
+      p.forEach((pi,i)=>{const h=pi*(H*0.32);ctx.fillStyle=pal[i];ctx.fillRect(bx+i*bw2+bw2*0.2,by-h,bw2*0.6,h);
+        ctx.fillStyle='#cfe6ff';ctx.font='10px monospace';ctx.textAlign='center';ctx.fillText(lab[i],bx+i*bw2+bw2*0.5,by+12);
+        ctx.fillText((pi*100).toFixed(0)+'%',bx+i*bw2+bw2*0.5,by-h-5);ctx.textAlign='left';});}
+  });
+  const detail=['context = [the, cat, gets]','each word → a one-hot vector (1 at its index)',
+    'look up each embedding: e_word = column of E','join the 3 embeddings into one vector e',
+    'hidden: h = g(W·e + b)','scores: z = U·h  (one per vocabulary word)','softmax(z) → next-word probabilities'];
+  function render(){cv.redraw();
+    let s='';for(let k=0;k<=stage;k++)s+=(k?'\n':'')+(k+1)+'. '+detail[k];
+    if(stage>=stages.length-1)s+='\n\n<span class="g">"fed" wins with 74%.</span>';
+    $('#fwLive').innerHTML=s;}
+  $('#fwStep').addEventListener('click',()=>{if(stage<stages.length-1){stage++;render();}});
+  $('#fwReset').addEventListener('click',()=>{stage=0;render();});
+  render();
+});
+
+/* 15 N-GRAM vs NLM: the one context axis */
+window.__demos.push(function(){
+  const c=$('#ngCanvas'); if(!c)return;
+  const host=$('#ngSliders'); host.innerHTML='';
+  const getT=makeSlider(host,{id:'ngT',label:'task size',min:'0',max:'100',step:'1',value:'30'},()=>render());
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const t=getT()/100;
+    ctx.clearRect(0,0,W,H);
+    const pad=44, y=H*0.55, barW=W-2*pad;
+    // axis
+    ctx.strokeStyle='rgba(120,150,210,.4)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();
+    ctx.fillStyle='#64759c';ctx.font='10.5px monospace';ctx.fillText('tiny task, little data',pad,y+26);ctx.textAlign='right';ctx.fillText('huge task, lots of data',W-pad,y+26);ctx.textAlign='left';
+    // zones
+    ctx.fillStyle='rgba(255,203,107,.10)';ctx.fillRect(pad,y-60,barW*0.45,52);
+    ctx.fillStyle='rgba(98,232,138,.10)';ctx.fillRect(pad+barW*0.55,y-60,barW*0.45,52);
+    ctx.fillStyle='#ffcb6b';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText('n-gram wins',pad+barW*0.22,y-34);
+    ctx.fillStyle='#62e88a';ctx.fillText('neural LM wins',pad+barW*0.78,y-34);ctx.textAlign='left';
+    // marker
+    const mx=pad+barW*t;
+    ctx.strokeStyle='#38f0d8';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(mx,y-66);ctx.lineTo(mx,y+10);ctx.stroke();
+    ctx.fillStyle='#38f0d8';ctx.beginPath();ctx.arc(mx,y,7,0,7);ctx.fill();
+  });
+  function render(){cv.redraw();
+    const t=getT()/100;
+    const ng=t<0.5;
+    $('#ngLive').innerHTML='task / data size = <span class="hl">'+getT()+'%</span>\n'+
+      'best fit: <span class="'+(ng?'hl':'g')+'">'+(ng?'n-gram LM (cheap, fast, easy to inspect)':'neural LM (accurate, generalizes, longer history)')+'</span>\n'+
+      (ng?'little data → the simple model is enough, and far cheaper.':'lots of data → the extra power and generalization pay off.');
+  }
+  render();
+});
+
+/* 16 TRAINING: gradient worked stepper */
+window.__demos.push(function(){
+  makeStepper('#trStep','#trReset','#trOut',[
+    'Unit: z = w·x + b,  ŷ = σ(z),  loss L_CE = −[y log ŷ + (1−y) log(1−ŷ)].',
+    'Step 1 — ∂L/∂ŷ = −y/ŷ + (1−y)/(1−ŷ).',
+    'Step 2 — ∂ŷ/∂z = ŷ(1−ŷ)   (the sigmoid slope).',
+    'Step 3 — multiply: ∂L/∂z = −y(1−ŷ) + (1−y)ŷ = <span class="hl">ŷ − y</span>.',
+    'Step 4 — ∂z/∂wⱼ = xⱼ.   Chain: ∂L/∂wⱼ = <span class="g">(ŷ − y)·xⱼ</span>.',
+    'Step 5 — one step with ŷ=0.7, y=1, xⱼ=2, η=0.1:\n  error = 0.7 − 1 = −0.3;  gradient = −0.3·2 = −0.6.',
+    'Step 6 — update: wⱼ ← wⱼ − 0.1·(−0.6) = wⱼ + <span class="g">0.06</span>.\n  We guessed too low, so the step raised wⱼ. The fix points the right way. ✓'
+  ]);
+});
+
+/* 16 TRAINING: loss-bowl ball with eta slider (overshoot/diverge) */
+window.__demos.push(function(){
+  const c=$('#gdCanvas'); if(!c)return;
+  const host=$('#trSliders'); host.innerHTML='';
+  const Lf=w=>0.5*Math.pow(w-3,2)+1, dL=w=>(w-3);
+  const wmin=-5,wmax=11,ymin=0,ymax=34;
+  let w=1, trail=[w], steps=0;
+  const getLr=makeSlider(host,{id:'gdLr',label:'η (rate)',min:'0.05',max:'2.6',step:'0.05',value:'0.5'},()=>render());
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const pad=42;
+    const X=v=>pad+(v-wmin)/(wmax-wmin)*(W-2*pad), Y=v=>H-pad-(v-ymin)/(ymax-ymin)*(H-2*pad);
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(120,150,210,.18)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad,Y(0));ctx.lineTo(W-pad,Y(0));ctx.stroke();
+    ctx.fillStyle='#64759c';ctx.font='11px monospace';ctx.fillText('w',W-pad+4,Y(0)+4);ctx.fillText('L(w)',pad-2,pad-8);
+    ctx.strokeStyle='#2a3a5c';ctx.lineWidth=2;ctx.beginPath();
+    for(let px=pad;px<=W-pad;px++){const ww=wmin+(px-pad)/(W-2*pad)*(wmax-wmin);const yy=Y(Lf(ww));if(px===pad)ctx.moveTo(px,yy);else ctx.lineTo(px,yy);}
+    ctx.stroke();
+    ctx.fillStyle='#62e88a';ctx.beginPath();ctx.arc(X(3),Y(Lf(3)),4,0,7);ctx.fill();
+    ctx.font='11px monospace';ctx.fillText('min w*=3',X(3)-22,Y(Lf(3))+20);
+    ctx.strokeStyle='rgba(255,203,107,.6)';ctx.lineWidth=1.4;ctx.beginPath();
+    trail.forEach((tw,i)=>{const px=X(clamp(tw,wmin,wmax)),py=Y(clamp(Lf(tw),ymin,ymax));if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);});ctx.stroke();
+    trail.forEach(tw=>{ctx.fillStyle='rgba(255,203,107,.5)';ctx.beginPath();ctx.arc(X(clamp(tw,wmin,wmax)),Y(clamp(Lf(tw),ymin,ymax)),3,0,7);ctx.fill();});
+    const bx=X(clamp(w,wmin,wmax)),by=Y(clamp(Lf(w),ymin,ymax));
+    ctx.fillStyle='#38f0d8';ctx.shadowColor='#38f0d8';ctx.shadowBlur=12;ctx.beginPath();ctx.arc(bx,by,8,0,7);ctx.fill();ctx.shadowBlur=0;
+  });
+  function render(){cv.redraw();
+    const g=dL(w);
+    $('#gdLive').innerHTML='step '+steps+':  w = '+fmt(w,3)+'   L(w) = '+(isFinite(Lf(w))?fmt(Lf(w),3):'∞')+'\n'+
+      'slope dL/dw = (w−3) = <span class="hl">'+fmt(g,3)+'</span>\n'+
+      'update: w ← w − η·slope\n'+
+      (getLr()>2?'<span class="p">η &gt; 2 → each step overshoots further → DIVERGES</span>':
+       getLr()>1?'<span class="hl">η in (1,2) → overshoots and oscillates, but still converges</span>':
+       '<span class="g">η in (0,1) → smooth, steady descent toward w*=3</span>');
+  }
+  function step(){const g=dL(w);w=w-getLr()*g;w=clamp(w,-1e6,1e6);trail.push(w);if(trail.length>40)trail.shift();steps++;render();}
+  $('#gdStep').addEventListener('click',step);
+  $('#gdRun').addEventListener('click',()=>{let n=0;const t=setInterval(()=>{step();if(++n>=20)clearInterval(t);},60);});
+  $('#gdReset').addEventListener('click',()=>{w=1;trail=[w];steps=0;render();});
+  render();
+});
+
+/* 17 LLM: zero-shot vs few-shot prompt toggle */
+window.__demos.push(function(){
+  const pre=$('#psPrompt'); if(!pre)return;
+  let mode='zero';
+  const zero='Classify the sentiment as Positive or Negative.\n\nReview: The plot dragged and I was bored.\nSentiment:';
+  const few='Review: I loved every minute.\nSentiment: Positive\n\nReview: A total waste of time.\nSentiment: Negative\n\nReview: The plot dragged and I was bored.\nSentiment:';
+  function render(){
+    pre.innerHTML='<button class="copybtn" id="psCopy">copy</button>'+(mode==='zero'?zero:few);
+    $('#psCopy').addEventListener('click',()=>{const txt=(mode==='zero'?zero:few);
+      if(navigator.clipboard)navigator.clipboard.writeText(txt);
+      const b=$('#psCopy');b.textContent='copied!';setTimeout(()=>b.textContent='copy',1200);});
+    $('#psLive').innerHTML='style = '+(mode==='zero'?'zero-shot (0 examples)':'few-shot (2 examples)')+'\n'+
+      'model completion: <span class="g">Negative</span>\n'+
+      (mode==='zero'?'no examples — the model uses its general knowledge.':'two examples first — the model copies the answer and the exact format.');
+  }
+  $('#psZero').addEventListener('click',()=>{mode='zero';$('#psZero').classList.add('active');$('#psFew').classList.remove('active');render();});
+  $('#psFew').addEventListener('click',()=>{mode='few';$('#psFew').classList.add('active');$('#psZero').classList.remove('active');render();});
+  render();
+});
+
+/* 18 TRANSFER: freeze vs fine-tune, layers light up */
+window.__demos.push(function(){
+  const c=$('#tfCanvas'); if(!c)return;
+  const host=$('#tfSliders'); host.innerHTML='';
+  let mode='freeze';
+  const getD=makeSlider(host,{id:'tfD',label:'target data',min:'0',max:'100',step:'1',value:'15'},()=>render());
+  const cv=setupCanvas(c,function(ctx,W,H){
+    ctx.clearRect(0,0,W,H);
+    const layers=['edges','shapes','parts','head'];
+    const n=layers.length, pad=60, gap=(W-2*pad)/(n-1), y=H*0.4;
+    for(let i=0;i<n-1;i++){ctx.strokeStyle='rgba(120,150,210,.3)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(pad+gap*i+22,y);ctx.lineTo(pad+gap*(i+1)-22,y);ctx.stroke();}
+    layers.forEach((lab,i)=>{
+      const isHead=(i===n-1);
+      let trained;
+      if(mode==='freeze')trained=isHead; else trained=true;
+      const col=trained?'#62e88a':'#19c4ff';
+      ctx.beginPath();ctx.arc(pad+gap*i,y,22,0,7);ctx.fillStyle=trained?'rgba(98,232,138,.2)':'rgba(25,196,255,.18)';ctx.fill();
+      ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.stroke();
+      ctx.fillStyle='#cfe6ff';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText(lab,pad+gap*i,y+4);
+      ctx.fillStyle=col;ctx.font='9.5px monospace';ctx.fillText(trained?'trained':'frozen',pad+gap*i,y+38);ctx.textAlign='left';});
+  });
+  function render(){cv.redraw();
+    const d=getD();
+    const overfit=(mode==='fine'&&d<35);
+    $('#tfLive').innerHTML='mode = '+(mode==='freeze'?'freeze early layers + new head':'fine-tune all layers')+'\n'+
+      'target (truck) data = '+d+'%\n'+
+      (mode==='freeze'?'<span class="g">blue layers reused, only the green head is trained.</span>':'<span class="hl">all layers update.</span>')+'\n'+
+      (overfit?'<span class="p">warning: little data + fine-tune all → overfits. Freeze instead.</span>':
+       (mode==='freeze'?'safe with little data: few weights to learn.':'good — lots of similar data makes full fine-tuning pay off.'));
+  }
+  $('#tfFreeze').addEventListener('click',()=>{mode='freeze';$('#tfFreeze').classList.add('active');$('#tfFine').classList.remove('active');render();});
+  $('#tfFine').addEventListener('click',()=>{mode='fine';$('#tfFine').classList.add('active');$('#tfFreeze').classList.remove('active');render();});
+  render();
+});
+
+/* 19 SYNTHESIS: grand-tour slider */
+window.__demos.push(function(){
+  const c=$('#syCanvas'); if(!c)return;
+  const host=$('#sySliders'); host.innerHTML='';
+  const stops=[
+    {t:'one unit',d:'A weighted sum, a bias, a squash. The atom.',col:'#19c4ff'},
+    {t:'activations',d:'A nonlinear bend lets units learn curves.',col:'#19c4ff'},
+    {t:'hidden layers',d:'Layers build features; XOR becomes solvable.',col:'#9b8cff'},
+    {t:'softmax',d:'Many-class output: probabilities that sum to 1.',col:'#9b8cff'},
+    {t:'embeddings',d:'Words as vectors; similar words sit close.',col:'#62e88a'},
+    {t:'neural LM',d:'Predict the next word from context.',col:'#62e88a'},
+    {t:'training',d:'Gradient descent shrinks the loss.',col:'#ffcb6b'},
+    {t:'LLM',d:'Scale it up: a giant transformer LM.',col:'#ff6ec7'}
+  ];
+  const getS=makeSlider(host,{id:'syS',label:'stage',min:'0',max:''+(stops.length-1),step:'1',value:'0'},()=>render());
+  const cv=setupCanvas(c,function(ctx,W,H){
+    const cur=getS();
+    ctx.clearRect(0,0,W,H);
+    const pad=44, gap=(W-2*pad)/(stops.length-1), y=H*0.5;
+    ctx.strokeStyle='rgba(56,240,216,.3)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();
+    stops.forEach((s,i)=>{const x=pad+gap*i, on=i<=cur, isCur=i===cur;
+      ctx.beginPath();ctx.arc(x,y,isCur?15:11,0,7);
+      ctx.fillStyle=on?s.col:'#0e1729';ctx.fill();if(isCur){ctx.shadowColor=s.col;ctx.shadowBlur=14;ctx.fill();ctx.shadowBlur=0;}
+      ctx.strokeStyle=s.col;ctx.lineWidth=2;ctx.stroke();
+      ctx.fillStyle=on?'#cfe6ff':'#5a6c8c';ctx.font=(isCur?'bold ':'')+'10px monospace';ctx.textAlign='center';
+      ctx.fillText(s.t,x,y+(i%2?34:-24));ctx.textAlign='left';});
+  });
+  function render(){cv.redraw();
+    const s=stops[getS()];
+    $('#syLive').innerHTML='stage '+(getS()+1)+' / '+stops.length+': <span class="g">'+s.t+'</span>\n'+s.d+'\n'+
+      (getS()>0?'built on: '+stops[getS()-1].t:'the starting atom.');
+  }
+  render();
+});
+
+/* ====================== boot ====================== */
+window.addEventListener('load',()=>{
+  runDemos(); initTheme(); initReveal(); initStory(); initRecall(); initCopy(); onScroll();
+  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();
+});
+</script>
+</body>
+</html>
