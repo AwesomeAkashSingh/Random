@@ -1,66 +1,784 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Natural Language Processing</title>
-</head>
+<style>
+  :root{
+    --bg: #f7f8fc;
+    --card: #ffffff;
+    --ink: #1b1e23;
+    --ink-soft: #5b6072;
+    --ink-faint: #8a8fa0;
+    --teal: #0f6f66;
+    --teal-dark: #0b524b;
+    --teal-soft: #e3f3f0;
+    --emerald: #1f9d6b;
+    --purple: #6b5bd6;
+    --purple-soft: #eeecfb;
+    --amber: #c98a1c;
+    --amber-soft: #fbf1de;
+    --rule: #e6e8f0;
+    --rule-strong: #d3d7e6;
+    --shadow: 0 1px 2px rgba(20,24,40,0.04), 0 8px 24px -12px rgba(20,24,40,0.10);
+    --shadow-hover: 0 2px 4px rgba(20,24,40,0.06), 0 14px 34px -14px rgba(20,24,40,0.18);
+  }
 
+  *{box-sizing: border-box;}
+  html{scroll-behavior: smooth;}
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif;
+    line-height:1.5;
+  }
+
+  ::selection{ background: var(--teal-soft); color: var(--ink); }
+  a{ color: inherit; }
+
+  .skip-link{
+    position:absolute; left:-999px; top:auto;
+    background:var(--ink); color:#fff; padding:8px 14px; z-index:100; border-radius:6px;
+  }
+  .skip-link:focus{ left:16px; top:16px; }
+
+  /* ---------- Header ---------- */
+  header.hero{
+    position:relative;
+    padding: 56px 8vw 40px;
+    background: linear-gradient(180deg, var(--teal-dark) 0%, var(--teal) 100%);
+    color: #fff;
+    overflow:hidden;
+  }
+  header.hero::after{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(700px 260px at 88% -20%, rgba(255,255,255,0.10), transparent 60%),
+      radial-gradient(500px 220px at 10% 120%, rgba(255,255,255,0.06), transparent 60%);
+    pointer-events:none;
+  }
+
+  .eyebrow{
+    position:relative;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.78);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 18px;
+  }
+  .eyebrow .dot{
+    width:8px; height:8px; border-radius:50%;
+    background: #ffd166;
+    display:inline-block;
+  }
+
+  h1.title{
+    position:relative;
+    font-weight: 750;
+    font-size: clamp(32px, 4.6vw, 48px);
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  h1.title .book-icon{ font-size: 0.8em; }
+
+  .dek{
+    position:relative;
+    max-width: 62ch;
+    font-size: 16px;
+    color: rgba(255,255,255,0.82);
+    margin: 0 0 30px;
+  }
+
+  .handout-row{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn-handout{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    background: #fff;
+    color: var(--teal-dark);
+    text-decoration:none;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 10px;
+    transition: transform .16s ease, box-shadow .16s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  }
+  .btn-handout:hover{ transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
+  .btn-handout svg{ width:15px; height:15px; }
+
+  /* ---------- Stat card (Resource counts) ---------- */
+  .stat-card{
+    position:relative;
+    margin-top: 32px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.16);
+    backdrop-filter: blur(6px);
+    border-radius: 16px;
+    padding: 20px 22px;
+    display:flex;
+    flex-wrap:wrap;
+    gap: 28px;
+    align-items:center;
+  }
+  .stat-item{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    color:#fff;
+  }
+  .stat-item .icon{ font-size: 20px; line-height:1; }
+  .stat-item .num{ font-size: 19px; font-weight: 800; }
+  .stat-item .label{ font-size: 12.5px; color: rgba(255,255,255,0.78); font-weight:500; }
+
+  /* ---------- Nav ---------- */
+  nav.jump{
+    position: sticky;
+    top:0;
+    z-index: 30;
+    background: rgba(247,248,252,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+    padding: 12px 8vw;
+    display:flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  nav.jump a{
+    text-decoration:none;
+    color: var(--ink-soft);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    transition: all .15s ease;
+  }
+  nav.jump a:hover, nav.jump a:focus-visible{
+    color: var(--teal-dark);
+    border-color: var(--teal);
+    background: var(--teal-soft);
+  }
+
+  /* ---------- Search ---------- */
+  .search-wrap{
+    padding: 28px 8vw 0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .search-box{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: var(--shadow);
+  }
+  .search-box svg{ width:18px; height:18px; color: var(--ink-faint); flex-shrink:0; }
+  .search-box input{
+    border:none; outline:none; flex:1;
+    font-size: 15px; font-family: inherit; color: var(--ink);
+    background: transparent;
+  }
+  .search-box input::placeholder{ color: var(--ink-faint); }
+  .search-clear{
+    display:none;
+    border:none; background: var(--rule); color: var(--ink-soft);
+    width:22px; height:22px; border-radius:50%; cursor:pointer;
+    font-size: 13px; align-items:center; justify-content:center; line-height:1;
+  }
+  .search-box.has-value .search-clear{ display:flex; }
+  #no-results{
+    display:none;
+    text-align:center;
+    color: var(--ink-faint);
+    font-size: 14px;
+    padding: 18px 0 0;
+  }
+
+  /* ---------- Main layout ---------- */
+  main{
+    padding: 28px 8vw 100px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .columns{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items:start;
+  }
+  @media (max-width: 980px){
+    .columns{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Professor card ---------- */
+  section.prof{
+    scroll-margin-top: 74px;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .prof-head{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+    padding: 20px 22px;
+    cursor: pointer;
+    user-select:none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .prof-head:hover{ background: #fafbfd; }
+
+  .prof-avatar{
+    width: 42px; height:42px;
+    border-radius: 12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 20px;
+    background: var(--teal-soft);
+    flex-shrink:0;
+  }
+
+  .prof-head-text{ flex:1; min-width:0; }
+  h2.prof-name{
+    font-size: 17px;
+    font-weight: 750;
+    margin:0 0 2px;
+    letter-spacing: -0.01em;
+  }
+  .prof-sub{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .prof-sub b{ color: var(--ink); font-weight:700; }
+
+  .chevron{
+    flex-shrink:0;
+    width: 30px; height:30px;
+    border-radius: 50%;
+    border: 1px solid var(--rule-strong);
+    display:flex; align-items:center; justify-content:center;
+    color: var(--ink-soft);
+    transition: transform .22s ease, background .15s ease;
+  }
+  section.prof.collapsed .chevron{ transform: rotate(-90deg); }
+  .prof-head:hover .chevron{ background: var(--teal-soft); color: var(--teal-dark); border-color: var(--teal); }
+
+  .prof-body{
+    border-top: 1px solid var(--rule);
+    max-height: 4000px;
+    overflow: hidden;
+    transition: max-height .35s ease, border-color .2s ease;
+  }
+  section.prof.collapsed .prof-body{
+    max-height: 0;
+    border-top-color: transparent;
+  }
+
+  /* Resource list */
+  ol.res-list{
+    list-style:none;
+    margin:0; padding: 8px;
+  }
+  ol.res-list li{
+    border-radius: 10px;
+  }
+  ol.res-list li.pinned .res-link{
+    background: var(--amber-soft);
+  }
+  ol.res-list li.hidden{ display:none; }
+
+  .res-link{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    padding: 11px 12px;
+    text-decoration:none;
+    color: var(--ink);
+    border-radius: 10px;
+    transition: background .14s ease;
+  }
+  .res-link:hover, .res-link:focus-visible{
+    background: var(--teal-soft);
+  }
+  .res-link:focus-visible{ outline: 2px solid var(--teal); outline-offset:-2px; }
+
+  .res-icon{
+    flex-shrink:0;
+    width: 30px; height:30px;
+    border-radius: 8px;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 15px;
+  }
+  .res-icon.pdf{ background: var(--purple-soft); }
+  .res-icon.notebook{ background: #dcecff; }
+  .res-icon.interactive{ background: var(--teal-soft); }
+  .res-icon.pinned-icon{ background: var(--amber-soft); }
+
+  .res-text{
+    flex:1;
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 0;
+  }
+
+  .tag{
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 999px;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .tag.pdf{ color: var(--purple); background: var(--purple-soft); }
+  .tag.notebook{ color: #1a63b8; background: #dcecff; }
+  .tag.interactive{ color: var(--teal-dark); background: var(--teal-soft); }
+  .tag.pinned-tag{ color: var(--amber); background: var(--amber-soft); }
+
+  footer{
+    padding: 34px 8vw 46px;
+    border-top: 1px solid var(--rule);
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  footer a{ text-decoration: underline; text-underline-offset: 3px; color: var(--teal-dark); font-weight:600; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition: none !important; scroll-behavior: auto !important; }
+  }
+
+  @media (max-width: 600px){
+    header.hero{ padding: 44px 6vw 32px; }
+    nav.jump{ padding: 10px 6vw; }
+    main{ padding: 24px 6vw 70px; }
+    .search-wrap{ padding: 24px 6vw 0; }
+    .stat-card{ gap: 16px 22px; }
+  }
+</style>
+</head>
 <body>
 
-<h1>Natural Language Processing</h1>
+<a class="skip-link" href="#main">Skip to resources</a>
 
-<ul>
-<li> <a href="Handout%20-%20NLP.pdf" target="_blank"> Handout </a> </li>
-</ul>
+<header class="hero">
+  <div class="eyebrow"><span class="dot"></span> BITS Pilani WILP &middot; AIML / AECL &middot; Sem 2</div>
+  <h1 class="title"><span class="book-icon">📚</span> Natural Language Processing</h1>
+  <p class="dek">Lecture companions, practice sets, and interactive notebooks from both sections — organized like a library so you can find what you need before an exam.</p>
 
-<hr>
+  <div class="handout-row">
+    <a class="btn-handout" href="Handout%20-%20NLP.pdf" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      Course Handout
+    </a>
+  </div>
 
-<h2>👨‍🏫 Prof. Saurabh</h2>
+  <div class="stat-card">
+    <div class="stat-item"><span class="icon">📄</span><span class="num">25</span><span class="label">PDFs</span></div>
+    <div class="stat-item"><span class="icon">💻</span><span class="num">5</span><span class="label">Notebooks</span></div>
+    <div class="stat-item"><span class="icon">🌐</span><span class="num">4</span><span class="label">Interactive Pages</span></div>
+    <div class="stat-item"><span class="icon">👩‍🏫</span><span class="num">2</span><span class="label">Professors</span></div>
+  </div>
+</header>
 
-<ul>
-<li> <a href="Saurabh/NLP_Practice_Set.pdf" target="_blank"> 📌 Practice Set for Modules 1–6 </a> </li>
-<li> <a href="Saurabh/NLP_lecture2_Companion.pdf" target="_blank"> Lecture 2 - Vector Semantics and Word Embeddings </a> </li>
-<li> <a href="Saurabh/cbow_guide-v2.pdf" target="_blank"> Lecture 2 - Continuous Bag-of-Words (CBOW) </a> </li>
-<li> <a href="Saurabh/NLP_Lecture3_Companion1.pdf" target="_blank"> Lecture 3 - Word2Vec : Skip-Gram - Vanilla Softmax to Negative Sampling (SGNS) </a> </li>
-<li> <a href="Saurabh/NLP_Lecture3_Companion2.pdf" target="_blank"> Lecture 3 - GloVe - Global Vectors for Word Representation </a> </li>
-<li> <a href="Saurabh/NLP_lecture4_Companion.pdf" target="_blank"> Lecture 4 - N-Gram Language Models </a> </li>
-<li> <a href="Saurabh/NLP_Lecture_4.html" target="_blank"> ⭐ Interactive - Language Modelling </a> </li>
-<li> <a href="Saurabh/NLP_Lecture5_companion.pdf" target="_blank"> Lecture 5 - Neural Networks & Neural Language Models </a> </li>
-<li> <a href="Saurabh/NLP_lecture5_Companion_Final.pdf" target="_blank"> Neural Networks & Neural Language Models </a> </li>
-<li> <a href="Saurabh/NLP_lecture5.html" target="_blank"> ⭐ Interactive - Neural Networks & Neural Language Models </a> </li>
-<li> <a href="Saurabh/POS-Tagging-Companion.pdf" target="_blank"> Lecture 6 - From word classes to HMMs, the Viterbi algorithm, and MEMMs </a> </li>
-<li> <a href="Saurabh/POS-Tagging-Interactive-Lecture.html" target="_blank"> ⭐ Interactive - Part-of-Speech Tagging </a> </li>
-<li> <a href="Saurabh/NLP_lecture6_Companion_Final.pdf" target="_blank"> Lecture 6 - Part-of-Speech Tagging : Hidden Markov Models & The Viterbi Algorithm </a> </li>
-<li> <a href="Saurabh/NLP_Lecture7_Companion.pdf" target="_blank"> Lecture 7 - Neural, LLM & Agentic Approaches to POS Tagging </a> </li>
-<li> <a href="Saurabh/NLP_Lecture_7.html" target="_blank"> ⭐ Interactive - POS Tagging, from RNNs to Agents, Bi-LSTM-CRF </a> </li>
-<li> <a href="Saurabh/NLP_L9_Companion.pdf" target="_blank"> Lecture 9 - Syntactic Parsing, Chart Parsers, and PCFGs </a> </li>
-<li> <a href="Saurabh/NLP_L10_Companion.pdf" target="_blank"> Lecture 10 - Dependency Grammar and Parsing </a> </li>
-<li> <a href="Saurabh/NLP_L11_Companion.pdf" target="_blank"> Lecture 11 - RNNs to BERT: Encoder-Decoder, Attention, and Contextual Embeddings </a> </li>
-<li> <a href="Saurabh/NLP_L12_Companion.pdf" target="_blank"> Lecture 12 - Word Senses, Relations, and WordNet </a> </li>
-<li> <a href="Saurabh/NLP_L13_Companion.pdf" target="_blank"> Lecture 13 - Semantic Web, Ontologies, and Knowledge Graphs </a> </li>
-<li> <a href="Saurabh/NLP_L14_Companion.pdf" target="_blank"> Lecture 14 - Retrieval-Augmented Generation, Graph RAG, and Autonomous Agents </a> </li>
-<li> <a href="Saurabh/NLP_L15_Companion.pdf" target="_blank"> Lecture 15 - Automated Text Summarization </a> </li>
-</ul>
+<nav class="jump" aria-label="Jump to section">
+  <a href="#saurabh">Prof. Saurabh</a>
+  <a href="#chetana">Prof. Chetana Gavankar</a>
+</nav>
 
-<hr>
+<div class="search-wrap">
+  <div class="search-box" id="searchBox">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Search resources..." aria-label="Search resources">
+    <button class="search-clear" id="searchClear" aria-label="Clear search">&times;</button>
+  </div>
+  <p id="no-results">No resources match your search.</p>
+</div>
 
-<h2>👩‍🏫 Prof. Chetana Gavankar</h2>
+<main id="main">
+  <div class="columns">
 
-<ul>
-<li> <a href="Chetana/NLP_Session_1_Natural_Language_Understanding_and_Generation.pdf" target="_blank"> Session 1 - Natural Language Understanding and Generation </a> </li>
-<li> <a href="https://colab.research.google.com/github/AwesomeAkashSingh/Random/blob/main/Sem2/NLP/Chetana/NLTK.ipynb" target="_blank"> ⭐ Interactive - NTLK </a> </li>
-<li> <a href="https://colab.research.google.com/github/AwesomeAkashSingh/Random/blob/main/Sem2/NLP/Chetana/Spacy.ipynb" target="_blank"> ⭐ Interactive - Spacy </a> </li>
-<li> <a href="Chetana/NLP_Session_2_Vector_Semantics.pdf" target="_blank"> Session 2 - Vector Semantics </a> </li>
-<li> <a href="https://colab.research.google.com/github/AwesomeAkashSingh/Random/blob/main/Sem2/NLP/Chetana/Count_Vectorization.ipynb" target="_blank"> ⭐ Interactive - Count Vectorization </a> </li>
-<li> <a href="https://colab.research.google.com/github/AwesomeAkashSingh/Random/blob/main/Sem2/NLP/Chetana/TF-IDF.ipynb" target="_blank"> ⭐ Interactive - TF-IDF </a> </li>
-<li> <a href="Chetana/NLP_Session_3-_Word_Embedding.pdf" target="_blank"> Session 3 - Word Embedding </a> </li>
-<li> <a href="Chetana/WordEmbeddingSGNS_Contact_session_problem_Solution_calculations.pdf" target="_blank"> SGNS problem solution's calculations </a> </li>
-<li> <a href="Chetana/NLP_Session_4-Language_modelling.pdf" target="_blank"> Session 4 - Language modelling </a> </li>
-<li> <a href="https://colab.research.google.com/github/AwesomeAkashSingh/Random/blob/main/Sem2/NLP/Chetana/N-Grams.ipynb" target="_blank"> ⭐ Interactive - N-Grams </a> </li>
-<li> <a href="Chetana/NLP_Session_5_Neural_networks_and_Neural_language_Models.pdf" target="_blank"> Session 5 - Neural networks and Neural Language models </a> </li>
-<li> <a href="Chetana/NLP_Session_6-_POS_Tagging_and_its_applications.pdf" target="_blank"> Session 6 - POS tagging and its applications </a> </li>
-<li> <a href="Chetana/NLP_Session_7-Neural_LLM_Agentic_approaches_to_POS_tagging.pdf" target="_blank"> Session 7 - Neural LLM Agentic Approaches to POS Tagging </a> </li>
-<li> <a href="Chetana/NLP_Midsem_recap_Vector_Semantics_and_word_embedding.pdf" target="_blank"> Midsem Recap </a> </li>
-</ul>
-  
+    <section class="prof" id="saurabh">
+      <div class="prof-head" data-toggle>
+        <div class="prof-avatar">🧑‍🏫</div>
+        <div class="prof-head-text">
+          <h2 class="prof-name">Prof. Saurabh</h2>
+          <p class="prof-sub"><b>15</b> Lectures &middot; <b>4</b> Interactive Labs &middot; <b>2</b> Practice Sets</p>
+        </div>
+        <div class="chevron" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+
+      <div class="prof-body">
+        <ol class="res-list">
+          <li class="pinned" data-search="practice set for modules 1-6">
+            <a class="res-link" href="Saurabh/NLP_Practice_Set.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pinned-icon">📌</span>
+              <span class="res-text">Practice Set for Modules 1&ndash;6</span>
+              <span class="tag pinned-tag">Pinned</span>
+            </a>
+          </li>
+          <li data-search="lecture 2 vector semantics and word embeddings pdf">
+            <a class="res-link" href="Saurabh/NLP_lecture2_Companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 2 &mdash; Vector Semantics and Word Embeddings</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="lecture 2 continuous bag-of-words cbow pdf">
+            <a class="res-link" href="Saurabh/cbow_guide-v2.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 2 &mdash; Continuous Bag-of-Words (CBOW)</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="lecture 3 word2vec skip-gram vanilla softmax negative sampling sgns pdf">
+            <a class="res-link" href="Saurabh/NLP_Lecture3_Companion1.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 3 &mdash; Word2Vec: Skip-Gram, Vanilla Softmax to Negative Sampling (SGNS)</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="lecture 3 glove global vectors for word representation pdf">
+            <a class="res-link" href="Saurabh/NLP_Lecture3_Companion2.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 3 &mdash; GloVe: Global Vectors for Word Representation</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="lecture 4 n-gram language models pdf">
+            <a class="res-link" href="Saurabh/NLP_lecture4_Companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 4 &mdash; N-Gram Language Models</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="interactive language modelling html">
+            <a class="res-link" href="Saurabh/NLP_Lecture_4.html" target="_blank" rel="noopener">
+              <span class="res-icon interactive">🌐</span>
+              <span class="res-text">Interactive &mdash; Language Modelling</span>
+              <span class="tag interactive">Interactive</span>
+            </a>
+          </li>
+          <li data-search="lecture 5 neural networks neural language models pdf">
+            <a class="res-link" href="Saurabh/NLP_Lecture5_companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 5 &mdash; Neural Networks &amp; Neural Language Models</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="neural networks neural language models final pdf">
+            <a class="res-link" href="Saurabh/NLP_lecture5_Companion_Final.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Neural Networks &amp; Neural Language Models (Final)</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="interactive neural networks neural language models html">
+            <a class="res-link" href="Saurabh/NLP_lecture5.html" target="_blank" rel="noopener">
+              <span class="res-icon interactive">🌐</span>
+              <span class="res-text">Interactive &mdash; Neural Networks &amp; Neural Language Models</span>
+              <span class="tag interactive">Interactive</span>
+            </a>
+          </li>
+          <li data-search="lecture 6 word classes hmms viterbi algorithm memms pdf pos tagging">
+            <a class="res-link" href="Saurabh/POS-Tagging-Companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 6 &mdash; From Word Classes to HMMs, the Viterbi Algorithm, and MEMMs</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="interactive part-of-speech tagging html pos">
+            <a class="res-link" href="Saurabh/POS-Tagging-Interactive-Lecture.html" target="_blank" rel="noopener">
+              <span class="res-icon interactive">🌐</span>
+              <span class="res-text">Interactive &mdash; Part-of-Speech Tagging</span>
+              <span class="tag interactive">Interactive</span>
+            </a>
+          </li>
+          <li data-search="lecture 6 pos tagging hidden markov models viterbi algorithm pdf">
+            <a class="res-link" href="Saurabh/NLP_lecture6_Companion_Final.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 6 &mdash; POS Tagging: Hidden Markov Models &amp; The Viterbi Algorithm</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="lecture 7 neural llm agentic approaches pos tagging pdf">
+            <a class="res-link" href="Saurabh/NLP_Lecture7_Companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 7 &mdash; Neural, LLM &amp; Agentic Approaches to POS Tagging</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="interactive pos tagging rnns agents bi-lstm-crf html">
+            <a class="res-link" href="Saurabh/NLP_Lecture_7.html" target="_blank" rel="noopener">
+              <span class="res-icon interactive">🌐</span>
+              <span class="res-text">Interactive &mdash; POS Tagging, from RNNs to Agents, Bi-LSTM-CRF</span>
+              <span class="tag interactive">Interactive</span>
+            </a>
+          </li>
+          <li data-search="lecture 9 syntactic parsing chart parsers pcfgs pdf">
+            <a class="res-link" href="Saurabh/NLP_L9_Companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 9 &mdash; Syntactic Parsing, Chart Parsers, and PCFGs</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="lecture 10 dependency grammar parsing pdf">
+            <a class="res-link" href="Saurabh/NLP_L10_Companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 10 &mdash; Dependency Grammar and Parsing</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="lecture 11 rnns to bert encoder-decoder attention contextual embeddings pdf attention demo transformer">
+            <a class="res-link" href="Saurabh/NLP_L11_Companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 11 &mdash; RNNs to BERT: Encoder-Decoder, Attention, and Contextual Embeddings</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="lecture 12 word senses relations wordnet pdf">
+            <a class="res-link" href="Saurabh/NLP_L12_Companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 12 &mdash; Word Senses, Relations, and WordNet</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="lecture 13 semantic web ontologies knowledge graphs pdf">
+            <a class="res-link" href="Saurabh/NLP_L13_Companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 13 &mdash; Semantic Web, Ontologies, and Knowledge Graphs</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="lecture 14 retrieval-augmented generation graph rag autonomous agents pdf">
+            <a class="res-link" href="Saurabh/NLP_L14_Companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 14 &mdash; Retrieval-Augmented Generation, Graph RAG, and Autonomous Agents</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="lecture 15 automated text summarization pdf">
+            <a class="res-link" href="Saurabh/NLP_L15_Companion.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Lecture 15 &mdash; Automated Text Summarization</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="prof" id="chetana">
+      <div class="prof-head" data-toggle>
+        <div class="prof-avatar">🧑‍🏫</div>
+        <div class="prof-head-text">
+          <h2 class="prof-name">Prof. Chetana Gavankar</h2>
+          <p class="prof-sub"><b>7</b> Sessions &middot; <b>5</b> Interactive Notebooks &middot; <b>1</b> Midsem Recap</p>
+        </div>
+        <div class="chevron" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+
+      <div class="prof-body">
+        <ol class="res-list">
+          <li data-search="session 1 natural language understanding and generation pdf">
+            <a class="res-link" href="Chetana/NLP_Session_1_Natural_Language_Understanding_and_Generation.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Session 1 &mdash; Natural Language Understanding and Generation</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="interactive nltk notebook colab">
+            <a class="res-link" href="https://colab.research.google.com/github/AwesomeAkashSingh/Random/blob/main/Sem2/NLP/Chetana/NLTK.ipynb" target="_blank" rel="noopener">
+              <span class="res-icon notebook">💻</span>
+              <span class="res-text">Interactive &mdash; NLTK</span>
+              <span class="tag notebook">Notebook</span>
+            </a>
+          </li>
+          <li data-search="interactive spacy notebook colab">
+            <a class="res-link" href="https://colab.research.google.com/github/AwesomeAkashSingh/Random/blob/main/Sem2/NLP/Chetana/Spacy.ipynb" target="_blank" rel="noopener">
+              <span class="res-icon notebook">💻</span>
+              <span class="res-text">Interactive &mdash; spaCy</span>
+              <span class="tag notebook">Notebook</span>
+            </a>
+          </li>
+          <li data-search="session 2 vector semantics pdf">
+            <a class="res-link" href="Chetana/NLP_Session_2_Vector_Semantics.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Session 2 &mdash; Vector Semantics</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="interactive count vectorization notebook colab">
+            <a class="res-link" href="https://colab.research.google.com/github/AwesomeAkashSingh/Random/blob/main/Sem2/NLP/Chetana/Count_Vectorization.ipynb" target="_blank" rel="noopener">
+              <span class="res-icon notebook">💻</span>
+              <span class="res-text">Interactive &mdash; Count Vectorization</span>
+              <span class="tag notebook">Notebook</span>
+            </a>
+          </li>
+          <li data-search="interactive tf-idf notebook colab">
+            <a class="res-link" href="https://colab.research.google.com/github/AwesomeAkashSingh/Random/blob/main/Sem2/NLP/Chetana/TF-IDF.ipynb" target="_blank" rel="noopener">
+              <span class="res-icon notebook">💻</span>
+              <span class="res-text">Interactive &mdash; TF-IDF</span>
+              <span class="tag notebook">Notebook</span>
+            </a>
+          </li>
+          <li data-search="session 3 word embedding pdf">
+            <a class="res-link" href="Chetana/NLP_Session_3-_Word_Embedding.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Session 3 &mdash; Word Embedding</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="sgns problem worked solution calculations pdf">
+            <a class="res-link" href="Chetana/WordEmbeddingSGNS_Contact_session_problem_Solution_calculations.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">SGNS Problem &mdash; Worked Solution &amp; Calculations</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="session 4 language modelling pdf">
+            <a class="res-link" href="Chetana/NLP_Session_4-Language_modelling.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Session 4 &mdash; Language Modelling</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="interactive n-grams notebook colab">
+            <a class="res-link" href="https://colab.research.google.com/github/AwesomeAkashSingh/Random/blob/main/Sem2/NLP/Chetana/N-Grams.ipynb" target="_blank" rel="noopener">
+              <span class="res-icon notebook">💻</span>
+              <span class="res-text">Interactive &mdash; N-Grams</span>
+              <span class="tag notebook">Notebook</span>
+            </a>
+          </li>
+          <li data-search="session 5 neural networks neural language models pdf">
+            <a class="res-link" href="Chetana/NLP_Session_5_Neural_networks_and_Neural_language_Models.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Session 5 &mdash; Neural Networks and Neural Language Models</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="session 6 pos tagging its applications pdf">
+            <a class="res-link" href="Chetana/NLP_Session_6-_POS_Tagging_and_its_applications.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Session 6 &mdash; POS Tagging and Its Applications</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li data-search="session 7 neural llm agentic approaches pos tagging pdf">
+            <a class="res-link" href="Chetana/NLP_Session_7-Neural_LLM_Agentic_approaches_to_POS_tagging.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pdf">📄</span>
+              <span class="res-text">Session 7 &mdash; Neural, LLM &amp; Agentic Approaches to POS Tagging</span>
+              <span class="tag pdf">PDF</span>
+            </a>
+          </li>
+          <li class="pinned" data-search="midsem recap vector semantics word embedding pdf pinned">
+            <a class="res-link" href="Chetana/NLP_Midsem_recap_Vector_Semantics_and_word_embedding.pdf" target="_blank" rel="noopener">
+              <span class="res-icon pinned-icon">📌</span>
+              <span class="res-text">Midsem Recap &mdash; Vector Semantics &amp; Word Embedding</span>
+              <span class="tag pinned-tag">Pinned</span>
+            </a>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <span>BITS M.Tech AIML &middot; Oct 2025 Batch (unofficial)</span>
+  <a href="../../../Random/">&larr; Back to batch hub</a>
+</footer>
+
+<script>
+  // Collapsible professor sections
+  document.querySelectorAll('[data-toggle]').forEach(function(head){
+    head.addEventListener('click', function(){
+      head.closest('.prof').classList.toggle('collapsed');
+    });
+  });
+
+  // Live search filter
+  var input = document.getElementById('searchInput');
+  var box = document.getElementById('searchBox');
+  var clearBtn = document.getElementById('searchClear');
+  var noResults = document.getElementById('no-results');
+  var allItems = Array.prototype.slice.call(document.querySelectorAll('ol.res-list > li'));
+  var allSections = Array.prototype.slice.call(document.querySelectorAll('section.prof'));
+
+  function runFilter(){
+    var q = input.value.trim().toLowerCase();
+    box.classList.toggle('has-value', q.length > 0);
+
+    if(!q){
+      allItems.forEach(function(li){ li.classList.remove('hidden'); });
+      allSections.forEach(function(sec){
+        sec.style.display = '';
+        sec.classList.remove('collapsed');
+      });
+      noResults.style.display = 'none';
+      return;
+    }
+
+    var anyVisible = false;
+    allSections.forEach(function(sec){
+      var sectionHasMatch = false;
+      sec.querySelectorAll('ol.res-list > li').forEach(function(li){
+        var haystack = (li.getAttribute('data-search') || '') + ' ' + li.textContent.toLowerCase();
+        var match = haystack.toLowerCase().indexOf(q) !== -1;
+        li.classList.toggle('hidden', !match);
+        if(match){ sectionHasMatch = true; anyVisible = true; }
+      });
+      sec.style.display = sectionHasMatch ? '' : 'none';
+      if(sectionHasMatch){ sec.classList.remove('collapsed'); }
+    });
+
+    noResults.style.display = anyVisible ? 'none' : 'block';
+  }
+
+  input.addEventListener('input', runFilter);
+  clearBtn.addEventListener('click', function(){
+    input.value = '';
+    runFilter();
+    input.focus();
+  });
+</script>
+
 </body>
 </html>
