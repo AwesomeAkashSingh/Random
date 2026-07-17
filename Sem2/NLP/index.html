@@ -936,6 +936,21 @@
     runFilter();
     input.focus();
   });
+
+  // Automatically count resources
+
+document.getElementById("pdfCount").textContent =
+    document.querySelectorAll(".tag.pdf").length;
+
+document.getElementById("notebookCount").textContent =
+    document.querySelectorAll(".tag.notebook").length;
+
+document.getElementById("interactiveCount").textContent =
+    document.querySelectorAll(".tag.interactive").length;
+
+document.getElementById("videoCount").textContent =
+    document.querySelectorAll(".tag.video").length;
+  
 </script>
 
 </body>
