@@ -8,8 +8,8 @@ const SHEET_ID = '1YJqISqU7KNN3mv-Vs1x6iTBfsNFcckOT1a_9ENnFmAA';
     el.style.display = 'none';
   });
 
-const main = document.getElementById('sem2-main-content');
-if (main && tabId === 'sem2') {
+const main = document.getElementById('sem3-main-content');
+if (main && tabId === 'sem3') {
     main.style.display = '';
 }
       
@@ -759,7 +759,7 @@ btn.classList.add('active');
     el.style.display = 'none';
   });
 
-  const main = document.getElementById('sem2-main-content');
+  const main = document.getElementById('sem3-main-content');
 
   if (main) {
     main.style.display = 'none';
