@@ -592,7 +592,7 @@ track.appendChild(row);
       if (!items.length) {
         const empty = document.createElement('div');
         empty.className = 'empty-state';
-        empty.textContent = 'No webinars are scheduled in the next 3 days.';
+        empty.textContent = 'No upcoming webinars found.';
         grid.appendChild(empty);
         return;
       }
@@ -707,7 +707,7 @@ const endObj = parseFlexibleDate(endRaw, 'end');
 const upcomingWebinars = normalized.filter(isWebinarRow).filter(i => wKey(i) && wKey(i).getTime() >= Date.now()).sort((a, b) => wKey(a) - wKey(b));
 const in3Days = upcomingWebinars.filter(i => wKey(i).getTime() <= Date.now() + 3 * 24 * 60 * 60 * 1000);
 const webinarRows = in3Days.length ? in3Days : upcomingWebinars.slice(0, 12);
-          .sort((a, b) => (a.startObj || a.endObj) - (b.startObj || b.endObj));
+          
         const deadlineRows = normalized.filter(isDeadlineRow);
 
         const upcomingDeadlines = getUpcomingDeadlines(deadlineRows);
