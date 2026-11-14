@@ -703,12 +703,10 @@ const endObj = parseFlexibleDate(endRaw, 'end');
         });
 
         const announcements = normalized.filter(isAnnouncementRow);
-        const webinarRows = normalized.filter(isWebinarRow)
-          .filter(item => {
-            const base = item.startObj || item.endObj;
-            if (!base) return false;
-            return base.getTime() >= Date.now() && base.getTime() <= Date.now() + (3 * 24 * 60 * 60 * 1000);
-          })
+        const wKey = i => i.startObj || i.endObj;
+const upcomingWebinars = normalized.filter(isWebinarRow).filter(i => wKey(i) && wKey(i).getTime() >= Date.now()).sort((a, b) => wKey(a) - wKey(b));
+const in3Days = upcomingWebinars.filter(i => wKey(i).getTime() <= Date.now() + 3 * 24 * 60 * 60 * 1000);
+const webinarRows = in3Days.length ? in3Days : upcomingWebinars.slice(0, 12);
           .sort((a, b) => (a.startObj || a.endObj) - (b.startObj || b.endObj));
         const deadlineRows = normalized.filter(isDeadlineRow);
 
