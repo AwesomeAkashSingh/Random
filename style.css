@@ -489,6 +489,8 @@
       margin: 2px 0;
     }
 
+.deadline-meta, .webinar-meta { overflow-wrap: anywhere; }
+
     .deadline-pill {
       display: inline-block;
       margin-top: 8px;
