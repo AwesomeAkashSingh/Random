@@ -348,8 +348,9 @@ function formatDateTime(dateObj) {
   raw = raw.replace(/\([^)]*\)/g, ' ');
   raw = raw.replace(/\b(?:IST|GMT|UTC)\b/gi, ' ');
   raw = raw.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+        raw = raw.replace(/^(\d{1,2})[-\/.]([A-Za-z]{3,})[-\/.](\d{4})/, '$1 $2 $3');
 raw = raw.replace(/\s+/g, ' ').trim();
-  raw = raw.replace(/^(\d{1,2})[-\/.]([A-Za-z]{3,})[-\/.](\d{4})/, '$1 $2 $3');
+  
 
   const applyDefaultTime = (dateObj, hasTime) => {
     if (hasTime) {
