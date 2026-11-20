@@ -627,6 +627,24 @@ track.appendChild(row);
       });
     }
 
+function renderOngoing(items) {
+  const grid = document.getElementById('ongoingGrid'), status = document.getElementById('ongoingStatus');
+  grid.innerHTML = '';
+  status.textContent = items.length ? `${items.length} ongoing ${items.length === 1 ? 'activity' : 'activities'}.` : 'No ongoing activities right now.';
+  items.forEach(item => {
+    const card = document.createElement('div'); card.className = 'deadline-card';
+    const title = document.createElement('h3'); title.className = 'deadline-title';
+    title.textContent = `${item.subject ? item.subject + ' — ' : ''}${item.event}`;
+    card.appendChild(title);
+    [['Started on', item.startObj ? formatDateTime(item.startObj) : '—'], ['Ends on', item.endObj ? formatDateTime(item.endObj) : '—'], ['', item.moredetails]].forEach(([label, value]) => {
+      if (!value) return;
+      const d = document.createElement('div'); d.className = 'deadline-meta';
+      d.textContent = label ? `${label}: ${value}` : value; card.appendChild(d);
+    });
+    grid.appendChild(card);
+  });
+}
+
     function fillModalList(elementId, items, kind) {
       const list = document.getElementById(elementId);
       list.innerHTML = '';
@@ -718,8 +736,14 @@ const webinarRows = in3Days.length ? in3Days : upcomingWebinars.slice(0, 12);
           .filter(item => item.endObj && item.endObj.getTime() >= nowMs && item.endObj.getTime() <= nowMs + fortyEightHoursMs)
           .sort((a, b) => a.endObj - b.endObj);
 
+          const endKey = i => i.endObj ? i.endObj.getTime() : 8.64e15;
+const ongoingRows = [...announcements, ...deadlineRows]
+  .filter(i => (!i.startObj || i.startObj.getTime() <= nowMs) && (!i.endObj || i.endObj.getTime() >= nowMs) && (i.startObj || i.endObj || isAnnouncementRow(i)))
+  .sort((a, b) => endKey(a) - endKey(b));
+
         renderAnnouncements(announcements);
         renderDeadlines(upcomingDeadlines);
+          renderOngoing(ongoingRows);
         renderWebinars(webinarRows);
 
         fillModalList('announcementsModalList', announcements, 'Announcement');
@@ -737,6 +761,7 @@ if (nearTermDeadlines.length) {
         document.getElementById('deadlineStatus').textContent = 'Could not load the sheet right now. Check that it is published or publicly accessible.';
         renderAnnouncements([]);
         renderDeadlines([]);
+          renderOngoing([]); document.getElementById('ongoingStatus').textContent = 'Could not load the sheet right now.';
         renderWebinars([]);
         fillModalList('announcementsModalList', [], 'Announcement');
         fillModalList('deadlinesModalList', [], 'Deadline');
