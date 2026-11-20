@@ -629,16 +629,21 @@ track.appendChild(row);
       });
     }
 
-function renderOngoing(items) {
-  const grid = document.getElementById('ongoingGrid'), status = document.getElementById('ongoingStatus');
+const UPCOMING_DAYS = 14;
+const hasClock = s => /\d{1,2}:\d{2}|\d{1,2}\s*(AM|PM)\b/i.test(String(s || '').replace(/\([^)]*\)/g, ' '));
+const isDash = s => /^[-–—]+$/.test(String(s || '').trim());
+const fmtStart = i => isDash(i.startRaw) ? 'To be announced' : !i.startObj ? '—' : hasClock(i.startRaw) ? formatDateTime(i.startObj) : formatDate(i.startObj);
+
+function renderActivities(items, gridId, statusId, startLabel, one, many) {
+  const grid = document.getElementById(gridId), status = document.getElementById(statusId);
   grid.innerHTML = '';
-  status.textContent = items.length ? `${items.length} ongoing ${items.length === 1 ? 'activity' : 'activities'}.` : 'No ongoing activities right now.';
+  status.textContent = items.length ? `${items.length} ${items.length === 1 ? one : many}.` : `No ${many} right now.`;
   items.forEach(item => {
     const card = document.createElement('div'); card.className = 'deadline-card';
     const title = document.createElement('h3'); title.className = 'deadline-title';
     title.textContent = `${item.subject ? item.subject + ' — ' : ''}${item.event}`;
     card.appendChild(title);
-    [['Started on', item.startObj ? formatDateTime(item.startObj) : '—'], ['Ends on', item.endObj ? formatDateTime(item.endObj) : '—'], ['', item.moredetails]].forEach(([label, value]) => {
+    [[startLabel, fmtStart(item)], ['Ends on', item.endObj ? formatDateTime(item.endObj) : '—'], ['', item.moredetails]].forEach(([label, value]) => {
       if (!value) return;
       const d = document.createElement('div'); d.className = 'deadline-meta';
       d.textContent = label ? `${label}: ${value}` : value; card.appendChild(d);
@@ -646,6 +651,8 @@ function renderOngoing(items) {
     grid.appendChild(card);
   });
 }
+const renderOngoing = items => renderActivities(items, 'ongoingGrid', 'ongoingStatus', 'Started on', 'ongoing activity', 'ongoing activities');
+const renderUpcoming = items => renderActivities(items, 'upcomingGrid', 'upcomingStatus', 'Starts on', 'upcoming activity', 'upcoming activities');
 
     function fillModalList(elementId, items, kind) {
       const list = document.getElementById(elementId);
@@ -738,14 +745,16 @@ const webinarRows = in3Days.length ? in3Days : upcomingWebinars.slice(0, 12);
           .filter(item => item.endObj && item.endObj.getTime() >= nowMs && item.endObj.getTime() <= nowMs + fortyEightHoursMs)
           .sort((a, b) => a.endObj - b.endObj);
 
-          const endKey = i => i.endObj ? i.endObj.getTime() : 8.64e15;
-const ongoingRows = [...announcements, ...deadlineRows]
-  .filter(i => (!i.startObj || i.startObj.getTime() <= nowMs) && (!i.endObj || i.endObj.getTime() >= nowMs) && (i.startObj || i.endObj || isAnnouncementRow(i)))
-  .sort((a, b) => endKey(a) - endKey(b));
+          const startState = i => isDash(i.startRaw) ? 'upcoming' : !i.startObj ? 'ongoing' : ((hasClock(i.startRaw) ? i.startObj.getTime() : new Date(i.startObj.getFullYear(), i.startObj.getMonth(), i.startObj.getDate(), 23, 59, 59, 999).getTime()) > nowMs ? 'upcoming' : 'ongoing');
+const pool = [...announcements, ...deadlineRows].filter(i => (!i.endObj || i.endObj.getTime() >= nowMs) && (i.startObj || i.endObj || isAnnouncementRow(i)));
+const endKey = i => i.endObj ? i.endObj.getTime() : 8.64e15, startKey = i => i.startObj ? i.startObj.getTime() : 8.64e15;
+const ongoingRows = pool.filter(i => startState(i) === 'ongoing').sort((a, b) => endKey(a) - endKey(b));
+const upcomingRows = pool.filter(i => startState(i) === 'upcoming' && (isDash(i.startRaw) || startKey(i) <= nowMs + UPCOMING_DAYS * 864e5)).sort((a, b) => startKey(a) - startKey(b) || endKey(a) - endKey(b));
 
         renderAnnouncements(announcements);
         renderDeadlines(upcomingDeadlines);
           renderOngoing(ongoingRows);
+          renderUpcoming(upcomingRows);
         renderWebinars(webinarRows);
 
         fillModalList('announcementsModalList', announcements, 'Announcement');
@@ -764,6 +773,7 @@ if (nearTermDeadlines.length) {
         renderAnnouncements([]);
         renderDeadlines([]);
           renderOngoing([]); document.getElementById('ongoingStatus').textContent = 'Could not load the sheet right now.';
+          renderUpcoming([]); document.getElementById('upcomingStatus').textContent = 'Could not load the sheet right now.';
         renderWebinars([]);
         fillModalList('announcementsModalList', [], 'Announcement');
         fillModalList('deadlinesModalList', [], 'Deadline');
